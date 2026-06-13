@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <g fill="none" stroke="#a09b8e" stroke-opacity="0.33" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- speech bubble -->
+    <path d="M22 32 q0 -10 10 -10 h26 q10 0 10 10 v12 q0 10 -10 10 h-16 l-9 9 v-9 h-1 q-10 0 -10 -10 z"/>
+    <!-- heart -->
+    <path d="M112 46 q-10 -10 -10 -18 q0 -8 8 -8 q6 0 10 6 q4 -6 10 -6 q8 0 8 8 q0 8 -10 18 l-8 6 z"/>
+    <!-- star -->
+    <path d="M182 28 l3 9 h10 l-8 6 l3 10 l-8 -6 l-8 6 l3 -10 l-8 -6 h10 z"/>
+    <!-- coffee cup -->
+    <path d="M30 116 h28 v20 q0 8 -8 8 h-12 q-8 0 -8 -8 z"/>
+    <path d="M58 122 h7 q6 0 6 6 q0 6 -6 6 h-7"/>
+    <path d="M34 106 q2 -4 0 -8 M42 106 q2 -4 0 -8 M50 106 q2 -4 0 -8"/>
+    <!-- moon -->
+    <circle cx="115" cy="128" r="12"/>
+    <path d="M113 118 q-9 9 0 20"/>
+    <!-- envelope -->
+    <path d="M170 122 l14 9 l14 -9 v22 h-28 z"/>
+    <path d="M170 122 h28"/>
+    <!-- musical note -->
+    <path d="M48 200 v-28 l18 -5 v28"/>
+    <path d="M48 202 a4 4 0 1 0 0 -0.1 z"/>
+    <path d="M66 198 a4 4 0 1 0 0 -0.1 z"/>
+    <!-- camera -->
+    <path d="M116 184 h32 v18 h-32 z"/>
+    <path d="M124 184 v-4 h16 v4"/>
+    <circle cx="132" cy="193" r="5"/>
+    <!-- airplane -->
+    <path d="M180 180 l28 12 l-12 4 l-2 12 l-6 -10 l-10 -2 z"/>
+  </g>
+</svg>

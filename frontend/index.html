@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link id="app-favicon" rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" />
+    <link id="app-touch-icon" rel="apple-touch-icon" href="/apple-touch-icon.png?v=4" />
+    <link id="app-manifest" rel="manifest" href="/manifest.json?v=desktop-20260606-2037" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#1A1A19" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F2F0E8" media="(prefers-color-scheme: light)" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
+    <title>Klaus</title>
+  </head>
+  <body>
+    <script>
+      // Safari Web Apps cachen Manifest-URLs aggressiv. Desktop und Mobile
+      // bekommen bewusst getrennte, versionierte Manifeste.
+      (function () {
+        try {
+          var m = document.getElementById('app-manifest');
+          if (!m) return;
+          var touch = document.getElementById('app-touch-icon');
+          var favicon = document.getElementById('app-favicon');
+          if (location.pathname.indexOf('/fokus') === 0) {
+            m.setAttribute('href', '/manifest-focus.json?v=focus-20260605-1945');
+            if (touch) touch.setAttribute('href', '/fokus-icon.png?v=2');
+            if (favicon) {
+              favicon.setAttribute('type', 'image/png');
+              favicon.setAttribute('href', '/fokus-icon.png?v=2');
+            }
+          } else if (location.pathname.indexOf('/mobile') === 0) {
+            m.setAttribute('href', '/manifest-mobile.json?v=mobile-20260604-2253');
+          }
+        } catch (e) {}
+      })();
+      // Kein FOUC: Theme synchron vor Render setzen.
+      (function () {
+        try {
+          var t = localStorage.getItem('control:theme') || 'auto';
+          var light = t === 'light' || (t === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+          if (light) document.documentElement.setAttribute('data-theme', 'light');
+        } catch (e) {}
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

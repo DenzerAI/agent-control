@@ -1,0 +1,13 @@
+{
+  "active": "main",
+  "owner": {
+    "name": "OWNER_NAME",
+    "email": "OWNER_EMAIL"
+  },
+  "agents": {
+    "main": {
+      "name": "AGENT_NAME",
+      "soul": "soul/BOOTSTRAP.md"
+    }
+  }
+}

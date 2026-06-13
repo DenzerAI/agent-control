@@ -1,0 +1,27 @@
+{
+  "day": [
+    { "file": "MarshDay.ogg", "label": "Sumpf, Tag" },
+    { "file": "ForestNormalDay.ogg", "label": "Wald, Tag" },
+    { "file": "ForestHighDay.ogg", "label": "Hochwald, Tag" },
+    { "file": "GrasslandsDay.ogg", "label": "Grasland, Tag" },
+    { "file": "DarnassusDay.ogg", "label": "Darnassus, Tag" }
+  ],
+  "night": [
+    { "file": "WestfallNight.ogg", "label": "Westfall, Nacht" },
+    { "file": "MarshNight.ogg", "label": "Sumpf, Nacht" },
+    { "file": "ForestNormalNight.ogg", "label": "Wald, Nacht" },
+    { "file": "ForestHighNight.ogg", "label": "Hochwald, Nacht" },
+    { "file": "DarnassusNight.ogg", "label": "Darnassus, Nacht" },
+    { "file": "StormwindNight.ogg", "label": "Stormwind, Nacht" },
+    { "file": "PlagueLandsNight.ogg", "label": "Pestländer, Nacht" }
+  ],
+  "weather": [
+    { "file": "RainLightLoop.ogg", "label": "Regen, leicht" },
+    { "file": "SandStormLight.ogg", "label": "Sandsturm, leicht" }
+  ],
+  "indoor": [
+    { "file": "TavernCrowded.ogg", "label": "Taverne, voll" },
+    { "file": "DungeonCatheadral.ogg", "label": "Kathedrale, leer" },
+    { "file": "AhnQirajRuinsBareRoomTone.ogg", "label": "Ruinen, leer" }
+  ]
+}

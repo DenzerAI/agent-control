@@ -1,0 +1,39 @@
+{
+  "name": "calendar",
+  "kind": "provider",
+  "provides": "calendar",
+  "version": "0.1.0",
+  "description": "Calendar-Schublade: lokale manuelle Events (data/chat.db) plus Google Calendar (Sub-Kalender Klaus/Privat/Beispielkunde/FCH/AI Workshop/AI Agent/AI Beratung). PT-Termine kommen aus people.db (kein Google-Sync mehr). Provider unter providers/google.py. Server bindet via app.include_router(modules.calendar.core.router).",
+  "env": [],
+  "enabled": true,
+  "setup": {
+    "group": "client-core",
+    "default_profiles": ["client-basic", "christian"],
+    "requires": {
+      "files": [
+        {
+          "path": "data/chat.db",
+          "required": false,
+          "hint": "Created by the backend on first start. Stores local calendar_events."
+        }
+      ]
+    },
+    "oauth": [
+      {
+        "label": "Google Calendar OAuth token",
+        "command": "python3 scripts/google-oauth-setup.py",
+        "creates": "data/google_token.json"
+      }
+    ],
+    "health": [
+      {
+        "label": "Calendar API",
+        "endpoint": "/api/calendar"
+      },
+      {
+        "label": "Google Calendar status",
+        "endpoint": "/api/google/status"
+      }
+    ]
+  }
+}

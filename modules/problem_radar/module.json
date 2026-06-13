@@ -1,0 +1,8 @@
+{
+  "name": "problem_radar",
+  "kind": "worker",
+  "provides": "problem_radar",
+  "version": "0.1.0",
+  "description": "Durchsucht einmal taeglich X/Twitter (ueber kuratierte Themen-Queries) nach echten Schmerzpunkten rund um AI-Agents, Automatisierung und KMU-Frust. Jeder Fund wird hart gegen unser Profil gefiltert; nur Treffer ueber Schwelle landen als geparkte Idee in brain/ideas/. Ping nur bei starkem Fund, sonst still.",
+  "enabled": true
+}

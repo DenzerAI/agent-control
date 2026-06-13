@@ -1,0 +1,9 @@
+{
+  "name": "lexware",
+  "kind": "provider",
+  "provides": "finance",
+  "version": "0.1.0",
+  "description": "Lexware-Schublade: Routen fuer Kontakte, Rechnungen, Finanz-Live-View und Beleg-Upload aus der Mail-Inbox. Datenquelle: Lexoffice API (lexoffice.io). Provider unter providers/ (aktuell lexoffice.py). Server importiert weiter via backend/lexware.py, das jetzt nur noch Re-Export-Fassade auf modules.lexware.providers.lexoffice ist.",
+  "env": ["LEXWARE_API_KEY"],
+  "enabled": true
+}

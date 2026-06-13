@@ -1,0 +1,27 @@
+{
+  "name": "search",
+  "kind": "router",
+  "provides": "search",
+  "version": "0.1.0",
+  "description": "Search-Schublade fuer lokale Chat-, Workspace- und Brain-Suche. Im Core-Profil aktiv.",
+  "enabled": true,
+  "setup": {
+    "group": "core",
+    "default_profiles": ["core", "client-basic", "christian"],
+    "requires": {
+      "files": [
+        {
+          "path": "data/chat.db",
+          "required": false,
+          "hint": "Created by the backend on first start."
+        }
+      ]
+    },
+    "health": [
+      {
+        "label": "Search API",
+        "endpoint": "/api/search"
+      }
+    ]
+  }
+}

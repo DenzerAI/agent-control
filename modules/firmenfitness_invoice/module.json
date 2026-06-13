@@ -1,0 +1,8 @@
+{
+  "name": "firmenfitness_invoice",
+  "kind": "worker",
+  "provides": "firmenfitness_invoice",
+  "version": "0.1.0",
+  "description": "Erkennt Jane-Monatsmeldung 'Xx stattgefunden' im WhatsApp-Stream, legt fuer den passenden Monat einen Lexware-Rechnungs-Draft an (Wiedemann GmbH, Kleinunternehmer, 50,00 EUR/Einheit) und postet eine Karte im Klaus-Channel zum Pruefen.",
+  "enabled": true
+}

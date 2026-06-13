@@ -1,0 +1,7 @@
+{
+  "name": "loops",
+  "kind": "router",
+  "provides": "loop-runner",
+  "enabled": true,
+  "description": "Lokale Loop-Sessions mit Parent-Chat-Bindung, Preview, Logs und Rueckmeldung."
+}

@@ -1,0 +1,9 @@
+{
+  "name": "content",
+  "label": "Content",
+  "description": "Reels, Karussells, Beiträge — Instagram-Content-Pipeline (Generieren, Approve, Publish).",
+  "owner": "core",
+  "routes_prefix": ["/api/reels", "/api/karussells", "/api/beitraege"],
+  "static_mounts": ["/reels-media", "/karussells-media", "/karussells-social", "/beitraege-media"],
+  "depends_on": ["instagram-post (skills/)", "jobs/_bin/run-job.sh"]
+}

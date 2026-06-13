@@ -1,0 +1,7 @@
+{
+  "name": "opportunity",
+  "kind": "router",
+  "provides": "opportunity-scanner",
+  "enabled": true,
+  "description": "Opportunity-Scanner: liest Kundenstamm und Markt-Radar, findet Service-as-Software-Gelegenheiten, meldet in den Klaus-Channel. Lernt aus Verworfen/Bestaetigt."
+}

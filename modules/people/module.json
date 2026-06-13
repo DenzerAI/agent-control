@@ -1,0 +1,27 @@
+{
+  "name": "people",
+  "kind": "provider",
+  "provides": "crm",
+  "version": "1.0.0",
+  "description": "People CRM, Customers, Pipeline, Marketing-Kampagnen — alle Daten zur people.db",
+  "enabled": true,
+  "setup": {
+    "group": "client-core",
+    "default_profiles": ["client-basic", "christian"],
+    "requires": {
+      "files": [
+        {
+          "path": "data/people.db",
+          "required": false,
+          "hint": "Created or imported during customer onboarding."
+        }
+      ]
+    },
+    "health": [
+      {
+        "label": "People API",
+        "endpoint": "/api/people"
+      }
+    ]
+  }
+}

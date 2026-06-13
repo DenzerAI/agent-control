@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+# agent-control — globaler Terminal-Befehl fuer die lokale Agent-Control-Instanz.
+#
+# Subbefehle:
+#   agent-control            Server starten falls noetig, dann UI im Browser oeffnen
+#   agent-control open       Nur die UI oeffnen (startet bei Bedarf)
+#   agent-control start      Server starten, ohne Browser
+#   agent-control restart    Server neu starten (scripts/restart-server.sh)
+#   agent-control stop       Server stoppen (launchd-Dienst bzw. start.sh-PID)
+#   agent-control update     scripts/update-agent-control.sh
+#   agent-control doctor     Selbstcheck mit Reparatur (scripts/doctor.sh)
+#   agent-control status     Kurzer Lauf-Status
+#
+# Der Wrapper findet seine Installation ueber einen festen Pfad, der beim
+# Verlinken eingesetzt wird (AC_HOME unten). Faellt sonst auf den Skriptpfad
+# zurueck, wenn er direkt aus dem Repo aufgerufen wird.
+set -euo pipefail
+
+# AC_HOME wird vom Installer (install-cli.sh) auf den echten Pfad gesetzt.
+# Platzhalter "__AC_HOME__" bleibt, wenn das Skript direkt aus dem Repo laeuft.
+AC_HOME_HINT="__AC_HOME__"
+
+resolve_home() {
+  if [ "$AC_HOME_HINT" != "__AC_HOME__" ] && [ -d "$AC_HOME_HINT" ]; then
+    echo "$AC_HOME_HINT"; return 0
+  fi
+  if [ -n "${AGENT_CONTROL_HOME:-}" ] && [ -d "${AGENT_CONTROL_HOME}" ]; then
+    echo "$AGENT_CONTROL_HOME"; return 0
+  fi
+  # Direktaufruf aus dem Repo: Skript liegt in scripts/.
+  local src="${BASH_SOURCE[0]}"
+  # Symlink aufloesen, falls verlinkt.
+  while [ -h "$src" ]; do
+    local dir; dir="$(cd "$(dirname "$src")" && pwd)"
+    src="$(readlink "$src")"
+    [[ "$src" != /* ]] && src="$dir/$src"
+  done
+  local here; here="$(cd "$(dirname "$src")" && pwd)"
+  if [ -f "$here/../scripts/lib/agent-control-env.sh" ]; then
+    (cd "$here/.." && pwd); return 0
+  fi
+  if [ -f "$here/lib/agent-control-env.sh" ]; then
+    (cd "$here/.." && pwd); return 0
+  fi
+  # Letzter Fallback: gaengige Orte.
+  for cand in "$HOME/agent-control" "$HOME/agent"; do
+    [ -f "$cand/scripts/lib/agent-control-env.sh" ] && { echo "$cand"; return 0; }
+  done
+  return 1
+}
+
+AC_ROOT="$(resolve_home)" || {
+  echo "agent-control: Installation nicht gefunden." >&2
+  echo "  Setze AGENT_CONTROL_HOME=/pfad/zur/installation und versuche erneut." >&2
+  exit 1
+}
+export AC_ROOT
+# shellcheck source=lib/agent-control-env.sh
+source "$AC_ROOT/scripts/lib/agent-control-env.sh"
+
+URL="http://127.0.0.1:$AC_PORT"
+STATUS_URL="$URL/api/system-status"
+
+server_up() { curl -fsS --max-time 2 "$STATUS_URL" >/dev/null 2>&1; }
+
+open_ui() {
+  if command -v open >/dev/null 2>&1; then
+    open "$URL" >/dev/null 2>&1 || true
+  else
+    echo "UI: $URL"
+  fi
+}
+
+ensure_started() {
+  if server_up; then return 0; fi
+  # Bevorzugt launchd, wenn registriert; sonst start.sh im Hintergrund.
+  if launchctl print "gui/$(id -u)/$AC_LABEL" >/dev/null 2>&1; then
+    launchctl kickstart "gui/$(id -u)/$AC_LABEL" >/dev/null 2>&1 || true
+  else
+    mkdir -p "$AC_ROOT/logs"
+    nohup bash "$AC_ROOT/scripts/start.sh" > "$AC_ROOT/logs/start.log" 2> "$AC_ROOT/logs/start.err.log" &
+  fi
+  # Auf Health warten (max ~20s).
+  for _ in $(seq 1 40); do
+    server_up && return 0
+    sleep 0.5
+  done
+  return 1
+}
+
+cmd="${1:-open}"
+[ $# -gt 0 ] && shift || true
+
+case "$cmd" in
+  open|"")
+    if ensure_started; then
+      echo "Agent Control laeuft: $URL"
+    else
+      echo "Agent Control gestartet, Health-Check noch offen. Log: $AC_ROOT/logs/start.err.log" >&2
+    fi
+    open_ui
+    ;;
+  start)
+    if ensure_started; then echo "ok: $URL"; else echo "Start angestossen, Health offen." >&2; exit 1; fi
+    ;;
+  restart)
+    bash "$AC_ROOT/scripts/restart-server.sh" "$@"
+    ;;
+  stop)
+    if launchctl print "gui/$(id -u)/$AC_LABEL" >/dev/null 2>&1; then
+      launchctl kill SIGTERM "gui/$(id -u)/$AC_LABEL" >/dev/null 2>&1 || true
+      echo "ok: $AC_LABEL gestoppt (launchd haelt KeepAlive — fuer dauerhaft: agent-control disable)."
+    elif [ -f "$AC_ROOT/.server.pid" ]; then
+      kill "$(cat "$AC_ROOT/.server.pid")" >/dev/null 2>&1 || true
+      echo "ok: Server-Prozess beendet."
+    else
+      echo "Kein laufender Server gefunden."
+    fi
+    ;;
+  disable)
+    bash "$AC_ROOT/scripts/install-launchd.sh" --uninstall
+    ;;
+  update)
+    bash "$AC_ROOT/scripts/update-agent-control.sh" "$@"
+    ;;
+  doctor)
+    bash "$AC_ROOT/scripts/doctor.sh" "$@"
+    ;;
+  status)
+    if server_up; then echo "up: $URL"; else echo "down: $URL"; fi
+    echo "Label: $AC_LABEL"
+    echo "Home:  $AC_ROOT"
+    ;;
+  --help|-h|help)
+    grep -E '^#( |$)' "${BASH_SOURCE[0]}" | sed -E 's/^# ?//' | head -20
+    ;;
+  *)
+    echo "agent-control: unbekannter Befehl '$cmd' (open|start|restart|stop|update|doctor|status|disable)" >&2
+    exit 2
+    ;;
+esac

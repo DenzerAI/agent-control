@@ -1,0 +1,8 @@
+{
+  "name": "cancel_detector",
+  "kind": "worker",
+  "provides": "cancel_detector",
+  "version": "0.1.0",
+  "description": "Erkennt Termin-Absagen in eingehenden WhatsApp/Mail-Texten, markiert das passende calendar_events als cancelled und postet eine Karte in den Klaus-Channel mit Grund und Slot-Vorschlaegen.",
+  "enabled": true
+}

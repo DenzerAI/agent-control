@@ -1,0 +1,42 @@
+{
+  "name": "mail",
+  "kind": "provider",
+  "provides": "mail",
+  "version": "0.2.0",
+  "description": "Mail-Schublade: mehrere Mailkonten als Quellen, ein zusammengeführtes Arbeits-Postfach, IMAP-Lesen, SMTP-Senden, Smartfilter, Tagging. Provider unter providers/ (aktuell resend.py; später gmail-api, outlook, ses, mailgun möglich). Der Server importiert weiter via backend/mail.py, das jetzt nur noch eine Re-Export-Fassade auf modules.mail.core ist.",
+  "env": ["RESEND_API_KEY", "DENZER_RESEND_API_KEY"],
+  "enabled": true,
+  "setup": {
+    "group": "client-communication",
+    "default_profiles": ["client-basic", "christian"],
+    "requires": {
+      "env": [
+        {
+          "name": "RESEND_API_KEY",
+          "required": false,
+          "hint": "Required for outbound mail via Resend."
+        }
+      ],
+      "files": [
+        {
+          "path": "config/mail-accounts.json",
+          "required": false,
+          "hint": "Mail accounts live here. Create one entry per mailbox during customer setup."
+        }
+      ]
+    },
+    "oauth": [
+      {
+        "label": "Gmail OAuth token",
+        "command": "python3 scripts/google-oauth-setup.py",
+        "creates": "data/google_token.json"
+      }
+    ],
+    "health": [
+      {
+        "label": "Mail API",
+        "endpoint": "/api/mail/accounts"
+      }
+    ]
+  }
+}

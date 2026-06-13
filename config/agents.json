@@ -1,0 +1,13 @@
+{
+  "active": "main",
+  "owner": {
+    "name": "Team"
+  },
+  "agents": {
+    "main": {
+      "name": "Agent",
+      "color": "#e85d5d",
+      "soul": "soul/BOOTSTRAP.md"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "whatsapp",
+  "kind": "provider",
+  "provides": "whatsapp",
+  "version": "0.1.0",
+  "description": "WhatsApp-Schublade: Routen, Bruecke zum WA-Bridge-Bot (Node), Chat-Liste, Summary- und Klassifikations-Worker. Datenquelle: ~/agent/data/whatsapp/whatsapp.db. Der Server importiert weiter via backend/whatsapp.py, das jetzt nur noch eine Re-Export-Fassade auf modules.whatsapp.core ist.",
+  "env": ["WA_BRIDGE_URL"],
+  "enabled": true,
+  "setup": {
+    "group": "client-communication",
+    "default_profiles": ["client-basic", "christian"],
+    "requires": {
+      "env": [
+        {
+          "name": "WA_BRIDGE_URL",
+          "required": false,
+          "hint": "Only needed when the WhatsApp bridge does not run on the default local URL."
+        }
+      ],
+      "files": [
+        {
+          "path": "data/whatsapp/whatsapp.db",
+          "required": false,
+          "hint": "Created by the WhatsApp bridge after first pairing."
+        }
+      ],
+      "commands": [
+        {
+          "command": "node",
+          "required": true,
+          "hint": "WhatsApp bridge uses the local Node runtime."
+        }
+      ]
+    },
+    "health": [
+      {
+        "label": "WhatsApp status",
+        "endpoint": "/api/whatsapp/status"
+      }
+    ]
+  }
+}

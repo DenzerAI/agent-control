@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "comment": "Modul-Registry fuer Agent Control. Module sind Schubladen am Grundkasten (Chat + Composer + CLI-Bruecke). HTTP-Routen-Module werden vom Module-Loader beim Server-Start geladen (kind=router). Provider-Module (kind=provider) werden direkt von Kern-Code importiert -- der Eintrag hier ist nur Marker fuer die UI und Lite-Detection.",
+  "modules": [
+    {
+      "name": "mail",
+      "kind": "provider",
+      "provides": "mail",
+      "enabled": true
+    },
+    {
+      "name": "whatsapp",
+      "kind": "provider",
+      "provides": "whatsapp",
+      "enabled": true
+    },
+    {
+      "name": "lexware",
+      "kind": "provider",
+      "provides": "finance",
+      "enabled": true
+    },
+    {
+      "name": "calendar",
+      "kind": "provider",
+      "provides": "calendar",
+      "enabled": true
+    },
+    {
+      "name": "people",
+      "kind": "provider",
+      "provides": "crm",
+      "enabled": true
+    },
+    {
+      "name": "content",
+      "kind": "provider",
+      "provides": "instagram-content",
+      "enabled": true
+    },
+    {
+      "name": "usage",
+      "kind": "router",
+      "provides": "usage-monitor",
+      "enabled": true
+    },
+    {
+      "name": "search",
+      "kind": "router",
+      "provides": "search",
+      "enabled": true
+    },
+    {
+      "name": "privacy",
+      "kind": "router",
+      "provides": "privacy-audit",
+      "enabled": true
+    },
+    {
+      "name": "loops",
+      "kind": "router",
+      "provides": "loop-runner",
+      "enabled": true
+    },
+    {
+      "name": "opportunity",
+      "kind": "router",
+      "provides": "opportunity-scanner",
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Database & runtime data (komplett lokal: chat.db, people.db, uploads, whatsapp media, ...)
+chat.db
+data/
+
+# Uploads (Legacy-Pfade)
+uploads/
+
+# Runtime
+.server.pid
+
+# Secrets
+.env
+.env.local
+.env.*.local
+.env.bak*
+secrets/
+*.p8
+*.pem
+*.key
+
+# Agent/Tooling-State (lokal, nicht ins Repo)
+.claude/
+.mcp.json
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.sw?
+
+# Certs
+certs/
+
+# Cron state
+.cron-watermark.json
+
+# Logs (Dateien und ganze logs/-Ordner)
+*.log
+*.err
+logs/
+
+# Job runtime state
+jobs/*/logs/
+jobs/*/data/
+jobs/_runs.log
+
+# Local infra (clones, daemons, secrets-bearing tools)
+_local/
+.secrets/
+
+# Grosse Medien (Videos > GitHub-Limit, gehoeren nicht ins Repo)
+*.mp4
+*.mov
+*.MOV
+*.mkv
+
+# GSD/Planning private notes
+.planning/notes/
+
+# work/-Assets — Markdown bleibt, schwere Bilder/Renders/Marketing-Material nicht
+work/*/brand/
+work/*/marketing/
+work/*/hero-renders/
+work/*/real-assets/
+work/*/instagram/
+work/**/*.png
+work/**/*.PNG
+work/**/*.jpg
+work/**/*.JPG
+work/**/*.jpeg
+work/**/*.JPEG
+work/**/*.heic
+work/**/*.HEIC
+work/**/*.webp
+work/**/*.psd
+work/**/*.ai
+work/**/*.zip
+
+# brain/-Assets — Markdown und Code bleibt, Bilder/DBs nicht
+brain/**/*.png
+brain/**/*.PNG
+brain/**/*.jpg
+brain/**/*.JPG
+brain/**/*.jpeg
+brain/**/*.heic
+brain/**/*.HEIC
+brain/**/*.webp
+brain/**/*.db
+brain/**/*.db-*
+brain/**/*.sqlite
+brain/**/*.zip
+
+# Worktrees (parallel arbeiten, scripts/wt.sh)
+/.worktrees/
+WORKTREE.md

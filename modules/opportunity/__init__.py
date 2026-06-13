@@ -1,0 +1,1 @@
+"""Opportunity-Scanner-Modul."""

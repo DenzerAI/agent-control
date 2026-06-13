@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "privacy",
+  "kind": "router",
+  "provides": "privacy-audit",
+  "version": "0.1.0",
+  "description": "DSGVO-Schutzansicht fuer Broker-Audit, Secret-Redaction und PII-Filter. Zeigt nur geschwaerzte Protokolldaten, keine Rohdaten.",
+  "enabled": true,
+  "setup": {
+    "group": "core",
+    "default_profiles": ["core", "christian"],
+    "health": [
+      {
+        "label": "Privacy Audit API",
+        "endpoint": "/api/privacy/audit"
+      }
+    ]
+  }
+}

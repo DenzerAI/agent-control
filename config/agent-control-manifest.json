@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-05-31T19:45:00+02:00",
+  "name": "Agent Control Manifest",
+  "purpose": "Trennt Produktkern, mitgelieferte Struktur und private Instanz-Inhalte einer laufenden Agent-Control-Installation.",
+  "terms": {
+    "product_core": "Code und Logik, ohne die Agent Control nicht läuft.",
+    "product_framework": "Ordner, Regeln, Templates und Mechaniken, die mitgeliefert werden, aber beim Kunden frisch gefüllt werden.",
+    "instance_content": "Echte Daten, Projekte, Gedächtnis, Jobs, Logs und lokale Dateien der jeweiligen Installation.",
+    "optional_module": "Nützliches Modul, aber nicht Teil jeder Installation."
+  },
+  "ship_policy": {
+    "ship": "Mitliefern.",
+    "template": "Struktur oder Vorlage mitliefern, Inhalt neu erzeugen.",
+    "select": "Pro Kunde bewusst auswählen.",
+    "do_not_ship": "Nicht in ein Kundenpaket übernehmen."
+  },
+  "areas": [
+    {
+      "path": "backend/",
+      "layer": "product_core",
+      "ship": "ship",
+      "meaning": "Server, APIs, Streaming, Auth, Datenzugriff und Modul-Routing."
+    },
+    {
+      "path": "frontend/",
+      "layer": "product_core",
+      "ship": "ship",
+      "meaning": "Sichtbare Agent-Control-App inklusive Chat, Mobile, InfoPane und Atlas."
+    },
+    {
+      "path": "modules/",
+      "layer": "product_core",
+      "ship": "select",
+      "meaning": "Fachliche Produktmodule wie Fokus, People, Mail, Kalender, WhatsApp und Suche."
+    },
+    {
+      "path": "scripts/",
+      "layer": "product_core",
+      "ship": "select",
+      "meaning": "Setup, Doctor, Restart, Migrationen und Wartungswerkzeuge."
+    },
+    {
+      "path": "config/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Konfiguration, Profile, Quellen und Regeln als Vorlage pro Installation."
+    },
+    {
+      "path": "soul/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Agent-Identität, Stil und Bootstrap als Struktur. Konkreter Agent-Inhalt bleibt privat."
+    },
+    {
+      "path": "brain/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Firmengedächtnis als Konzept: Memory, Learnings, Projekte, Fäden, Daily Logs, Dreams. Inhalt neu aufbauen."
+    },
+    {
+      "path": "work/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Arbeitsordner für echte Kunden- und Projektarbeit. Konkrete Projekte nicht mitliefern."
+    },
+    {
+      "path": "jobs/",
+      "layer": "product_framework",
+      "ship": "select",
+      "meaning": "Job-System gehört zum Produkt. Konkrete Jobs werden in Grundjobs, optionale Jobs und User-only getrennt."
+    },
+    {
+      "path": "skills/",
+      "layer": "product_framework",
+      "ship": "select",
+      "meaning": "Skill-System und Grundskills gehören zum Produkt. Spezialskills werden pro Kunde ausgewählt."
+    },
+    {
+      "path": "data/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Laufzeitort für Datenbanken, Uploads, Caches und Backups. Nur leere DBs oder Schema mitliefern."
+    },
+    {
+      "path": "logs/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Laufzeitort für Protokolle. Ordner ja, bestehende Logs nein."
+    },
+    {
+      "path": "certs/",
+      "layer": "product_framework",
+      "ship": "template",
+      "meaning": "Zertifikatskonzept dokumentieren, Zertifikate pro Installation neu erzeugen."
+    },
+    {
+      "path": "_local/",
+      "layer": "instance_content",
+      "ship": "do_not_ship",
+      "meaning": "Maschinenzustand, lokale Clones und Abhängigkeiten."
+    },
+    {
+      "path": "video/",
+      "layer": "optional_module",
+      "ship": "select",
+      "meaning": "Content- und Reel-Studio. Für User wichtig, für KMU nicht automatisch Kern."
+    }
+  ],
+  "projects": {
+    "active": [
+      "Agent Control",
+      "Knowledge Base",
+      "Client Onboarding",
+      "Workshops",
+      "Operations"
+    ],
+    "not_projects": [],
+    "rule": "Gesprächsartefakte, Personenfälle und Health-Protokolle sind keine Projekte im Workspace."
+  },
+  "jobs": {
+    "core_framework": [
+      "_bin",
+      "wartung"
+    ],
+    "candidate_core_jobs": [
+      "dreaming",
+      "morgenbriefing",
+      "memory-log",
+      "wochenrueckblick"
+    ],
+    "optional_jobs": [
+      "radar-*",
+      "lead-sync",
+      "meetings",
+      "backup"
+    ],
+    "user_only_review": [
+      "health*",
+      "finance-*",
+      "social-*",
+      "reels-nightly",
+      "offer-send-*",
+      "customer-oneshot-*",
+      "community-*"
+    ]
+  },
+  "skills": {
+    "candidate_core_skills": [
+      "daily-log-format",
+      "server-restart",
+      "job-prompt-format",
+      "debug",
+      "explain",
+      "plan",
+      "code-review",
+      "commit",
+      "search"
+    ],
+    "candidate_product_skills": [
+      "crm-update",
+      "calendar-add",
+      "whatsapp-send",
+      "infopane-style",
+      "ui-ux-pro-max",
+      "taste",
+      "impeccable"
+    ],
+    "user_only_review": [
+      "reels-*",
+      "social-*",
+      "ads-*",
+      "carousel-*",
+      "workshop-*",
+      "voice-dna"
+    ]
+  }
+}
