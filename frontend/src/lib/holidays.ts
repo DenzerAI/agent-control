@@ -31,7 +31,7 @@ export const HOLIDAYS_DE: Record<string, string> = {
   '2027-12-26': '2. Weihnachtstag',
 }
 
-// Urlaubsfenster (Christians eigene Abwesenheiten). Wird wie Feiertage
+// Urlaubsfenster (des Nutzers eigene Abwesenheiten). Wird wie Feiertage
 // gerendert: gestreifter Hintergrund, warm-orange Label.
 export const VACATIONS: Record<string, string> = (() => {
   const out: Record<string, string> = {}

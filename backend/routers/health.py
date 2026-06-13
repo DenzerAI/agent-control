@@ -77,7 +77,7 @@ async def restart_policy_grant(request: Request):
     except Exception:
         body = {}
     minutes = int((body or {}).get("minutes") or 2)
-    reason = str((body or {}).get("reason") or "Composer-Freigabe durch Christian")
+    reason = str((body or {}).get("reason") or "Composer-Freigabe durch der Nutzer")
     policy = restart_policy_allow(minutes=minutes, reason=reason, actor="composer")
     return JSONResponse(policy)
 

@@ -211,7 +211,7 @@ _VOICE_REALTIME_TOOLS = [
      "parameters": {"type": "object", "properties": {
          "limit": {"type": "integer", "description": "Wie viele letzte Nachrichten (Default 10)."}}}},
     {"type": "function", "name": "get_open_artifact",
-     "description": "Liest die Seite, die Christian gerade im Workspace offen hat. Nutze das wenn er sich auf 'die Seite', 'das hier' oder 'die offene HTML' bezieht und live darüber reden will.",
+     "description": "Liest die Seite, die der Nutzer gerade im Workspace offen hat. Nutze das wenn er sich auf 'die Seite', 'das hier' oder 'die offene HTML' bezieht und live darüber reden will.",
      "parameters": {"type": "object", "properties": {}}},
     {"type": "function", "name": "search_brain",
      "description": "Durchsuche Klaus' Gedächtnis (brain/: Memory, Learnings, Projekte, Logs) nach einem Stichwort.",
@@ -271,7 +271,7 @@ async def voice_realtime_session():
             # turn_detection MUSS explizit gesetzt sein: server-VAD ist nur in
             # Speech-to-Speech-Sessions automatisch an. Bei output_modalities=text
             # ohne dieses Feld kommt nie ein speech_started und nie eine Antwort
-            # auf Christians Stimme — die Session begrüßt einmal und friert ein.
+            # auf des Nutzers Stimme — die Session begrüßt einmal und friert ein.
             "audio": {
                 "input": {
                     "transcription": {"model": "whisper-1"},
@@ -498,7 +498,7 @@ _UMLAUT_WORDS = {
     "koeln": "köln",
     "muenchen": "münchen",
     "oesterreich": "österreich",
-    # Eigenheiten Christian
+    # Eigenheiten der Nutzer
     "identitaet": "identität",
     "qualitaet": "qualität",
     "aktivitaet": "aktivität",
@@ -901,7 +901,7 @@ async def voice_tool_run_briefing(request: Request):
 
 
 # UI-State: alle offenen Panes + aktueller Fokus.
-# Frontend pusht den vollen Layout-Snapshot, damit Klaus weiß was Christian grad sieht.
+# Frontend pusht den vollen Layout-Snapshot, damit Klaus weiß was der Nutzer grad sieht.
 _VOICE_UI_STATE: dict = {
     "panes": [],       # [{id, agent, convId, title, active}]
     "activePaneId": None,
@@ -1093,7 +1093,7 @@ async def voice_tool_send_chat(request: Request):
         return JSONResponse({"error": f"unknown agent '{agent}'"}, status_code=400)
     # Default-Channel je Agent. main = der sichtbare Klaus-Channel (Pane 1),
     # NICHT 'channel:main' — sonst landet die Antwort in einem Raum, den
-    # Christian nie sieht. Andere Agents bekommen ihren eigenen Channel.
+    # der Nutzer nie sieht. Andere Agents bekommen ihren eigenen Channel.
     default_conv = "klaus-channel" if agent_id == "main" else f"channel:{agent_id}"
     conv_id = body.get("convId") or default_conv
     # In die message_queue legen — der Queue-Worker führt den Agent aus, sobald
@@ -1113,7 +1113,7 @@ async def voice_tool_send_pane(request: Request):
     """Schreibt einen Text direkt in Chat-Pane N (1..4) auf allen verbundenen
     Frontends. Der Text landet wie eine getippte Nachricht im Chat dieser Pane,
     unabhängig davon, welcher Agent die Pane gerade belegt. So platziert
-    Voice-Klaus Infos/Ergebnisse genau dort, wo Christian sie sieht.
+    Voice-Klaus Infos/Ergebnisse genau dort, wo der Nutzer sie sieht.
 
     Anders als send-chat (das einen Agent-Channel anhand des Agent-Namens
     adressiert) zielt das hier auf eine konkrete sichtbare Pane-Nummer."""

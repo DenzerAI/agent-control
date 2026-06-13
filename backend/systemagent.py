@@ -2,7 +2,7 @@
 
 Schliesst den Kreis aus Logbuch, Werkstatt und Klaus-Channel:
 auffaellige Workflow-Runs werden einmal ins Systemagent-Log geschrieben und
-Christian nur dann gepingt, wenn wirklich etwas passiert ist.
+der Nutzer nur dann gepingt, wenn wirklich etwas passiert ist.
 """
 from __future__ import annotations
 
@@ -196,7 +196,7 @@ def _green_pulses() -> set[str]:
     """Pulse-Namen, die aktuell NICHT rot sind (fail_streak < 3).
 
     Ein einzelner Pulse-Fehlrun (IMAP-/KV-Netzwackler) heilt sich beim
-    naechsten Lauf selbst. Solche transienten Aussetzer sollen Christian
+    naechsten Lauf selbst. Solche transienten Aussetzer sollen der Nutzer
     nicht als Blocker pingen, exakt wie die UI-Ampel erst ab drei Fehllaeufen
     in Folge auf Rot kippt.
     """
@@ -232,7 +232,7 @@ def _event_from_row(row: sqlite3.Row, *, green_pulses: set[str] | None = None) -
 
     if status != "error" and review_status not in {"error", "warning"} and klass not in {"blocker", "detour"}:
         return None
-    # Normale Agent-Umwege sind Logbuch-Material. Christian bekommt dazu erst
+    # Normale Agent-Umwege sind Logbuch-Material. der Nutzer bekommt dazu erst
     # einen Ping, wenn sie blockieren oder als wiederholtes Learning kuratiert werden.
     if key == "agent.turn" and klass == "detour" and review_status == "warning":
         return None

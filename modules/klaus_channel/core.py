@@ -1,7 +1,7 @@
 """Klaus-Channel — ein ewiger, proaktiver Chat-Faden.
 
 Heartbeat-Watcher und andere Quellen rufen hier ein, wenn sie etwas Relevantes
-finden, von dem Christian wissen soll. Die Nachricht landet als Assistant-Turn
+finden, von dem der Nutzer wissen soll. Die Nachricht landet als Assistant-Turn
 in der stabilen Conversation `klaus-channel`, die Conv wird `highlight=1`
 markiert (orange im Switcher), und das Frontend zieht sie spätestens beim
 nächsten `/api/conversations`-Poll nach.
@@ -33,7 +33,7 @@ PROPOSED_HEADER = "## Vorgeschlagene Learnings"
 _DEDUP_MARKER = "<!--klaus-channel:{source}:{key}-->"
 
 # Rate-Limit: pro Tag, und Mindestabstand zwischen zwei Posts.
-# Bewusst locker, Christian will organische Frequenz statt künstlicher Stille.
+# Bewusst locker, der Nutzer will organische Frequenz statt künstlicher Stille.
 # Dedup-Key pro Source verhindert, dass dasselbe Thema in Schleife kommt.
 MAX_POSTS_PER_DAY = 15
 MIN_GAP_SEC = 5 * 60
@@ -140,7 +140,7 @@ def _rotation_index(source: str = "", window_sec: int = 7 * 86400) -> int:
 
 
 def _response_rate(source: str, last_n: int = 5, window_sec: int = 14 * 86400) -> tuple[int, int]:
-    """Wie oft hat Christian auf die letzten N proaktiven Posts dieser Source
+    """Wie oft hat der Nutzer auf die letzten N proaktiven Posts dieser Source
     geantwortet? Nutzt `klaus_pulse_posts.response_seen` (durch `mark_user_response`
     gesetzt). Returns (responses, total)."""
     cutoff = time.time() - window_sec
@@ -177,7 +177,7 @@ def _rate_limited() -> Optional[str]:
     """Gibt einen Grund zurück, wenn aktuell nicht gepostet werden darf, sonst None.
 
     Zählt nur proaktive Klaus-Posts (assistant-Messages mit Dedup-Marker).
-    Christians eigene Antworten zählen nicht."""
+    des Nutzers eigene Antworten zählen nicht."""
     now = time.time()
     day_ago = now - 86400
     gap_ago = now - MIN_GAP_SEC
@@ -270,7 +270,7 @@ def post(
 
 def mark_user_response(ts: float, within_sec: int = 24 * 3600) -> int:
     """Markiert alle proaktiven Posts der letzten `within_sec` Sekunden als beantwortet.
-    Wird aus `save_msg` aufgerufen, sobald Christian in den Klaus-Channel schreibt.
+    Wird aus `save_msg` aufgerufen, sobald der Nutzer in den Klaus-Channel schreibt.
 
     Returns: Anzahl der Posts, die jetzt als gesehen markiert wurden.
     """
@@ -285,7 +285,7 @@ def mark_user_response(ts: float, within_sec: int = 24 * 3600) -> int:
 
 
 def consecutive_ignored(source: str, n: int = 3, window_sec: int = 14 * 86400) -> int:
-    """Wie viele Posts dieser Quelle hat Christian zuletzt am Stück ignoriert?
+    """Wie viele Posts dieser Quelle hat der Nutzer zuletzt am Stück ignoriert?
     Bricht ab, sobald er auf einen geantwortet hat. Returns: Anzahl unbeantwortet,
     maximal `n`."""
     if not source:

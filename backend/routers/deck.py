@@ -850,7 +850,7 @@ async def deck_pair_confirm(request: Request, payload: dict = Body(...)):
                 return JSONResponse({"error": "Code abgelaufen"}, status_code=410)
             p["confirmed"] = True
             # Mehrere Bildschirme dürfen koexistieren (synchrone Spiegel desselben
-            # Decks). Vergessene TVs verwaltet Christian über die Bildschirm-Liste
+            # Decks). Vergessene TVs verwaltet der Nutzer über die Bildschirm-Liste
             # in der Remote, statt dass jedes Koppeln blind alle alten rauswirft.
             p["token"] = mint_monitor_token(name)
             return JSONResponse({"ok": True})
@@ -925,7 +925,7 @@ start();
 
 # Origin, auf die der QR zeigt: dort muss das koppelnde Handy bereits mit dem
 # Haupt-Token eingeloggt sein (Cookie). Das ist exakt die Adresse, über die
-# Christian die App nutzt — Tailscale Serve auf 443 (HTTPS, ohne Port). Ein
+# der Nutzer die App nutzt — Tailscale Serve auf 443 (HTTPS, ohne Port). Ein
 # abweichendes Schema oder ein Port wie :8890 wäre ein anderer Origin ohne
 # Login-Cookie, dann landet das Handy auf /login statt im Pairing.
 DECK_REMOTE_ORIGIN = os.environ.get(

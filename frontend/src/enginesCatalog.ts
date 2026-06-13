@@ -114,7 +114,7 @@ export const ENGINES: EngineCatalogItem[] = [
       },
       {
         label: 'WhatsApp-/Mail-Drafts',
-        what: 'Formuliert Drafts in Christians Ton, klingt menschlich.',
+        what: 'Formuliert Drafts in des Nutzers Ton, klingt menschlich.',
         trigger: 'Inline im Chat ("schick X per WA: ...")',
       },
     ],

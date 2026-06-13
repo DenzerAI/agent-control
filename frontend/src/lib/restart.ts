@@ -28,7 +28,7 @@ export async function triggerSafeRestart(opts?: { confirm?: boolean }): Promise<
       await fetch('/api/restart-policy/grant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ minutes: 2, reason: 'Fester Restart-Button durch Christian' }),
+        body: JSON.stringify({ minutes: 2, reason: 'Fester Restart-Button durch der Nutzer' }),
       })
     } catch { /* nicht fatal, restart-safe prueft selbst */ }
 

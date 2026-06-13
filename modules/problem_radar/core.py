@@ -51,7 +51,7 @@ MAX_PARK = 3
 
 # Konservative Defaults: lieber an einem Tag NICHTS melden als Muell.
 DEFAULT_KEEP_THRESHOLD = 0.78   # darunter fliegt der Fund raus
-DEFAULT_PING_THRESHOLD = 0.86   # erst ein wirklich starker Fund pingt Christian
+DEFAULT_PING_THRESHOLD = 0.86   # erst ein wirklich starker Fund pingt der Nutzer
 
 
 # ── Baustein 6: Lernspeicher (kuratiert, kein Verlauf) ───────────────────────
@@ -60,7 +60,7 @@ def _load_learning() -> dict:
         d = json.loads(LEARN_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         d = {}
-    d.setdefault("dismissed", [])   # Idee-Slugs, die Christian verworfen hat
+    d.setdefault("dismissed", [])   # Idee-Slugs, die der Nutzer verworfen hat
     d.setdefault("confirmed", [])   # Slugs, die er gut fand (bevorzugen)
     d.setdefault("rules", [])       # freie Regeln, die der Prompt erbt
     d.setdefault("seen_urls", [])   # schon verarbeitete Quell-URLs, nicht doppeln
@@ -172,7 +172,7 @@ def _build_prompt(hits: list[dict], learn: dict) -> str:
     items = "\n".join(
         f'{i}. "{h["title"]}" — {h["text"]}'[:400] for i, h in enumerate(hits)
     )
-    return f"""Du bist Klaus, Christians Geschaeftspartner. Christian betreibt Denzer AI
+    return f"""Du bist Klaus, des Nutzers Geschaeftspartner. der Nutzer betreibt Denzer AI
 und baut Agent Control: eine lokale, deutsche, DSGVO-nahe Plattform fuer kleine
 spezialisierte AI-Agents fuer KMU (Service-as-Software: wir uebernehmen eine
 Dienstleistung, die im Hintergrund auf AI laeuft). Wir haben echte Infra

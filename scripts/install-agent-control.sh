@@ -16,7 +16,7 @@ INSTALL_TOOLS=0
 INSTALL_LOCAL_LLM=0
 YES=0
 # Engine-Login, globaler CLI-Befehl und launchd-Autostart sind im One-Click-Pfad
-# standardmaessig an. Einzeln abschaltbar fuer Sonderfaelle / Christians Checkout.
+# standardmaessig an. Einzeln abschaltbar fuer Sonderfaelle / des Nutzers Checkout.
 SETUP_ENGINE=1
 INSTALL_CLI=1
 INSTALL_AUTOSTART=1
@@ -454,7 +454,7 @@ if [[ "$INSTALL_CLI" -eq 1 ]]; then
 fi
 
 # 3. Autostart nach Reboot via launchd registrieren.
-#    Schutz: Christians bestehender Checkout in $HOME/agent wird NICHT angefasst,
+#    Schutz: des Nutzers bestehender Checkout in $HOME/agent wird NICHT angefasst,
 #    ausser der Nutzer erzwingt es. So bleibt seine laufende Instanz unberuehrt.
 if [[ "$INSTALL_AUTOSTART" -eq 1 && "$(uname -s)" == "Darwin" ]]; then
   if [[ "$ROOT" == "$HOME/agent" ]]; then

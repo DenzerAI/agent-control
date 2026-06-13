@@ -8,7 +8,7 @@ IBAN-Muster. Schnell, deterministisch, genau auf die eigenen Leute zugeschnitten
     masked, mapping = tokenize(prompt)     # vor dem Cloud-Call
     text = restore(model_output, mapping)  # nach dem Cloud-Call
 
-Christians eigene Identitaeten bleiben unmaskiert, damit der Absender-Kontext im
+des Nutzers eigene Identitaeten bleiben unmaskiert, damit der Absender-Kontext im
 Entwurf erhalten bleibt. Vornamen bleiben stehen (Anrede natuerlich, gering
 identifizierend); Nachname, Firma, Nummer, Mail und IBAN werden maskiert.
 """

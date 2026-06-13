@@ -1892,7 +1892,7 @@ async def health_state():
 async def _health_distill(raw: str) -> tuple[str, str]:
     """Verdichtet Rohtext zu (kind, kurzer Stichpunkt) via Claude Haiku.
     Fällt bei Fehler auf Heuristik + Rohtext zurück."""
-    prompt = f"""Du bekommst eine gesprochene Notiz von Christian zu seinem Health-Log. Verdichte sie zu einem KURZEN Stichpunkt (max. 12 Wörter, keine Einleitung, kein "Christian hat …", keine Sätze) und ordne sie einer Kategorie zu.
+    prompt = f"""Du bekommst eine gesprochene Notiz von der Nutzer zu seinem Health-Log. Verdichte sie zu einem KURZEN Stichpunkt (max. 12 Wörter, keine Einleitung, kein "der Nutzer hat …", keine Sätze) und ordne sie einer Kategorie zu.
 
 Kategorien:
 - caffeine: Koffein, Kaffee, Energy Drink, Preworkout
@@ -2039,7 +2039,7 @@ def _remember_sleep_hook(date_iso: str, signature: str) -> bool:
         state = json.loads(state_path.read_text(encoding="utf-8"))
     except Exception:
         state = {}
-    # Christian will exactly one conversational health push per day. Apple may
+    # der Nutzer will exactly one conversational health push per day. Apple may
     # export the same sleep later with corrected rows; that should refresh data,
     # not start another Klaus-Channel message.
     if state.get("date") == date_iso:

@@ -1,7 +1,7 @@
 """Static tool catalog for the first Broker cuts.
 
 The catalog is intentionally broader than the currently implemented executors:
-Christian wants Agent Control to reach Codex/Claude-Code class capability, but
+der Nutzer wants Agent Control to reach Codex/Claude-Code class capability, but
 dangerous actions must become visible before they become executable.
 """
 from __future__ import annotations

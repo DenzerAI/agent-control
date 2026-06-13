@@ -1389,7 +1389,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
     chatTrace('chat.show.cached-or-empty', { conversationId: cid, limit, paneIndex, mobile: !!mobile })
     messagesConvIdRef.current = ''
     if (!restoreCachedHistory(cid, limit)) {
-      // Bewusst KEIN localStorage-Erstpaint mehr: Christian will beim Neuladen nur
+      // Bewusst KEIN localStorage-Erstpaint mehr: der Nutzer will beim Neuladen nur
       // den echten Ist-Stand vom Server sehen, nie eine alte gespeicherte Kopie, die
       // kurz aufblitzt. Die lokale Kopie bleibt reiner Notnagel und wird erst in der
       // loadHistory-Fehlerbehandlung gezogen, falls der Server nicht antwortet
@@ -1585,7 +1585,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
         detail: { conversationId: done.conversationId },
       }))
       // Selbst erzeugte HTML-Artefakte sofort im Workspace-Preview zeigen,
-      // sobald der Turn fertig ist — Christian muss den Link nicht erst klicken.
+      // sobald der Turn fertig ist — der Nutzer muss den Link nicht erst klicken.
       // Nur Desktop: auf Mobile würde ein Vollbild-Overlay den Chat verdecken.
       if (!mobile) {
         const matches = done.responseText.match(/\bwork\/artifacts\/\d{4}-\d{2}-\d{2}-[^\s)"'<>]+\.html\b/g)
@@ -3492,7 +3492,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
   /**
    * Was vorgelesen wird: nur die finale Antwort-Prosa, nicht der Arbeitsweg.
    * Segmente werden an jedem Tool-Aufruf getrennt; das letzte nicht-leere
-   * Segment ist der Text nach dem letzten Tool, also Christians "Fließtext".
+   * Segment ist der Text nach dem letzten Tool, also des Nutzers "Fließtext".
    * Ohne Segmente (z. B. Cron-Ergebnis) bleibt der ganze Text.
    */
   const extractFinalProse = useCallback((text: string, segments?: string[]): string => {
@@ -3583,7 +3583,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
   // Confirm-Haken: Erkennt, ob Agent gerade eine kurze Ja/Nein-Bestätigung erwartet.
   // Fällt zurück auf false, sobald der User wieder etwas sendet oder Agent weiterläuft.
   // Decline schickt keine Nachricht mehr — es markiert die aktuelle Confirm-Anfrage
-  // einfach als verworfen, sodass der Haken verschwindet und Christian direkt weitersprechen kann.
+  // einfach als verworfen, sodass der Haken verschwindet und der Nutzer direkt weitersprechen kann.
   const [dismissedConfirmIdx, setDismissedConfirmIdx] = useState<number>(-1)
   const awaitingConfirmation = useMemo(() => {
     if (busy) return false
@@ -3604,7 +3604,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
     setDismissedConfirmIdx(messages.length - 1)
   }, [messages.length])
 
-  // ESC dismissed den Confirm-Haken (auch ohne dass Christian den X-Button trifft).
+  // ESC dismissed den Confirm-Haken (auch ohne dass der Nutzer den X-Button trifft).
   useEffect(() => {
     if (!isActive) return
     if (!awaitingConfirmation) return

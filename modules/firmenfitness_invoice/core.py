@@ -173,7 +173,7 @@ async def maybe_create(*, text: str, wa_chat_id: str, message_id: str, msg_ts: i
         res = await create_invoice(
             contact_id=cfg["lexware_contact_id"],
             line_items=[line],
-            finalize=False,  # bleibt Draft — Christian prueft und versendet
+            finalize=False,  # bleibt Draft — der Nutzer prueft und versendet
         )
         voucher_id = res.get("id", "")
         if voucher_id:

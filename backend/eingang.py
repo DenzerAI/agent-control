@@ -149,7 +149,7 @@ def record_event(
 
     silent=True: Bestands-Backfill. Event wird sofort als seen=1 markiert
     und kein Fokus-Inbox-Eintrag wird erzeugt. Dient dazu, beim ersten Lauf
-    Bestandsdaten in events zu hinterlegen, ohne Christian zu spammen.
+    Bestandsdaten in events zu hinterlegen, ohne der Nutzer zu spammen.
 
     Gibt {ok, inserted, event_id, fokus_added} zurück.
     """
@@ -482,7 +482,7 @@ def _maybe_scan_mail_async() -> None:
     """Startet scan_mail() im Hintergrund, wenn throttle abgelaufen.
 
     Nicht-blockierend — counts-Endpoint kommt sofort zurück. Beim nächsten
-    Frontend-Poll (60s später) sieht Christian dann neue orange Icons.
+    Frontend-Poll (60s später) sieht der Nutzer dann neue orange Icons.
     """
     import threading
     now = time.time()

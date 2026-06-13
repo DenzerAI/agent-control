@@ -288,7 +288,7 @@ def build_dreaming_context() -> str:
     """Leiser Dreaming-Kontext für Live-Antworten.
 
     Der Block ist bewusst klein und handlungsarm: Er soll Klaus' Ton und
-    Priorisierung kalibrieren, aber Christian keine weitere Lesepflicht geben.
+    Priorisierung kalibrieren, aber der Nutzer keine weitere Lesepflicht geben.
     """
     try:
         import dreaming_module
@@ -535,7 +535,7 @@ def build_whatsapp_project_context(project_id: str, per_chat_limit: int = 12) ->
     """Liefert die letzten Nachrichten aller WhatsApp-Chats, die an dieses Projekt gepinnt sind.
 
     Wird als Block in den initialen Stream-Kontext geschoben, damit Klaus in
-    Projekt-Chats automatisch weiss, was per WhatsApp lief, ohne dass Christian
+    Projekt-Chats automatisch weiss, was per WhatsApp lief, ohne dass der Nutzer
     es nachreichen muss.
     """
     if not project_id:

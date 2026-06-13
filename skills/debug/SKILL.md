@@ -3,7 +3,7 @@ name: debug
 description: Systematisches Debugging
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Systematisches Debugging'
+- 'der Nutzer fragt nach: Systematisches Debugging'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

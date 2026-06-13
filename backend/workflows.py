@@ -588,7 +588,7 @@ def record_feedback(run_id: str, rating: str, note: str = "") -> dict:
     add_step(
         run_id,
         "user_feedback",
-        "Christian Feedback",
+        "der Nutzer Feedback",
         "ok" if rating == "helpful" else "warning",
         "Kontext hilfreich" if rating == "helpful" else "Kontext falsch oder stoerend",
         {"rating": rating, "note": note},

@@ -353,7 +353,7 @@ function CustomerDetail({ c }: { c: Customer; detailLeftPad?: number }) {
             </span>
             <span className="min-w-0">
               {it.kind === 'chat' && (
-                <><span className="text-[var(--t3)]/60 mr-1">{it.author === 'user' ? 'Christian:' : 'Agent:'}</span>{it.snippet}</>
+                <><span className="text-[var(--t3)]/60 mr-1">{it.author === 'user' ? 'der Nutzer:' : 'Agent:'}</span>{it.snippet}</>
               )}
               {it.kind === 'wa' && (
                 <><span className="text-[var(--t3)]/60 mr-1">{it.from_me ? 'Du:' : `${it.chat_name}:`}</span>{it.snippet || <span className="text-[var(--t3)]/40 italic">[{it.type}]</span>}</>

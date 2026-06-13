@@ -300,7 +300,7 @@ export default function VoiceRealtimeSession({ onClose, onReconnect, setState }:
           break
         }
         case 'input_audio_buffer.speech_started': {
-          // Christian redet — Barge-in: laufende Agent-Ausgabe stoppen.
+          // der Nutzer redet — Barge-in: laufende Agent-Ausgabe stoppen.
           stopTTS()
           break
         }
@@ -374,10 +374,10 @@ export default function VoiceRealtimeSession({ onClose, onReconnect, setState }:
         dcRef.current = dc
         dc.onopen = () => {
           logVoiceEvent('dc_open', {})
-          // Kurze Begrüßung anstoßen, damit Christian sofort hört dass es lebt.
+          // Kurze Begrüßung anstoßen, damit der Nutzer sofort hört dass es lebt.
           dc.send(JSON.stringify({
             type: 'response.create',
-            response: { instructions: 'Begrüße Christian mit genau einem kurzen, lockeren Satz und frag, woran ihr denken wollt.' },
+            response: { instructions: 'Begrüße der Nutzer mit genau einem kurzen, lockeren Satz und frag, woran ihr denken wollt.' },
           }))
         }
         dc.onmessage = (e) => {

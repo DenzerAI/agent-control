@@ -80,7 +80,7 @@ function buildRadarSpeech(data: RadarData | null): string {
     section.items.forEach(item => {
       parts.push(item.title)
       if (item.body) parts.push(item.body)
-      if (item.implication) parts.push(`Für Christian: ${item.implication}`)
+      if (item.implication) parts.push(`Für der Nutzer: ${item.implication}`)
     })
   })
   if (data.tweets?.length) {
@@ -99,7 +99,7 @@ const KIND_ICON = { video: Play, tweet: Quote, paper: FileText, article: Newspap
 const KIND_LABEL = { video: 'Video', tweet: 'Tweet', paper: 'Paper', article: 'Artikel' } as const
 
 // Eine Beitragskarte: Quelle als Badge, Titel als Link, Fliesstext, und die
-// Implikation für Christian als abgesetzter Terracotta-Block.
+// Implikation für der Nutzer als abgesetzter Terracotta-Block.
 function ItemCard({ item }: { item: RadarItem }) {
   const Icon = KIND_ICON[item.kind] || Newspaper
   return (
@@ -116,7 +116,7 @@ function ItemCard({ item }: { item: RadarItem }) {
       {item.body && <p className="mt-2 text-[15px] leading-relaxed text-[var(--r-t2)]">{item.body}</p>}
       {item.implication && (
         <div className="radar-implication mt-3.5 rounded-lg bg-[var(--r-accent-soft)] px-4 py-3">
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--r-accent)]">Für Christian</div>
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--r-accent)]">Für der Nutzer</div>
           <p className="text-[14px] leading-relaxed text-[var(--r-t1)]">{item.implication}</p>
         </div>
       )}

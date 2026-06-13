@@ -8,7 +8,7 @@ UND die Person einen kommenden Termin hat, wird:
 2. ein Eintrag in cancellation_events angelegt
 3. eine Karte im Klaus-Channel gepostet (mit Grund + Slot-Vorschlaegen)
 
-Christian kann den Termin in der UI per Reactivate-Tap zurueckholen.
+der Nutzer kann den Termin in der UI per Reactivate-Tap zurueckholen.
 """
 from __future__ import annotations
 

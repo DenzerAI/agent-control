@@ -246,7 +246,7 @@ def _classify(thread: dict[str, Any], headers_lower: dict[str, str], rules: list
 
 
 def _bucket(thread: dict[str, Any]) -> tuple[str, str]:
-    """Christians Arbeitskörbe: Aufmerksamkeit, Rechnung, Rest."""
+    """des Nutzers Arbeitskörbe: Aufmerksamkeit, Rechnung, Rest."""
     cat = thread.get("category") or "primary"
     subj = (thread.get("subject") or "").lower()
     frm = (thread.get("from_raw") or "").lower()
@@ -287,7 +287,7 @@ def _bucket(thread: dict[str, Any]) -> tuple[str, str]:
 
 
 def _is_silent_system_mail(thread: dict[str, Any]) -> bool:
-    """Erfolgreiche technische Checks aus Christians Arbeits-Inbox halten."""
+    """Erfolgreiche technische Checks aus des Nutzers Arbeits-Inbox halten."""
     subject = (thread.get("subject") or "").lower()
     _, from_addr = parseaddr(thread.get("from_raw") or "")
     from_addr = (from_addr or "").lower()
@@ -1701,7 +1701,7 @@ def _do_attention_fetch(account_key: str, limit: int, cache_key: str) -> dict[st
                 continue
             # Beantwortete Mails verschwinden nicht mehr, sondern bleiben als
             # `replied` sichtbar (Frontend zeigt sie weiss in der E-Mails-Gruppe,
-            # bis Christian sie archiviert). Lesen demotet eine Mail nicht mehr;
+            # bis der Nutzer sie archiviert). Lesen demotet eine Mail nicht mehr;
             # erst eine echte Antwort macht sie zu `replied`.
             replied = _has_later_outbound(ctx, t, sent_by_addr)
             inbox_ctx = ctx or {"projects": [], "reason": (v or {}).get("reason") or "Von Klaus als wichtig markiert"}

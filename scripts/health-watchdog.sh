@@ -8,7 +8,7 @@ set -u
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # Geteilte Umgebung laden, falls vorhanden (Label/Port/venv/Root). Fuer
-# Christians Checkout bleibt alles exakt wie zuvor (com.klaus.agent, 8890).
+# des Nutzers Checkout bleibt alles exakt wie zuvor (com.klaus.agent, 8890).
 if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
   # shellcheck source=lib/agent-control-env.sh
   source "$PROJECT_ROOT/scripts/lib/agent-control-env.sh"
@@ -19,7 +19,7 @@ ENV_FILE="${AC_ROOT:-$PROJECT_ROOT}/.env"
 PY="${AC_PY:-$PROJECT_ROOT/.venv/bin/python3}"
 LABEL="${AC_LABEL:-com.klaus.agent}"
 # State-File pro Label, damit mehrere Instanzen sich nicht ueberschreiben.
-# Christians bestehender Pfad bleibt exakt erhalten (kein Counter-Reset).
+# des Nutzers bestehender Pfad bleibt exakt erhalten (kein Counter-Reset).
 if [ "$LABEL" = "com.klaus.agent" ]; then
   STATE_FILE="/tmp/klaus-agent-watchdog-fails"
 else

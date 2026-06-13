@@ -2259,7 +2259,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   }
 
                   // Status-Text auf der Karte: bei queued zeigt das konkrete Datum,
-                  // sonst Standard-Label. Das löst Christians "wartet auf Slot ist abgeschnitten"-Pain.
+                  // sonst Standard-Label. Das löst des Nutzers "wartet auf Slot ist abgeschnitten"-Pain.
                   const pipelineStatus = (state?: SocialState, scheduledFor?: string | null, publishedAt?: number | null) => {
                     if (state === 'queued') return formatScheduled(scheduledFor, 'wartet auf Slot')
                     return stateLabel(state, publishedAt)

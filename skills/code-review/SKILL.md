@@ -3,7 +3,7 @@ name: code-review
 description: Code-Review vor Merge
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Code-Review vor Merge'
+- 'der Nutzer fragt nach: Code-Review vor Merge'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

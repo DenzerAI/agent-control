@@ -2180,7 +2180,7 @@ export function Chat({ messages, onQuote, onOpenRef, onSpeak, onResend, onEditMe
   }, [onNearBottomChange])
 
   // Harte User-Geste: Finger/Wheel nach oben pausiert den Auto-Scroll sofort,
-  // unabhaengig von Pixel-Schwellen. So reisst es Christian beim Lesen nie runter.
+  // unabhaengig von Pixel-Schwellen. So reisst es der Nutzer beim Lesen nie runter.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return

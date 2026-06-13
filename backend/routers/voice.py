@@ -754,7 +754,7 @@ async def voice_status():
 # Ein Anruf entsteht aus einer Quelle (Puls/Briefing/Job/Event), die heute schon
 # in den Chat pingt, nur mit zweiter Stufe "wichtig genug zum Anrufen". Statt zu
 # posten, broadcastet sie ein `voice.incoming_call`-Event: das Frontend zeigt ein
-# pulsierendes Telefon. Christian geht ran oder wischt weg. Geht er ran, startet
+# pulsierendes Telefon. der Nutzer geht ran oder wischt weg. Geht er ran, startet
 # die Voice-Session und zieht das hier hinterlegte Anruf-Briefing als zweite
 # Prompt-Schicht (Mid-Conversation-Auftrag), ohne Klaus' Identität zu überschreiben.
 #
@@ -798,7 +798,7 @@ def _radar_call_briefing() -> dict | None:
         "teaser": titel,
         "anrufgrund": f"Es gibt ein Agenten-Update, über das wir kurz reden sollten: {titel}.",
         "was_erzaehlen": [kern] if kern else [],
-        "gespraechsziel": "Christian kennt das Update und weiss, ob es für Agent Control oder seine Workshops relevant ist.",
+        "gespraechsziel": "der Nutzer kennt das Update und weiss, ob es für Agent Control oder seine Workshops relevant ist.",
         "opener": f"Moin. Ich ruf an wegen einem Ding aus dem Radar heute: {titel}. Haste kurz?",
         "quelle": str(path.relative_to(PROJECT_ROOT)),
     }
@@ -860,7 +860,7 @@ async def voice_call_briefing_consume():
 
 @router.post("/api/voice/call-briefing/dismiss")
 async def voice_call_briefing_dismiss():
-    """Verwirft das anstehende Anruf-Briefing (Christian hat weggewischt)."""
+    """Verwirft das anstehende Anruf-Briefing (der Nutzer hat weggewischt)."""
     global _pending_call
     _pending_call = None
     return JSONResponse({"ok": True})

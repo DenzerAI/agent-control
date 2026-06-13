@@ -3,7 +3,7 @@ name: daily-log-format
 description: Sektions-Struktur und Schreibregeln für den Daily Log in ~/agent/brain/daily-log/. Aktivieren, wann immer ein Job in den Daily Log schreibt oder aus ihm liest.
 category: Logging / Format
 triggers:
-- 'Christian fragt nach: Sektions-Struktur und Schreibregeln für den Daily Log in ~/agent/brain/daily-log/. Aktivieren, wann immer ein Job in den Daily Log schreibt oder aus ihm liest.'
+- 'der Nutzer fragt nach: Sektions-Struktur und Schreibregeln für den Daily Log in ~/agent/brain/daily-log/. Aktivieren, wann immer ein Job in den Daily Log schreibt oder aus ihm liest.'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill
@@ -26,7 +26,7 @@ Eine Quelle der Wahrheit für den Daily Log. Alle Jobs, die schreiben oder lesen
 
 ## Was der Daily Log ist
 
-Ein Spiegel des Tages, nicht ein Tech-Protokoll. Er soll zeigen, **was Christian dachte, fühlte, anschnitt und verwarf** — und **wie Klaus mitgedacht hat**. Bauarbeit ist Teil davon, nicht das Zentrum. Wenn man den Log nach drei Monaten liest, soll man den Menschen und den Tag spüren, nicht nur Commit-Zeilen.
+Ein Spiegel des Tages, nicht ein Tech-Protokoll. Er soll zeigen, **was der Nutzer dachte, fühlte, anschnitt und verwarf** — und **wie Klaus mitgedacht hat**. Bauarbeit ist Teil davon, nicht das Zentrum. Wenn man den Log nach drei Monaten liest, soll man den Menschen und den Tag spüren, nicht nur Commit-Zeilen.
 
 Faustregel: wenn der Tag substantiell war und nichts Persönliches/Stimmungsmäßiges im Log steht, fehlt etwas. Das gilt umgekehrt nicht: ein ruhiger Mensch-Tag ohne viel Build-Output ist ein gültiger Log.
 
@@ -46,20 +46,20 @@ Reihenfolge fest, leere Sektionen weglassen.
 ## Claude Code
 
 ### Stimmung / Energie
-- Wie war Christians Energie heute? Wo war er fokussiert, wo abgelenkt, wo gereizt, wo angesprungen?
+- Wie war des Nutzers Energie heute? Wo war er fokussiert, wo abgelenkt, wo gereizt, wo angesprungen?
 - Lust- und Frustpunkte, Tempo, Mood-Wechsel. Konkrete Auslöser nennen, nicht generisch.
 - Auch persönliches Leben gehört hier rein: Hochzeit, Familie, Gesundheit, Kunden-Sorgen, Geld-Themen, FCH, PT-Zweifel — alles was den Kopf gefüllt hat, auch wenn es nichts mit Build zu tun hatte.
 
-### Christians Gedanken
+### des Nutzers Gedanken
 - Ideen, Visionen, Wünsche, Zweifel, Sorgen — möglichst nah an seiner Wortwahl.
 - **Was hat ihn angesprungen?** Welche Idee hat sofort Energie gehabt?
 - **Welche Ideen wurden verworfen** und warum (eigenes Veto, andere Priorität, technisch nicht greifbar)?
 - Längere Zitate sind erwünscht, wenn sie den Ton tragen. Verdichten, nicht glätten.
 
 ### Klaus' Gedanken
-- Wie Klaus auf Christians Gedanken reagiert hat: zugestimmt, widersprochen, weitergesponnen.
+- Wie Klaus auf des Nutzers Gedanken reagiert hat: zugestimmt, widersprochen, weitergesponnen.
 - Eigene Beobachtungen, Muster, Sorgen, die Klaus während des Tages aufgefallen sind.
-- Bewusst kurz, keine zweite Christian-Sektion. Aber sichtbar — der Log ist Zwiegespräch, nicht Monolog.
+- Bewusst kurz, keine zweite der Nutzer-Sektion. Aber sichtbar — der Log ist Zwiegespräch, nicht Monolog.
 
 ### Menschen / CRM
 - Wer war heute Thema: Kunden, Leads, Freunde, Familie. Aus `data/people.db`, WhatsApp-Chats, Mails, Kalendern, FOCUS-Tags.
@@ -104,9 +104,9 @@ Die Einzel-Radare (X, Web, Tech, YouTube, AGI) schreiben **nicht** mehr in den D
 
 ## Schreibregeln
 
-**Stimmung vor Bauarbeit.** Wenn beide Sektionen Material haben, kommt Stimmung/Energie zuerst, dann Christians Gedanken, dann Klaus' Gedanken, dann Build. Mensch vor Code.
+**Stimmung vor Bauarbeit.** Wenn beide Sektionen Material haben, kommt Stimmung/Energie zuerst, dann des Nutzers Gedanken, dann Klaus' Gedanken, dann Build. Mensch vor Code.
 
-**Rohstoff aus den Chats ziehen.** Der Daily Log ist kein abstrakter Bericht, er soll an realen Sätzen Christians hängen. Verdichten ja, glätten nein. Wenn Christian "großes Foul" sagt, steht "großes Foul" im Log, nicht "negative Rückmeldung".
+**Rohstoff aus den Chats ziehen.** Der Daily Log ist kein abstrakter Bericht, er soll an realen Sätzen des Nutzers hängen. Verdichten ja, glätten nein. Wenn der Nutzer "großes Foul" sagt, steht "großes Foul" im Log, nicht "negative Rückmeldung".
 
 **Auch das Verworfene loggen.** Nicht nur was gebaut wurde, sondern auch was angedacht und wieder fallengelassen wurde, mit Grund. Das ist später Goldwert.
 

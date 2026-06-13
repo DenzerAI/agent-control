@@ -316,7 +316,7 @@ function DecisionRow({ info, mobile }: { info: BibliothekarInfo; mobile?: boolea
   if (decisionProposals.length === 0) {
     return (
       <div className="info-detail-list info-text-meta">
-        <DetailLine label="Stand" value="Keine Entscheidung für Christian offen." />
+        <DetailLine label="Stand" value="Keine Entscheidung für der Nutzer offen." />
         <DetailLine label="Ping" value="Der Systemagent meldet sich nur, wenn ein Lauf auffällig war oder eine echte Entscheidung offen ist." />
         <DetailLine label="Regel" value="Normale Umwege bleiben im Logbuch; Werkzeugpflege liegt in der Werkstatt." />
       </div>
@@ -466,7 +466,7 @@ function SystemagentInlineSection({ mobile }: { mobile?: boolean }) {
         <div className="pb-2">
           <Guided>
             <div className="pl-1 pr-3 py-2 info-text-meta text-[var(--t3)]/75 leading-relaxed">
-              Ich beobachte Läufe, prüfe Werkzeuge und melde mich nur, wenn etwas passiert ist oder Christian wirklich handeln muss.
+              Ich beobachte Läufe, prüfe Werkzeuge und melde mich nur, wenn etwas passiert ist oder der Nutzer wirklich handeln muss.
             </div>
             <SubFolder title="Logbuch" icon={BookOpen} count={recentRuns.length} attention={eventRuns.length > 0} mobile={mobile}>
               {recentRuns.length > 0 ? recentRuns.map(run => <WorkflowRow key={run.id} run={run} mobile={mobile} />) : (

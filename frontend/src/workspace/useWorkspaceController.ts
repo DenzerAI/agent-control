@@ -47,7 +47,7 @@ export function useWorkspaceController(): WorkspaceController {
   const [file, setFile] = useState<WorkspaceFile | null>(null)
   const [filesystemPath, setFilesystemPath] = useState<string | null>(null)
   // Modus, zu dem ein Zurück-Sprung führt, wenn aus einem Listen-Modul (z.B.
-  // Artefakte) eine Datei geöffnet wurde. So findet Christian aus der Preview
+  // Artefakte) eine Datei geöffnet wurde. So findet der Nutzer aus der Preview
   // zurück in die Liste, statt im Datei-Modus festzustecken.
   const [returnMode, setReturnMode] = useState<WorkspaceMode | null>(() => PARENT_MODE_BY_MODE[mode] || null)
   const openRef = useRef(open)

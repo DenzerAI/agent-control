@@ -1070,7 +1070,7 @@ def _get_pulse_state(name: str) -> dict:
 
 def _pulse_radar_intraday() -> dict:
     """Liest das heutige radar-konsolidiert.md und pingt einmal pro Tag einen
-    Punkt, der zu Christians scharfen Themen passt. Fokus liegt auf
+    Punkt, der zu des Nutzers scharfen Themen passt. Fokus liegt auf
     Agenten-Systemen, OpenClaw/Hermes und konkretem Nachbau-Wert für Agent
     Control. Bewusst getrennt vom Morgenbriefing — feuert frühestens 12:00,
     einmal pro Tag.
@@ -1092,7 +1092,7 @@ def _pulse_radar_intraday() -> dict:
         return {"status": "ok", "message": "kein Radar heute", "payload": state}
 
     text = radar_file.read_text(encoding="utf-8", errors="replace")
-    # Themen-Keywords, scharf an Christians Interessen. OpenClaw/Hermes sind
+    # Themen-Keywords, scharf an des Nutzers Interessen. OpenClaw/Hermes sind
     # Beobachtungsquellen, aber gepostet wird nur bei Substanz oder Nachbau-Wert.
     themes = [
         "openclaw", "hermes agent", "hermes", "personal agent", "memory-agent",
@@ -1119,7 +1119,7 @@ def _pulse_radar_intraday() -> dict:
         # Titel extrahieren
         m_title = re.search(r"\*\*\[([^\]]+)\]", block)
         m_why = (
-            re.search(r"\*\*Implikation für Christian:\*\*\s*([^\n]+)", block)
+            re.search(r"\*\*Implikation für der Nutzer:\*\*\s*([^\n]+)", block)
             or re.search(r"\*\*Warum wichtig:\*\*\s*([^\n]+)", block)
         )
         if not m_title:

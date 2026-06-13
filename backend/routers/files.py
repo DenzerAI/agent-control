@@ -226,7 +226,7 @@ async def get_daily(limit: int = 200):
         for fp in sorted(daily_dir.glob("2*.md"), reverse=True):
             try:
                 content = fp.read_text()
-                _known_agents = {'Klaus', 'Christian', 'System'}
+                _known_agents = {'Klaus', 'der Nutzer', 'System'}
                 headings = [h.strip() for h in _re.findall(r'^## (.+)$', content, _re.MULTILINE)]
                 agents = [h for h in headings if h in _known_agents]
                 logs.append({
@@ -343,7 +343,7 @@ async def recent_entries(limit: int = 30):
                 if fp.is_file() and not fp.name.startswith(".") and fp.suffix.lower() in _artifact_exts:
                     _add(fp, "main", f"asset:{job_dir.name}")
 
-    # Outputs created directly for Christian (Erklär-/Brainstorm-HTML, geteilte
+    # Outputs created directly for der Nutzer (Erklär-/Brainstorm-HTML, geteilte
     # Dateien). User-facing, keine Job-Internals, gehören ins Artefakte-Modul.
     artifacts_dir = server.PROJECT_ROOT / "work" / "artifacts"
     if artifacts_dir.is_dir():
@@ -523,7 +523,7 @@ def _extract_videos(*texts: str) -> list[dict]:
 
 _RADAR_ITEM = _re.compile(r"^[-*]\s+\*\*\[(?P<title>.+?)\]\((?P<url>[^)]+)\)\*\*\s*(?P<tail>.*)$")
 _RADAR_SECTION = _re.compile(r"^#{2,3}\s+(?P<label>.+?)\s*$")
-_RADAR_IMPL = _re.compile(r"^\s*\*\*(?:Implikation für Christian|Warum wichtig)[:.]?\*\*\s*(?P<txt>.*)$")
+_RADAR_IMPL = _re.compile(r"^\s*\*\*(?:Implikation für der Nutzer|Warum wichtig)[:.]?\*\*\s*(?P<txt>.*)$")
 _RADAR_SOURCES = _re.compile(r"\*\(Quellen?:\s*(?P<src>[^)]+)\)\*")
 _RADAR_TOP = _re.compile(r"^\*\*Top-?\d.*\*\*\s*$")
 

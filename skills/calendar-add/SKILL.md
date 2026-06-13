@@ -3,7 +3,7 @@ name: calendar-add
 description: Termin anlegen, ändern oder löschen
 category: Integrationen / Automation
 triggers:
-- 'Christian fragt nach: Termin anlegen, ändern oder löschen'
+- 'der Nutzer fragt nach: Termin anlegen, ändern oder löschen'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill
@@ -22,13 +22,13 @@ status: active
 
 # calendar-add
 
-Termine aus dem Chat anlegen, ändern oder löschen. Christian sagt z.B. "trag Mittwoch 14 Uhr Friseur ein" oder "lösch den Friseur-Termin", und der Eintrag landet im lokalen Kalender (`calendar_events` in `chat.db`, bzw. `pt_appointments` in `people.db` für Personal Training) und ist sofort im Fokus und in der Agent-UI sichtbar.
+Termine aus dem Chat anlegen, ändern oder löschen. der Nutzer sagt z.B. "trag Mittwoch 14 Uhr Friseur ein" oder "lösch den Friseur-Termin", und der Eintrag landet im lokalen Kalender (`calendar_events` in `chat.db`, bzw. `pt_appointments` in `people.db` für Personal Training) und ist sofort im Fokus und in der Agent-UI sichtbar.
 
 **Eine Wahrheit:** Normale Termine werden über `/api/calendar` in `data/chat.db` (`calendar_events`) angelegt. Kein direkter Google-Write, kein zweiter Kalenderpfad. Google-IDs bleiben nur Referenzen für alte oder importierte Einträge.
 
 ## Wann dieser Skill greift
 
-Christian formuliert Termine in Sprache, etwa:
+der Nutzer formuliert Termine in Sprache, etwa:
 
 - "trag Mittwoch 14 Uhr Friseur ein"
 - "morgen 10 Uhr Vor-Ort-Termin Jens GmbH, dauert 90 Minuten"
@@ -87,7 +87,7 @@ Auch ähnliche Schreibweisen mitsuchen (Meier/Meyer, Petersen/Pedersen, c/k, ein
 
 **3. Dauer raten oder erfragen.** Default 60 Minuten. Bei "kurz" 30, bei "Workshop" 180. Wenn unklar und wichtig, kurz nachfragen.
 
-**4. Direkt ausführen.** Christian will bei Kalender-Add keine Preview und kein Warten. Wenn Titel, Datum und Uhrzeit klar sind, POST sofort absetzen. Nur bei echter Unklarheit oder Konflikt kurz fragen.
+**4. Direkt ausführen.** der Nutzer will bei Kalender-Add keine Preview und kein Warten. Wenn Titel, Datum und Uhrzeit klar sind, POST sofort absetzen. Nur bei echter Unklarheit oder Konflikt kurz fragen.
 
 ```bash
 curl -s -X POST "http://127.0.0.1:8890/api/calendar" \
@@ -106,7 +106,7 @@ curl -s -X POST "http://127.0.0.1:8890/api/calendar" \
 
 ## Ablauf — Verschieben oder Löschen
 
-**1. Termin finden.** GET über den passenden Zeitraum, im Titel nach Christians Wort suchen.
+**1. Termin finden.** GET über den passenden Zeitraum, im Titel nach des Nutzers Wort suchen.
 
 **2. Bei mehreren Treffern nachfragen.** "Ich seh zwei Friseur-Termine, der am Mittwoch oder Donnerstag?" Nicht raten.
 
@@ -128,9 +128,9 @@ curl -s -X DELETE "http://127.0.0.1:8890/api/calendar/<id>" \
 
 PT-Termine (Personal Training, EMS) brauchen zwei Schritte, weil sie zusätzlich zur `pt_appointments`-Tabelle und zur Person verlinkt werden.
 
-**1. Person in `people.db` finden.** Aus Christians Wort den Namen lesen und in `data/people.db` matchen (genau wie find-contact). Bei mehreren Treffern fragen.
+**1. Person in `people.db` finden.** Aus des Nutzers Wort den Namen lesen und in `data/people.db` matchen (genau wie find-contact). Bei mehreren Treffern fragen.
 
-**2. Trainingsdauer ableiten.** Default `personal_training` mit 60 Minuten. Wenn Christian "EMS" sagt oder der Titel "EMS" enthält: `ems` mit 30 Minuten. Bei "30 Minuten" oder "kurz" ohne EMS-Hinweis kurz nachfragen.
+**2. Trainingsdauer ableiten.** Default `personal_training` mit 60 Minuten. Wenn der Nutzer "EMS" sagt oder der Titel "EMS" enthält: `ems` mit 30 Minuten. Bei "30 Minuten" oder "kurz" ohne EMS-Hinweis kurz nachfragen.
 
 **3. Direkt anlegen.** Wenn Person, Datum, Uhrzeit und Trainingstyp klar sind, keine Preview zeigen. Erst Kalendereintrag mit Person anlegen, dann Convert zu PT:
 

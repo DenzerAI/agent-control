@@ -8,7 +8,7 @@ NICHT sofort einen echten Post.
 Schritte: Recherche-Notiz -> Entwurf + Selbst-Check -> Freigabe-Vorschau.
 Erst auf ausdrückliche Freigabe (approve_post) geht der Post über
 scripts/pioniere-post.sh wirklich in die Pioniere-Community. So geht nie etwas
-ungesehen raus, ganz nach Christians Outbound-Regel.
+ungesehen raus, ganz nach des Nutzers Outbound-Regel.
 
 Bausteine aus dem Bestand:
 - scripts/pioniere-post.sh (echter Community-Post + Klaus-Channel-Ping)
@@ -59,7 +59,7 @@ def _bump_fail_streak(reset: bool = False) -> int:
     return streak
 
 
-# ── Titel + kurze ID, damit Christian über einen Entwurf reden kann ──
+# ── Titel + kurze ID, damit der Nutzer über einen Entwurf reden kann ──
 
 def _make_title(body: str, source_note: str = "") -> str:
     """Kurzer, sprechbarer Titel für einen Entwurf.
@@ -96,7 +96,7 @@ def _self_check(body: str) -> tuple[int, list[str]]:
     if words > 160:
         warnings.append(f"Recht lang ({words} Wörter), Pioniere-Posts sind kurz")
     if "—" in body or " – " in body:
-        warnings.append("Gedankenstrich im Text, Christian mag keine")
+        warnings.append("Gedankenstrich im Text, der Nutzer mag keine")
     return words, warnings
 
 
@@ -337,7 +337,7 @@ async def edit_post(run_id: str, idx: int, body: str, *, title: str = "") -> dic
 async def approve_post(run_id: str, idx: int = 0) -> dict[str, Any]:
     """Freigabe: legt den Entwurf in die Versand-Queue. Postet NICHT sofort.
 
-    Christians Takt: Freigabe und Versand sind getrennt. Der freigegebene
+    des Nutzers Takt: Freigabe und Versand sind getrennt. Der freigegebene
     Entwurf wartet in der Queue, der Versand-Job schiebt ihn getaktet (alle
     zwei Tage) automatisch raus. Sofortversand geht über publish_now.
     """
@@ -446,7 +446,7 @@ def list_pending_drafts(limit: int = 30) -> list[dict[str, Any]]:
     """Alle wartenden Entwürfe quer über die letzten Läufe (für den Workspace).
 
     Wartend = weder gepostet noch verworfen noch in der Queue. So sieht
-    Christian den ganzen Sammel-Stapel, nicht nur den jüngsten Lauf.
+    der Nutzer den ganzen Sammel-Stapel, nicht nur den jüngsten Lauf.
     """
     import workflows
     runs = workflows.recent_runs(limit=limit, workflow_key=WORKFLOW_KEY, visible_only=False)

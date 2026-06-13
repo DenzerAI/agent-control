@@ -40,7 +40,7 @@ def _of_stream() -> str:
     try:
         return get_owner()["first_name"]
     except Exception:
-        return "Christian"
+        return "der Nutzer"
 from engines import engine_label, normalize_model_for_engine
 from engines.runtime_policy import broker_tool_context, build_claude_print_cmd, build_codex_exec_cmd
 
@@ -77,7 +77,7 @@ _EXTERNAL_NETWORK_HINTS = (
 
 
 def _normalize_codex_model(raw: object) -> str:
-    """Codex CLI in Christians ChatGPT-Account kann keine Claude-Modelle ausführen."""
+    """Codex CLI in des Nutzers ChatGPT-Account kann keine Claude-Modelle ausführen."""
     return normalize_model_for_engine("codex", str(raw or ""))
 
 
@@ -1225,7 +1225,7 @@ def _build_werkbank_background_prompt(
         f"Ursprungschat: {origin_conv_id} ({origin_title or 'ohne Titel'})\n\n"
         "Arbeite diesen Auftrag im Hintergrund ab. Der Ursprungschat soll frei bleiben. "
         "Wenn du fertig bist, melde dein Ergebnis knapp; die Werkbank spiegelt es in den Ursprungschat zurück.\n\n"
-        "Beende deine allerletzte Nachricht mit genau diesem dreizeiligen Abschluss, jede Zeile beginnt mit ihrem Label in Grossbuchstaben:\nFERTIG: was jetzt konkret fertig oder anders ist, ein bis zwei Saetze.\nGEAENDERT: die wichtigsten geaenderten Dateien oder Bereiche, knapp.\nDU KANNST: was Christian jetzt pruefen, testen oder als Naechstes tun kann.\n\n"
+        "Beende deine allerletzte Nachricht mit genau diesem dreizeiligen Abschluss, jede Zeile beginnt mit ihrem Label in Grossbuchstaben:\nFERTIG: was jetzt konkret fertig oder anders ist, ein bis zwei Saetze.\nGEAENDERT: die wichtigsten geaenderten Dateien oder Bereiche, knapp.\nDU KANNST: was der Nutzer jetzt pruefen, testen oder als Naechstes tun kann.\n\n"
         f"Titel:\n{title.strip()}\n\n"
         f"Verdichteter Auftrag:\n{brief.strip()}\n\n"
         f"Abnahme:\n{acceptance.strip()}\n\n"
@@ -1269,7 +1269,7 @@ def _build_work_session_prompt(
         "Arbeite in dieser separaten Session nur den folgenden Auftrag ab. "
         "Nutze den Kontext als Hintergrund, aber folge dem verdichteten Auftrag. "
         "Wenn du fertig bist, melde dein Ergebnis knapp zurück.\n\n"
-        "Beende deine allerletzte Nachricht mit genau diesem dreizeiligen Abschluss, jede Zeile beginnt mit ihrem Label in Grossbuchstaben:\nFERTIG: was jetzt konkret fertig oder anders ist, ein bis zwei Saetze.\nGEAENDERT: die wichtigsten geaenderten Dateien oder Bereiche, knapp.\nDU KANNST: was Christian jetzt pruefen, testen oder als Naechstes tun kann.\n\n"
+        "Beende deine allerletzte Nachricht mit genau diesem dreizeiligen Abschluss, jede Zeile beginnt mit ihrem Label in Grossbuchstaben:\nFERTIG: was jetzt konkret fertig oder anders ist, ein bis zwei Saetze.\nGEAENDERT: die wichtigsten geaenderten Dateien oder Bereiche, knapp.\nDU KANNST: was der Nutzer jetzt pruefen, testen oder als Naechstes tun kann.\n\n"
         f"Titel:\n{title.strip()}\n\n"
         f"Verdichteter Auftrag:\n{brief.strip()}\n\n"
         "Arbeitsbudget:\n"
@@ -1387,7 +1387,7 @@ async def _enqueue_work_session_background(client: WebSocket, msg: dict, engine:
     if not project:
         project = str(origin.get("project") or "")
 
-    # Punkt 4: Laeuft zum Thema schon eine Werkbank-Session und Christian will dort
+    # Punkt 4: Laeuft zum Thema schon eine Werkbank-Session und der Nutzer will dort
     # weiterbauen, haengen wir den Folgeauftrag an, statt eine neue Session zu oeffnen.
     if resume_requested:
         resumed = await _resume_work_session(client, msg, engine, agent_id, project)
@@ -1534,7 +1534,7 @@ async def create_work_session_record(
 ) -> dict | None:
     """Client-freier Kern fuer den bewussten Werkbank-Spawn.
 
-    Beide Haende gehen hier durch: Klaus loest bewusst per Endpoint aus, Christian
+    Beide Haende gehen hier durch: Klaus loest bewusst per Endpoint aus, der Nutzer
     per Button. Kein Stichwort-Vorfilter, kein WebSocket noetig. Legt Worker-Chat,
     Werkbank-Task und Queue-Item an und gibt die IDs zurueck.
     """
@@ -2038,7 +2038,7 @@ async def broadcast_project_update(conv_id: str, project_id: str):
 
 
 async def broadcast_project_suggest(conv_id: str, project_id: str, project_name: str):
-    """Frage Christian inline ob der Chat zu Projekt X gehört."""
+    """Frage der Nutzer inline ob der Chat zu Projekt X gehört."""
     await _broadcast(json.dumps({
         "type": "conv.projectSuggest",
         "conversationId": conv_id,
@@ -2475,7 +2475,7 @@ def setup_streaming(app_config: dict):
         if dual_mode:
             dual_reason = _dual_sidecar_reason(message, project, force=True)
         # Two-Pass aktiv heißt: Text des ersten Passes wird gepuffert (NICHT ans UI),
-        # danach Sidecar-Review, danach finaler Synthese-Pass dessen Text Christian sieht.
+        # danach Sidecar-Review, danach finaler Synthese-Pass dessen Text der Nutzer sieht.
         two_pass_active = bool(dual_reason)
 
         proc = None
@@ -2822,14 +2822,14 @@ def setup_streaming(app_config: dict):
                 await _consume_codex(proc)
                 await proc.wait()
                 # Zweiter stiller Tod: auch der frische Lauf brachte nichts. Statt
-                # leerer "toter" Session ein sichtbares Signal an Christian geben.
+                # leerer "toter" Session ein sichtbares Signal an der Nutzer geben.
                 if not full_text.strip():
                     full_text = "Codex konnte nach dem Neuanknüpfen nicht antworten. Schick die Nachricht bitte noch einmal."
 
             full_text = linkify_file_paths(full_text)
 
             # Two-Pass: Draft ist fertig (Tools sichtbar, Text gepuffert). Jetzt
-            # Sidecar holen, dann Final-Synthese, dann erst die Antwort an Christian.
+            # Sidecar holen, dann Final-Synthese, dann erst die Antwort an der Nutzer.
             if two_pass_active and full_text.strip() and conv_id not in _stop_requests:
                 draft_text = full_text
                 await _safe_send({
@@ -2879,7 +2879,7 @@ def setup_streaming(app_config: dict):
                     final_text = draft_text
                 full_text = linkify_file_paths(final_text)
                 text_segments = [full_text]
-                # Jetzt erst sieht Christian den Text.
+                # Jetzt erst sieht der Nutzer den Text.
                 await _safe_send({
                     "type": "agent.text",
                     "agent": agent_display,
@@ -3595,7 +3595,7 @@ def setup_streaming(app_config: dict):
             full_text = linkify_file_paths(full_text)
 
             # Two-Pass: Draft des ersten Claude-Passes ist fertig. Sidecar holen,
-            # dann Final-Synthese, dann erst die Antwort an Christian streamen.
+            # dann Final-Synthese, dann erst die Antwort an der Nutzer streamen.
             if two_pass_active and full_text.strip() and conv_id not in _stop_requests:
                 draft_text = full_text
                 await _safe_send({

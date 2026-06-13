@@ -52,7 +52,7 @@ type PersonDetail = {
   whatsapp_chat_id?: string | null
 }
 
-// Reihenfolge: Workshops, Agent, Leads (was Christian zuerst sieht).
+// Reihenfolge: Workshops, Agent, Leads (was der Nutzer zuerst sieht).
 const STREAM_ORDER = ['workshops', 'agent', 'leads']
 
 const STREAM_ACCENT: Record<string, string> = {

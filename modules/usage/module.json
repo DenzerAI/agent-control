@@ -2,7 +2,7 @@
   "schema_version": 1,
   "name": "usage",
   "kind": "router",
-  "description": "Liest Christians Claude-Max- und Codex/ChatGPT-Kontingente on-demand via Playwright mit persistenten Login-Profilen.",
+  "description": "Liest des Nutzers Claude-Max- und Codex/ChatGPT-Kontingente on-demand via Playwright mit persistenten Login-Profilen.",
   "endpoints": [
     "GET /api/usage/claude",
     "GET /api/usage/history",

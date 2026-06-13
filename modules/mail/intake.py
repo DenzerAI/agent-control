@@ -2,7 +2,7 @@
 
 Routing -> Kontext -> Entwurf -> Selbst-Check -> Freigabe. Jeder Schritt
 wird im Workflow-Log sichtbar (workflow_key="mail.intake"). Der Agent sendet
-NIE selbst. Entwürfe landen als Freigabe-Vorlage; Christian gibt frei.
+NIE selbst. Entwürfe landen als Freigabe-Vorlage; der Nutzer gibt frei.
 
 Bausteine aus dem Bestand:
 - mail.core.fetch_inbox / fetch_message / _bucket / _mail_attention_context / _mail_reply_meta
@@ -22,9 +22,9 @@ _log = logging.getLogger("mail.intake")
 WORKFLOW_KEY = "mail.intake"
 PING_SOURCE = "posteingang-agent"
 
-# Christians Stilregeln, die in jeden Entwurf einfliessen.
+# des Nutzers Stilregeln, die in jeden Entwurf einfliessen.
 _STYLE_RULES = (
-    "Schreib wie Christian: klar, menschlich, direkt, kein Assistenten-Sprech, "
+    "Schreib wie der Nutzer: klar, menschlich, direkt, kein Assistenten-Sprech, "
     "keine Floskeln, keine uebertriebene Begeisterung. Niemals Binde- oder "
     "Gedankenstriche als Stilmittel, stattdessen Komma oder Punkt. Keine "
     "erfundenen Zusagen. Wenn etwas offen ist, benenne es ehrlich statt es zu "
@@ -36,7 +36,7 @@ async def _llm(prompt: str, feature: str, max_tokens: int = 900) -> tuple[str, s
     """Codex zuerst, lokales Modell als Fallback. Liefert (text, model).
 
     PII (Kontakte aus people.db, Telefon/Mail/IBAN) wird vor dem Cloud-Call
-    maskiert und in der Antwort wieder hergestellt. Christians eigene Daten
+    maskiert und in der Antwort wieder hergestellt. des Nutzers eigene Daten
     bleiben Klartext. Siehe backend/pii_redact.py.
     """
     from db import run_codex_cli
@@ -163,7 +163,7 @@ def _draft_prompt(msg: dict[str, Any], ctx_block: str) -> str:
     body = (msg.get("body_text") or "").strip()
     if len(body) > 7000:
         body = body[:7000] + "\n[...]"
-    return f"""Du schreibst einen E-Mail-Antwortentwurf fuer Christian. Der Entwurf wird ihm vorgelegt, er sendet selbst. Gib NUR den Mailtext zurueck, ohne Betreff, ohne Kommentar, ohne Anfuehrungszeichen.
+    return f"""Du schreibst einen E-Mail-Antwortentwurf fuer der Nutzer. Der Entwurf wird ihm vorgelegt, er sendet selbst. Gib NUR den Mailtext zurueck, ohne Betreff, ohne Kommentar, ohne Anfuehrungszeichen.
 
 {_STYLE_RULES}
 
@@ -182,7 +182,7 @@ Antwortentwurf:"""
 
 
 def _review_prompt(draft: str, msg: dict[str, Any]) -> str:
-    return f"""Du bist Christians strenger Lektor. Pruefe den folgenden E-Mail-Entwurf gegen diese Regeln:
+    return f"""Du bist des Nutzers strenger Lektor. Pruefe den folgenden E-Mail-Entwurf gegen diese Regeln:
 
 {_STYLE_RULES}
 Zusaetzlich: Antwortet er wirklich auf das Anliegen der Original-Mail? Keine erfundenen Fakten oder Zusagen?
@@ -276,7 +276,7 @@ async def run_intake(account_key: str = "all", *, limit: int = 25,
                         for t in alerts[:6]]},
         )
 
-    # Gelerntes Signal: Absender, deren Entwürfe Christian schon verworfen hat,
+    # Gelerntes Signal: Absender, deren Entwürfe der Nutzer schon verworfen hat,
     # bekommen keinen neuen Draft mehr (geschlossener Lern-Kreis, mail-learning.json).
     no_draft = {a.lower() for a in mail.load_learning().get("no_draft_addresses", [])}
 
@@ -429,7 +429,7 @@ async def discard_draft(run_id: str, idx: int, *, learn: bool = True) -> dict[st
     """Verwirft einen Entwurf. Bei learn=True merkt sich der Agent den Absender,
     damit der gleiche Absender beim nächsten Lauf keinen Draft mehr bekommt.
 
-    Das ist der geschlossene Lern-Kreis: Christians Verwerfen fließt zurück in
+    Das ist der geschlossene Lern-Kreis: des Nutzers Verwerfen fließt zurück in
     mail-learning.json (no_draft_addresses) und steuert künftige Läufe.
     """
     from . import core as mail

@@ -3,7 +3,7 @@ name: refactor
 description: Refactoring-Richtlinien
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Refactoring-Richtlinien'
+- 'der Nutzer fragt nach: Refactoring-Richtlinien'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

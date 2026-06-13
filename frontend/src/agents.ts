@@ -29,7 +29,7 @@ const FALLBACK: AgentConfig[] = [
 // Der sichtbare Name des Haupt-Agenten kommt aus config/agents.json (Backend
 // /api/agents). Der Code verdrahtet ihn nirgends hart: UI-Strings ziehen ihn
 // ueber mainAgentName() / useMainAgentName(). Default ist der FALLBACK-Wert,
-// also "Agent" fuer Christians Instanz. Public-Builds setzen hier den im Setup
+// also "Agent" fuer des Nutzers Instanz. Public-Builds setzen hier den im Setup
 // vergebenen Namen (Default-Platzhalter "Agent").
 const _nameSubs = new Set<() => void>()
 

@@ -278,7 +278,7 @@ export function ChatagentWorkspace() {
               <span />
               <div>
                 <strong>{primaryAction}</strong>
-                <em>{report.attention?.level === 'christian' ? 'Christian' : report.attention?.level === 'klaus' ? 'Agent' : 'niemand'} muss aktuell handeln.</em>
+                <em>{report.attention?.level === 'christian' ? 'der Nutzer' : report.attention?.level === 'klaus' ? 'Agent' : 'niemand'} muss aktuell handeln.</em>
               </div>
               <aside>
                 <button

@@ -11,7 +11,7 @@
 #
 # Label-Logik (eine Wahrheit fuer restart/watchdog/launchd/CLI):
 #   1. config/launchd-label (vom Setup geschrieben) gewinnt, falls vorhanden.
-#   2. Christians bestehender Checkout in $HOME/agent behaelt com.klaus.agent
+#   2. des Nutzers bestehender Checkout in $HOME/agent behaelt com.klaus.agent
 #      (Abwaertskompatibilitaet: restart-server.sh/health-watchdog.sh erwarten das).
 #   3. Sonst com.agentcontrol.server (neutraler Fresh-Install-Default).
 

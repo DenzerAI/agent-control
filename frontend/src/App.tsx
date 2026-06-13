@@ -675,7 +675,7 @@ export default function App() {
 
   // Agent-Channel: wenn die Conv highlight=1 hat, übernimmt sie Pane 1 wie ein
   // Chatwechsel — Agent-Tab wandert an Position 0 und wird aktiv, der vorherige
-  // aktive Chat rutscht als Tab nach rechts. So weiß Christian sofort, dass es
+  // aktive Chat rutscht als Tab nach rechts. So weiß der Nutzer sofort, dass es
   // was Neues gibt. Beim Schließen (closeTab) wird /seen gerufen, damit der
   // Auto-Spawn erst beim nächsten echten Post wieder triggert.
   // Konzept: brain/ideas/klaus-channel.md.

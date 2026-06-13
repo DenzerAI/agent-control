@@ -76,7 +76,7 @@ function shortPath(path?: string): string {
   return String(path || '').replace('/Users/klaus/agent/', '~/agent/')
 }
 
-// Grosse, lebendige Zahl als Herz der Seite: Christian liebt es zu sehen, wie
+// Grosse, lebendige Zahl als Herz der Seite: der Nutzer liebt es zu sehen, wie
 // viel zwischen ihm und Agent schon passiert ist. Die Hauptzahl traegt den
 // warmen Akzent, die Nebenzahlen bleiben ruhig.
 function BigStat({ label, value, hint, accent }: { label: string; value: string | number; hint?: string; accent?: boolean }) {
@@ -114,7 +114,7 @@ export function KlausWorkspace() {
   useEffect(() => { load() }, [load])
 
   const soulCards = useMemo(() => ([
-    { icon: Sparkles, label: 'Identität', text: section(data?.soul || '', 'Identität') || data?.role || 'Christians persönlicher Agent.' },
+    { icon: Sparkles, label: 'Identität', text: section(data?.soul || '', 'Identität') || data?.role || 'des Nutzers persönlicher Agent.' },
     { icon: Brain, label: 'Haltung', text: section(data?.soul || '', 'Haltung') || 'Handle, wenn der Weg klar ist. Frage nur, wenn es echte Folgen hat.' },
     { icon: MessageSquare, label: 'Stimme', text: section(data?.soul || '', 'Stimme') || 'Warm, direkt, menschlich. Ergebnis zuerst.' },
     { icon: ShieldCheck, label: 'Grenzen', text: section(data?.soul || '', 'Grenzen') || 'Private Daten bleiben privat. Outbound nur als Draft.' },
@@ -137,7 +137,7 @@ export function KlausWorkspace() {
             <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--warm)]">Main Agent · Persona</div>
             <h2 className="klaus-title mt-1 truncate font-medium leading-none text-[var(--t1)]">{data?.name || agentName}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--t2)]">
-              {data?.role || 'Christians persönlicher Agent.'} Kein Modell-Showroom, sondern die sichtbare Identität hinter diesem Workspace.
+              {data?.role || 'des Nutzers persönlicher Agent.'} Kein Modell-Showroom, sondern die sichtbare Identität hinter diesem Workspace.
             </p>
           </div>
           <button type="button" onClick={load} disabled={loading} className="shrink-0 border border-[var(--border)] p-2 text-[var(--t2)] hover:bg-white/[0.05] disabled:opacity-60" title="Neu laden">

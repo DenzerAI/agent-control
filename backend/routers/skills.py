@@ -900,7 +900,7 @@ async def skill_curator():
 
 @router.post("/api/skill-bibliothekar/decide")
 async def skill_bibliothekar_decide(payload: dict = Body({})):
-    """Merkt Christians Review-Entscheidung für einen Bibliothekar-Hinweis.
+    """Merkt des Nutzers Review-Entscheidung für einen Bibliothekar-Hinweis.
 
     Body: {id: str, action: "done"|"dismiss"|"snooze"}. Es werden keine Skills
     geändert; die Entscheidung blendet nur diesen Hinweis aus, bis er sich
@@ -1083,7 +1083,7 @@ async def agent_detail(agent: str = 'main'):
     import server
     profile = get_agent_profile(agent)
     agent = profile["id"]
-    # Fuer Christian ist alles Klaus. Das gesamte System ist aus Klaus entstanden,
+    # Fuer der Nutzer ist alles Klaus. Das gesamte System ist aus Klaus entstanden,
     # in Unteragents (claude, wolf, eva, alex ...) gebrancht und holistisch wieder
     # zu Klaus zusammengefuehrt. Der main-Agent zaehlt darum die gesamte Historie.
     today_start = time.mktime(time.strptime(time.strftime('%Y-%m-%d'), '%Y-%m-%d'))

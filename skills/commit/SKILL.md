@@ -3,7 +3,7 @@ name: commit
 description: Git-Commit-Nachricht strukturieren
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Git-Commit-Nachricht strukturieren'
+- 'der Nutzer fragt nach: Git-Commit-Nachricht strukturieren'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

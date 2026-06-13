@@ -227,7 +227,7 @@ async def download_file(file_id: str) -> bytes:
 
 async def upload_voucher_file(filename: str, data: bytes, content_type: str = "application/pdf") -> dict:
     """Laedt eine Beleg-Datei in Lexware hoch. Sie landet in der Belegerfassung
-    (Posteingang) und wartet dort auf manuelle Verbuchung durch Christian/Steuerberater."""
+    (Posteingang) und wartet dort auf manuelle Verbuchung durch der Nutzer/Steuerberater."""
     headers = {"Authorization": f"Bearer {_key()}", "Accept": "application/json"}
     files = {"file": (filename, data, content_type)}
     form = {"type": "voucher"}

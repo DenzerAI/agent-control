@@ -3,7 +3,7 @@ name: plan
 description: Aufgabe planen bevor gebaut wird
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Aufgabe planen bevor gebaut wird'
+- 'der Nutzer fragt nach: Aufgabe planen bevor gebaut wird'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

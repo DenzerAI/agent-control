@@ -1,7 +1,7 @@
 """Runtime process guard for engine subprocesses.
 
 The guard is deliberately read-only. It classifies risky engine processes so
-Christian can approve cleanup instead of letting an agent kill processes
+der Nutzer can approve cleanup instead of letting an agent kill processes
 silently.
 """
 from __future__ import annotations

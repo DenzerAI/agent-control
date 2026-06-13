@@ -3,7 +3,7 @@ name: whatsapp-send
 description: WhatsApp-Nachrichten senden
 category: Integrationen / Automation
 triggers:
-- 'Christian fragt nach: WhatsApp-Nachrichten senden'
+- 'der Nutzer fragt nach: WhatsApp-Nachrichten senden'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill
@@ -22,11 +22,11 @@ status: active
 
 # whatsapp-send
 
-Aus jedem beliebigen Chat heraus WhatsApp-Nachrichten an Christians Kontakte schicken. Kontakt per Name finden, dann Text senden.
+Aus jedem beliebigen Chat heraus WhatsApp-Nachrichten an des Nutzers Kontakte schicken. Kontakt per Name finden, dann Text senden.
 
 ## Wann dieser Skill greift
 
-Christian sagt zum Beispiel:
+der Nutzer sagt zum Beispiel:
 
 - "Schick Jasper per WhatsApp: …"
 - "Sag Paul über WhatsApp, dass …"
@@ -69,8 +69,8 @@ Antwort:
 **Regeln für die Auswahl:**
 
 - Genau ein Match → direkt senden.
-- Mehrere Matches → Christian kurz fragen ("Ich sehe zwei Jaspers in deinen Chats, welcher?") und die Kandidaten mit letzter Aktivität zeigen. Nie raten.
-- Kein Match → Christian das sagen, nicht raten und nicht senden. Vorschlag: "Schreib mir die Nummer oder öffne den Chat einmal, dann find ich ihn."
+- Mehrere Matches → der Nutzer kurz fragen ("Ich sehe zwei Jaspers in deinen Chats, welcher?") und die Kandidaten mit letzter Aktivität zeigen. Nie raten.
+- Kein Match → der Nutzer das sagen, nicht raten und nicht senden. Vorschlag: "Schreib mir die Nummer oder öffne den Chat einmal, dann find ich ihn."
 
 **2. Senden**
 
@@ -94,15 +94,15 @@ Der Run ist in der InfoPane unter `Automation → Learning Log` sichtbar. Der Pr
 
 ## Absolute Tabus
 
-- **Nie unbeaufsichtigt senden.** Nur wenn Christian in dieser Nachricht explizit dazu auffordert ("schick ihm das", "sag ihr"). Nicht proaktiv, nicht aus einem Cron, nicht als Interpretation einer allgemeinen Bitte.
-- **Text vorher zeigen** wenn er länger ist als ein Satz oder wenn Christian ihn nicht wörtlich diktiert hat. Eine kurze Bestätigung reicht ("Schick ich so ab: '…'"), dann senden.
+- **Nie unbeaufsichtigt senden.** Nur wenn der Nutzer in dieser Nachricht explizit dazu auffordert ("schick ihm das", "sag ihr"). Nicht proaktiv, nicht aus einem Cron, nicht als Interpretation einer allgemeinen Bitte.
+- **Text vorher zeigen** wenn er länger ist als ein Satz oder wenn der Nutzer ihn nicht wörtlich diktiert hat. Eine kurze Bestätigung reicht ("Schick ich so ab: '…'"), dann senden.
 - **Keine Annahmen bei Mehrdeutigkeit.** Lieber einmal nachfragen als den falschen Jasper anschreiben.
 - **Bridge-Direktcall verboten.** Port 8891 (rohe WA-Bridge) ist kein Test-Endpunkt — was dort reingeht, geht sofort echt raus. Senden immer nur über `/api/whatsapp/send` mit Backend-Auth. Bei `unauthorized`-Fehler: Auth klären, nicht umgehen.
-- **Kein Test-Send an echte Kontakte.** Wenn ein Send-Test nötig ist, ausschließlich an Christians eigene Nummer (+49 170 0000000). Vor jedem curl-Send den Empfänger zweimal lesen.
+- **Kein Test-Send an echte Kontakte.** Wenn ein Send-Test nötig ist, ausschließlich an des Nutzers eigene Nummer (+49 170 0000000). Vor jedem curl-Send den Empfänger zweimal lesen.
 
 ## Gruppen
 
-`is_group: true` im Match bedeutet: das ist eine Gruppe, nicht eine einzelne Person. Wenn Christian nicht explizit eine Gruppe meint, ist das wahrscheinlich der falsche Match. Nochmal nachfragen.
+`is_group: true` im Match bedeutet: das ist eine Gruppe, nicht eine einzelne Person. Wenn der Nutzer nicht explizit eine Gruppe meint, ist das wahrscheinlich der falsche Match. Nochmal nachfragen.
 
 ## Nach dem Senden
 
@@ -112,13 +112,13 @@ Wenn der Send-Endpoint ein `workflow_review_status` ungleich `ok` zurückgibt, k
 
 ## Drafts schreiben
 
-Wenn Christian "mach mal eine Draft für WhatsApp an X" sagt, gilt:
+Wenn der Nutzer "mach mal eine Draft für WhatsApp an X" sagt, gilt:
 
 - **Fence ist `wa-draft`**, nicht `draft`. Der Renderer setzt den Quote-Balken dann auf WhatsApp-Grün.
-- **Keine Begrüßung.** Kein "Moin Jasper", "Hi Marco", "Hallo X" am Anfang. WhatsApp ist ein fortlaufender Chat, Christian schreibt da nicht jedes Mal "Hallo". Ausnahme: er sagt explizit "mit Begrüßung" oder "schreib ihn an" (also Erstkontakt). Im Zweifel ohne.
+- **Keine Begrüßung.** Kein "Moin Jasper", "Hi Marco", "Hallo X" am Anfang. WhatsApp ist ein fortlaufender Chat, der Nutzer schreibt da nicht jedes Mal "Hallo". Ausnahme: er sagt explizit "mit Begrüßung" oder "schreib ihn an" (also Erstkontakt). Im Zweifel ohne.
 - **Ein Absatz.** Möglichst alles in einem durchgeschriebenen Absatz. Nur trennen, wenn echt zwei Gedanken — zwischen Body und Gruß kein eigener Absatz.
 - **Keine Em-/En-/Bindestriche** als Stilmittel im Fließtext. Komma, Punkt oder neuer Satz. Auch nicht "—", "–", " - ".
-- **Klingt wie Christian.** Umgangssprachlich, leicht hingeworfen, nicht zu poliert. Lieber ein bisschen unrund als gestelzt-perfekt. Siehe `feedback_whatsapp_style.md` in Memory.
+- **Klingt wie der Nutzer.** Umgangssprachlich, leicht hingeworfen, nicht zu poliert. Lieber ein bisschen unrund als gestelzt-perfekt. Siehe `feedback_whatsapp_style.md` in Memory.
 - **Keine Meta-Phrasen.** Nicht "Kurze Rückmeldung", "Wollte mich melden wegen". Direkt rein.
 - **Keine harten Zeilenumbrüche** im Fließtext. WhatsApp bricht selbst um.
 
@@ -137,5 +137,5 @@ hab kurz reingeschaut — passt soweit. Die zwei Slots am Donnerstag mach ich au
 dann sehen wir weiter.
 
 Gruß
-Christian
+der Nutzer
 ```

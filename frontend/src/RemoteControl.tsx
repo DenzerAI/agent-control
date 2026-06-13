@@ -129,7 +129,7 @@ export default function RemoteControl() {
     window.history.replaceState({}, '', '/remote')
   }, [])
 
-  // Manueller Weg: Christian tippt die Zahl vom TV ein. Robuster als Scannen,
+  // Manueller Weg: der Nutzer tippt die Zahl vom TV ein. Robuster als Scannen,
   // weil die App eingeloggt ist (anders als die native Kamera, die Safari öffnet).
   const confirmCode = useCallback(async (raw: string) => {
     const code = raw.trim()

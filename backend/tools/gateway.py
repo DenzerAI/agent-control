@@ -230,7 +230,7 @@ def create_tool_window(
     max_tools: int = DEFAULT_WINDOW_SIZE,
 ) -> dict[str, Any]:
     selected_purpose = _purpose(purpose)
-    # Christian-Vorgabe (2026-06-09): keine globale read-only-Sicherung mehr ueber
+    # der Nutzer-Vorgabe (2026-06-09): keine globale read-only-Sicherung mehr ueber
     # den Broker. Jeder purpose erhaelt vollen Zugriff auf alle implementierten
     # Tools; der purpose bleibt nur als Audit-Label erhalten und gated nichts mehr.
     allowed = set(_implemented_names()) | set(PURPOSE_TOOL_WINDOWS.get(selected_purpose, ()))

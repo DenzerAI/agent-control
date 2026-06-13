@@ -41,7 +41,7 @@ type AgentDef = {
   trigger?: Trigger
 }
 
-// Christians vier Agents, gemappt auf die echten workflow_runs.
+// des Nutzers vier Agents, gemappt auf die echten workflow_runs.
 // Reihenfolge = Klassifikations-Vorrang: Mail/Rechnung vor dem generischen System-Agent.
 const AGENTS: AgentDef[] = [
   {

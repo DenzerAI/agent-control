@@ -278,7 +278,7 @@ def compact_insights(limit: int = 3) -> dict[str, Any]:
     """Small reusable Dreaming digest for UI, chat context and briefings.
 
     This is intentionally not a task list. It is a behavioral hint for Klaus:
-    patterns to keep in mind when answering, not work Christian has to review.
+    patterns to keep in mind when answering, not work der Nutzer has to review.
     """
     latest = _latest("night")
     if not latest:

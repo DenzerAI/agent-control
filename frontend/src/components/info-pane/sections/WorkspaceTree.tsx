@@ -107,7 +107,7 @@ function RenameInput({ initial, onCommit, onCancel }: { initial: string; onCommi
 }
 
 // Persist Folder-Open-State pro Pfad in localStorage. Damit bleibt der Tree
-// nach Reload genau so aufgeklappt, wie ihn Christian zuletzt verlassen hat.
+// nach Reload genau so aufgeklappt, wie ihn der Nutzer zuletzt verlassen hat.
 const FS_OPEN_KEY = 'infopane:fs:openFolders'
 function loadOpenSet(): Set<string> {
   try { return new Set(JSON.parse(localStorage.getItem(FS_OPEN_KEY) || '[]')) }

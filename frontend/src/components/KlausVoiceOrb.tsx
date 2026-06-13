@@ -9,7 +9,7 @@ import type { VoiceState } from './voiceState'
 // damit man sie auch bei 50px sofort auseinanderhaelt:
 //   listening  — ruhiger, langsamer Atem + Idle-Persoenlichkeit (schweben,
 //                gucken, blinzeln). Auf Desktop schlagen die Augen live mit
-//                Christians Mikro-Pegel aus (--voice-input-level).
+//                des Nutzers Mikro-Pegel aus (--voice-input-level).
 //   speaking   — heller Kopf, schnelles Pumpen der Augen UND ein sichtbarer
 //                Puls des ganzen Kopfes (reden).
 //   thinking   — teal, Welle laeuft durch die Augen (verarbeiten).
@@ -17,7 +17,7 @@ import type { VoiceState } from './voiceState'
 //   connecting — grauer Kopf, dunkle Augen, dezenter Puls (noch nicht wach).
 //
 // Reduced-Motion wird hier bewusst NICHT respektiert: die Bewegung ist das
-// Kernsignal des Voice-Modus auf Christians eigenem Geraet, kein Deko-Effekt.
+// Kernsignal des Voice-Modus auf des Nutzers eigenem Geraet, kein Deko-Effekt.
 // Transform-Ebenen sind getrennt (eine Achse pro <g>), damit Puls, Schweben,
 // Gucken, Blinzeln und Atmung nicht um dieselbe Achse konkurrieren.
 

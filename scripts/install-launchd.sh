@@ -6,7 +6,7 @@
 # Das Label kommt aus scripts/lib/agent-control-env.sh (eine Wahrheit fuer
 # restart-server.sh, health-watchdog.sh, install-launchd.sh und den
 # agent-control-CLI-Wrapper). Fresh-Install-Default: com.agentcontrol.server.
-# Christians bestehender Checkout in $HOME/agent behaelt com.klaus.agent.
+# des Nutzers bestehender Checkout in $HOME/agent behaelt com.klaus.agent.
 #
 # Sicherheit: Eine bereits vorhandene plist mit identischem Label wird nur
 # ueberschrieben, wenn sie auf denselben AC_ROOT zeigt oder --force gesetzt ist.

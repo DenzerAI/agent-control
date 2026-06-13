@@ -97,7 +97,7 @@ def broker_tool_context(conv_id: str, project: str) -> str:
             "- Im Hauptchat bleibt Klaus in der Planphase: werkbankfaehige Arbeit wird als Werkbank-Prompt formuliert und sichtbar uebergeben.\n"
             "- Im Werkbank-Lauf nutzt die Engine ihre nativen CLI-Werkzeuge frei fuer normale Projektarbeit; keine Broker-Whitelist fuer Lesen, Schreiben, Build, Test oder Deploy.\n"
             "- Der Stream protokolliert sichtbare Tool-Calls, Laufzeit, Tokens und Datei-Diffs fuer die Werkbank/Audit-Spur.\n"
-            "- Nutze den Broker nur fuer brokerpflichtige Tools, externe Sends, Admin-Aktionen oder wenn Christian es ausdruecklich verlangt.\n"
+            "- Nutze den Broker nur fuer brokerpflichtige Tools, externe Sends, Admin-Aktionen oder wenn der Nutzer es ausdruecklich verlangt.\n"
             f"- Broker-Fallback: `{client} run --purpose inspect --tool git.status --args '{{}}' "
             f"--conversation-id {conversation} --project {project_id}`.\n"
             "- Wenn der Broker kurz nicht verfuegbar ist, blockiere nicht minutenlang: nutze lokale Read/Build-Tools weiter und melde den Broker-Ausfall knapp.\n"

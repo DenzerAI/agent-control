@@ -10,7 +10,7 @@ POLICY_PATH = PROJECT_ROOT / "config" / "restart-policy.json"
 
 DEFAULT_POLICY = {
     "blocked": True,
-    "reason": "Restart nur nach ausdrücklicher Freigabe durch Christian.",
+    "reason": "Restart nur nach ausdrücklicher Freigabe durch der Nutzer.",
     "grant_until": 0,
     "grant_reason": "",
     "updated_at": 0,

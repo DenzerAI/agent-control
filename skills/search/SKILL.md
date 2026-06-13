@@ -3,7 +3,7 @@ name: search
 description: Allgemeine Suche mit Quellenprüfung
 category: Recherche / Markt
 triggers:
-- 'Christian fragt nach: Allgemeine Suche mit Quellenprüfung'
+- 'der Nutzer fragt nach: Allgemeine Suche mit Quellenprüfung'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

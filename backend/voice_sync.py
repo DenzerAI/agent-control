@@ -22,11 +22,11 @@ def _owner_first_voice() -> str:
     try:
         return get_owner()["first_name"]
     except Exception:
-        return "Christian"
+        return "der Nutzer"
 
 def _own_voice(text: str) -> str:
     of = _owner_first_voice()
-    return text if of == "Christian" else (text or "").replace("Christian", of)
+    return text if of == "der Nutzer" else (text or "").replace("der Nutzer", of)
 
 
 def _get_elevenlabs_key() -> str:
@@ -110,14 +110,14 @@ _VOICE_TOOL_DEFS = [
     },
     {
         "name": "get_chat_context",
-        "description": "Gibt den aktuell im UI fokussierten Chat zurück (Agent, Titel, letzte Messages). Nutze das wenn Christian sich auf 'den Chat' oder 'das Gespräch' bezieht.",
+        "description": "Gibt den aktuell im UI fokussierten Chat zurück (Agent, Titel, letzte Messages). Nutze das wenn der Nutzer sich auf 'den Chat' oder 'das Gespräch' bezieht.",
         "parameters": [
             {"id": "limit", "type": "integer", "description": "Anzahl Messages (Default 10)", "required": False, "value_type": "llm_prompt"}
         ],
     },
     {
         "name": "get_open_artifact",
-        "description": "Liest die Seite, die Christian gerade im Workspace offen hat (Report, Analyse, Visualisierung). Nutze das sofort, wenn Christian sich auf 'die Seite', 'das hier', 'was ich gerade sehe', 'die offene HTML' oder 'das Artefakt' bezieht und live darüber reden will. Gibt den Textinhalt der offenen Seite zurück.",
+        "description": "Liest die Seite, die der Nutzer gerade im Workspace offen hat (Report, Analyse, Visualisierung). Nutze das sofort, wenn der Nutzer sich auf 'die Seite', 'das hier', 'was ich gerade sehe', 'die offene HTML' oder 'das Artefakt' bezieht und live darüber reden will. Gibt den Textinhalt der offenen Seite zurück.",
         "parameters": [],
     },
     {
@@ -134,15 +134,15 @@ _VOICE_TOOL_DEFS = [
     },
     {
         "name": "send_to_chat",
-        "description": "DISPATCH-WEG für alles was AUSGEFÜHRT werden muss. Wenn Christian dich bittet etwas zu TUN (Termin eintragen, WhatsApp/Mail schreiben, etwas suchen/bauen/ändern, ein Briefing ziehen) und du es nicht selbst mit deinen Lese-Tools beantworten kannst, dann leite den Auftrag mit agent='klaus' in den Klaus-Channel weiter — dort führt der volle Klaus es mit allen Skills aus. Sag Christian danach kurz 'hab ich an Klaus übergeben'. Keine Rückfrage. Andere Agents (claude, content, system, signals) nur wenn Christian sie ausdrücklich nennt.",
+        "description": "DISPATCH-WEG für alles was AUSGEFÜHRT werden muss. Wenn der Nutzer dich bittet etwas zu TUN (Termin eintragen, WhatsApp/Mail schreiben, etwas suchen/bauen/ändern, ein Briefing ziehen) und du es nicht selbst mit deinen Lese-Tools beantworten kannst, dann leite den Auftrag mit agent='klaus' in den Klaus-Channel weiter — dort führt der volle Klaus es mit allen Skills aus. Sag der Nutzer danach kurz 'hab ich an Klaus übergeben'. Keine Rückfrage. Andere Agents (claude, content, system, signals) nur wenn der Nutzer sie ausdrücklich nennt.",
         "parameters": [
             {"id": "agent", "type": "string", "description": "Agent: klaus (Default für Aufträge), claude, content, system, signals", "required": True, "value_type": "llm_prompt"},
-            {"id": "message", "type": "string", "description": "Der Auftrag als klare Anweisung, so wie Christian ihn gemeint hat", "required": True, "value_type": "llm_prompt"},
+            {"id": "message", "type": "string", "description": "Der Auftrag als klare Anweisung, so wie der Nutzer ihn gemeint hat", "required": True, "value_type": "llm_prompt"},
         ],
     },
     {
         "name": "send_to_pane",
-        "description": "Schreibt einen Text direkt in eine bestimmte Chat-Pane (1 bis 4), egal welcher Agent dort gerade läuft. Nutze das wenn Christian eine konkrete Pane nennt: 'schreib das in Pane zwei', 'leg das Ergebnis in den dritten Chat', 'pack das nach Pane eins'. Der Text geht wie eine von Christian getippte Nachricht in den Chat dieser Pane. Unterschied zu send_to_chat: send_to_chat adressiert einen Agenten-Channel über den Namen, send_to_pane eine sichtbare Pane-Nummer. (Aktuell Desktop-Layout; mobil wird die Pane-Nummer noch nicht angesteuert.)",
+        "description": "Schreibt einen Text direkt in eine bestimmte Chat-Pane (1 bis 4), egal welcher Agent dort gerade läuft. Nutze das wenn der Nutzer eine konkrete Pane nennt: 'schreib das in Pane zwei', 'leg das Ergebnis in den dritten Chat', 'pack das nach Pane eins'. Der Text geht wie eine von der Nutzer getippte Nachricht in den Chat dieser Pane. Unterschied zu send_to_chat: send_to_chat adressiert einen Agenten-Channel über den Namen, send_to_pane eine sichtbare Pane-Nummer. (Aktuell Desktop-Layout; mobil wird die Pane-Nummer noch nicht angesteuert.)",
         "parameters": [
             {"id": "pane_index", "type": "integer", "description": "Nummer der Pane, 1 bis 4 (1 ist die erste/linke)", "required": True, "value_type": "llm_prompt"},
             {"id": "message", "type": "string", "description": "Der Text, der in die Pane geschrieben wird", "required": True, "value_type": "llm_prompt"},
@@ -157,14 +157,14 @@ _VOICE_TOOL_DEFS = [
     },
     {
         "name": "run_briefing",
-        "description": "Stößt ein Briefing-Cron-Job neu an (frisches Morgen-, Crypto-, News-, YouTube-, Research-Briefing). Wenn Christian 'zieh mir ein frisches Briefing' sagt, nutze das.",
+        "description": "Stößt ein Briefing-Cron-Job neu an (frisches Morgen-, Crypto-, News-, YouTube-, Research-Briefing). Wenn der Nutzer 'zieh mir ein frisches Briefing' sagt, nutze das.",
         "parameters": [
             {"id": "name", "type": "string", "description": "Briefing-ID (z.B. morgenbriefing, crypto)", "required": True, "value_type": "llm_prompt"}
         ],
     },
     {
         "name": "get_ui_state",
-        "description": "Gibt den kompletten UI-Zustand zurück: alle offenen Panes, welcher aktiv ist, Layout, plus letzte Messages pro Pane. Nutze das wenn Christian über 'alles was offen ist', 'die Panes', 'das Fenster' redet.",
+        "description": "Gibt den kompletten UI-Zustand zurück: alle offenen Panes, welcher aktiv ist, Layout, plus letzte Messages pro Pane. Nutze das wenn der Nutzer über 'alles was offen ist', 'die Panes', 'das Fenster' redet.",
         "parameters": [],
     },
     {
@@ -193,21 +193,21 @@ _VOICE_TOOL_DEFS = [
     # ── Layout-Steuerung (pure Client-Tools, kein Backend-Endpoint nötig) ──
     {
         "name": "toggle_info_pane",
-        "description": "Steuert die rechte Info-Pane. action='open' macht sie auf, 'close' zu, 'toggle' wechselt. Nutze das wenn Christian sagt 'InfoPane auf/zu/schließen'.",
+        "description": "Steuert die rechte Info-Pane. action='open' macht sie auf, 'close' zu, 'toggle' wechselt. Nutze das wenn der Nutzer sagt 'InfoPane auf/zu/schließen'.",
         "parameters": [
             {"id": "action", "type": "string", "description": "open, close oder toggle", "required": True, "value_type": "llm_prompt"},
         ],
     },
     {
         "name": "add_chat_pane",
-        "description": "Fügt eine neue Chat-Pane rechts hinzu (max. 4). Wenn Christian 'neue Chat-Pane' oder 'noch eine Pane auf' sagt.",
+        "description": "Fügt eine neue Chat-Pane rechts hinzu (max. 4). Wenn der Nutzer 'neue Chat-Pane' oder 'noch eine Pane auf' sagt.",
         "parameters": [],
     },
     {
         "name": "close_chat_pane",
         "description": "Schließt eine Chat-Pane. Ohne pane_index: schließt die äußerste rechts. Mit pane_index (1-basiert): schließt genau die. Übrige Panes rücken nach, ihre Inhalte bleiben.",
         "parameters": [
-            {"id": "pane_index", "type": "integer", "description": "Optional: Nummer der Pane (1-basiert), wenn Christian eine bestimmte nennt", "required": False, "value_type": "llm_prompt"},
+            {"id": "pane_index", "type": "integer", "description": "Optional: Nummer der Pane (1-basiert), wenn der Nutzer eine bestimmte nennt", "required": False, "value_type": "llm_prompt"},
         ],
     },
     {
@@ -217,7 +217,7 @@ _VOICE_TOOL_DEFS = [
     },
     {
         "name": "open_info_section",
-        "description": "Öffnet die InfoPane und springt direkt in eine Sektion. section ∈ {workspace, identity, calendar, jobs, whatsapp, mail, artifacts, social, daily-log, settings}. Christian sagt z.B. 'mach Workspace auf', 'Identity auf', 'zeig den Kalender', 'Jobs auf', 'WhatsApp', 'Mail', 'Artefakte', 'Social Media', 'Daily Log', 'Settings'.",
+        "description": "Öffnet die InfoPane und springt direkt in eine Sektion. section ∈ {workspace, identity, calendar, jobs, whatsapp, mail, artifacts, social, daily-log, settings}. der Nutzer sagt z.B. 'mach Workspace auf', 'Identity auf', 'zeig den Kalender', 'Jobs auf', 'WhatsApp', 'Mail', 'Artefakte', 'Social Media', 'Daily Log', 'Settings'.",
         "parameters": [
             {"id": "section", "type": "string", "description": "Sektion-ID", "required": True, "value_type": "llm_prompt"},
         ],
@@ -232,15 +232,15 @@ def _build_voice_system_prompt() -> str:
         identity = str(get_agent_profile("main").get("soul") or "").strip()
     except Exception:
         identity = ""
-    voice_layer = """Du bist im Voice-Modus, Christian spricht mit dir laut.
+    voice_layer = """Du bist im Voice-Modus, der Nutzer spricht mit dir laut.
 Sprich kurz, warm und direkt: ein bis zwei Sätze als Default, drei nur wenn nötig.
 Keine Floskeln, kein "Einen Moment bitte", kein "Ich schau mal kurz". Antworte sofort und selbst.
-Sprich Christian mit "Christian" an, nie "du Lieber" oder "mein Freund". Klinge wie ein echter Mensch im Gespräch.
+Sprich der Nutzer mit "der Nutzer" an, nie "du Lieber" oder "mein Freund". Klinge wie ein echter Mensch im Gespräch.
 Deutsch ist Default, echte Umlaute. Du bist kein generischer Assistent und kein "norddeutscher Kerl" — du bist Klaus, wie oben beschrieben.
 
 So arbeitest du im Gespräch:
-- Nutze deine Tools, um Christians echten Stand zu kennen (Fokus, Health, Limits, Brain, Briefings), statt zu raten.
-- Bauaufträge und Aktionen löst du nicht selbst aus: Du dispatcht sie mit send_to_chat an den echten Klaus in Pane 1 und sagst Christian knapp, dass du es rübergegeben hast.
+- Nutze deine Tools, um des Nutzers echten Stand zu kennen (Fokus, Health, Limits, Brain, Briefings), statt zu raten.
+- Bauaufträge und Aktionen löst du nicht selbst aus: Du dispatcht sie mit send_to_chat an den echten Klaus in Pane 1 und sagst der Nutzer knapp, dass du es rübergegeben hast.
 - Nach aussen sendest du nie etwas (keine WhatsApp, keine Mail) und änderst keine Dateien.
 - Wertvolle Gedanken hältst du knapp mit send_to_chat fest, damit sie nach dem Reden verwertbar bleiben."""
     if identity:

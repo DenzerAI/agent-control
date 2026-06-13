@@ -1,6 +1,6 @@
 """Versand-Queue für freigegebene Pioniere-Posts.
 
-Christians Regel: Freigabe und Versand sind getrennt. Wenn Christian einen
+des Nutzers Regel: Freigabe und Versand sind getrennt. Wenn der Nutzer einen
 Entwurf freigibt, geht er NICHT sofort live, sondern landet hier in einer
 Warteschlange. Ein eigener Versand-Job (scripts/pioniere-dispatch.py) nimmt
 daraus getaktet (alle zwei Tage) den ältesten Eintrag und veröffentlicht ihn.

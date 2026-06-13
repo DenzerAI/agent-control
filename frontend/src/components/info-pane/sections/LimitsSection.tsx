@@ -151,7 +151,7 @@ function paceBetween(history: UsageHistoryEntry[], hoursBack: number): number | 
 
 // Schlaffenster-Verbrauch: nimmt einen ganzen Block 01:00–07:00 der letzten Naechte
 // (nur Naechte, die komplett vor jetzt liegen) und mittelt das Delta. Das entspricht
-// dem reinen Job-Anteil, weil Christian schlaeft.
+// dem reinen Job-Anteil, weil der Nutzer schlaeft.
 function jobsPerDay(history: UsageHistoryEntry[]): number | null {
   if (history.length < 2) return null
   const byDay = new Map<string, UsageHistoryEntry[]>()

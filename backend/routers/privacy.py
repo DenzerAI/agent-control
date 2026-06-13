@@ -4,7 +4,7 @@ Speist den DSGVO-Workspace. Liest ausschließlich aus der separaten Broker-DB
 (`data/broker.db`, siehe tools/storage.py) und gibt nur Aggregate plus bereits
 geschwärzte, gekappte Vorschauen zurück. KEINE Rohdaten, keine Klartext-PII.
 
-Wichtige Grenze (die Christian mehrfach bestätigt hat): geschwärzt wird nur das
+Wichtige Grenze (die der Nutzer mehrfach bestätigt hat): geschwärzt wird nur das
 Protokoll der Werkzeug-Läufe, niemals die eigentlichen Quellen (people.db, Chats,
 Kalender). Diese Route liest darum bewusst nur die Audit-Tabelle.
 

@@ -678,7 +678,7 @@ li::before {{ content:"·"; position:absolute; left:0; top:-1px; color:var(--acc
         <ul>
           <li>Der Button im Modul erzeugt den echten Lauf mit Lock, Audit und HTML.</li>
           <li>Ein Hook darf nur vorbefüllen und das Modul öffnen.</li>
-          <li>Finalisierung bleibt Freigabe durch Christian.</li>
+          <li>Finalisierung bleibt Freigabe durch der Nutzer.</li>
         </ul>
       </article>
     </div>
@@ -894,7 +894,7 @@ def _bauhof_enqueue_followup_run(task: dict[str, Any]) -> bool:
     prompt = (
         f"Werkbank-Task-ID: {task_id}\n"
         "Folge-Lauf mit Nachtraegen aus dem Ursprungschat. Der vorige Lauf dieses Auftrags ist durch; "
-        "Christian hat waehrenddessen noch Folgendes nachgereicht. Arbeite es auf dem bisherigen Stand ein, "
+        "der Nutzer hat waehrenddessen noch Folgendes nachgereicht. Arbeite es auf dem bisherigen Stand ein, "
         "ohne von vorne zu beginnen, und melde dein Ergebnis danach knapp zurueck.\n\n"
         f"Nachtraege:\n{notes}"
     )
@@ -950,7 +950,7 @@ def _parse_werkbank_closing(text: str) -> dict:
 
 def _werkbank_report_body(summary: str, title: str, final_status: str, next_action: str) -> str:
     """Baut den editorialen Abschluss-Post: klarer Status, was gebaut wurde,
-    was Christian tun kann. Faellt auf gekuerzten Rohtext zurueck."""
+    was der Nutzer tun kann. Faellt auf gekuerzten Rohtext zurueck."""
     text = (summary or "").strip()
     fields = _parse_werkbank_closing(text)
     parts: list[str] = []
@@ -1137,7 +1137,7 @@ def _bauhof_enqueue_auto_rerun(task: dict[str, Any], findings: list[str], reason
     """Schickt einen unklaren/blockierten Werkbank-Lauf automatisch zurück
     in denselben Worker-Chat, solange das Rundenlimit nicht erreicht ist.
 
-    Christian soll keinen technischen Blocker lösen müssen. Erst wenn die
+    der Nutzer soll keinen technischen Blocker lösen müssen. Erst wenn die
     automatische Nacharbeit ausgeschöpft ist oder kein Worker-Chat existiert,
     bleibt der Auftrag sichtbar stehen.
     """
@@ -1161,7 +1161,7 @@ def _bauhof_enqueue_auto_rerun(task: dict[str, Any], findings: list[str], reason
     prompt = (
         f"Werkbank-Task-ID: {task_id}\n"
         "Automatische Werkbank-Nacharbeit. Der vorige Lauf ist nicht abnahmefähig "
-        "und darf nicht als Aufgabe bei Christian landen. Arbeite auf dem bisherigen "
+        "und darf nicht als Aufgabe bei der Nutzer landen. Arbeite auf dem bisherigen "
         "Stand weiter, löse den Befund ursächlich oder liefere einen wirklich belegten "
         "externen Blocker. Wenn du nicht verifizieren kannst, baue den fehlenden Check "
         "oder markiere präzise, welche Systemgrenze außerhalb der Werkbank liegt.\n\n"
@@ -1857,7 +1857,7 @@ async def werkbank_spawn(req: Request):
     """Bewusster Werkbank-Spawn aus einer Hand.
 
     Kein Stichwort-Trigger: hier landet nur ein expliziter Auftrag. Klaus zieht den
-    Hebel bewusst per curl, Christian per Button. Body: conversationId + brief,
+    Hebel bewusst per curl, der Nutzer per Button. Body: conversationId + brief,
     optional title/acceptance/project/agentId.
     """
     if not WERKBANK_ENABLED:

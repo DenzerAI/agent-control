@@ -3,7 +3,7 @@ name: explain
 description: Code oder Konzept erklären
 category: Entwicklungs-Workflow
 triggers:
-- 'Christian fragt nach: Code oder Konzept erklären'
+- 'der Nutzer fragt nach: Code oder Konzept erklären'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill

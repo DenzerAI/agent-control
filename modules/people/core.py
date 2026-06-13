@@ -175,7 +175,7 @@ LOST_REASONS = {
     "kein_bedarf": "Kein Bedarf",
 }
 
-# Pro (stream, stage): nach wie vielen Tagen ohne echte Antwort ist Christian dran.
+# Pro (stream, stage): nach wie vielen Tagen ohne echte Antwort ist der Nutzer dran.
 # "Echter Kontakt" = WhatsApp/Mail in beide Richtungen, kein Pageview, kein Kalender.
 # End-Stages bekommen keinen Eintrag, dort wird nicht gewarnt.
 STAGE_ATTENTION_DAYS: dict[str, dict[str, int]] = {
@@ -3233,7 +3233,7 @@ async def _person_synthesize(person: dict, last_touches: list, open_focus: list,
     ) or "—"
     today = datetime.now().strftime("%Y-%m-%d")
 
-    prompt = f"""Heute ist {today}. Du bekommst Christians letzte Kontakte und offenen Punkte zu einer Person. Verdichte das zu drei sehr kurzen Saetzen fuer eine Kunden-Detail-Ansicht.
+    prompt = f"""Heute ist {today}. Du bekommst des Nutzers letzte Kontakte und offenen Punkte zu einer Person. Verdichte das zu drei sehr kurzen Saetzen fuer eine Kunden-Detail-Ansicht.
 
 Person: {person.get('name','')}{f" ({person.get('company')})" if person.get('company') else ''}
 
@@ -3249,7 +3249,7 @@ Offene Punkte:
 Anstehende Termine:
 {upcoming_txt}
 
-Schreibe drei Felder, jeweils ein Satz, in Christians warmer Sprache (deutsch, volle Umlaute, KEINE Bindestriche im Fliesstext):
+Schreibe drei Felder, jeweils ein Satz, in des Nutzers warmer Sprache (deutsch, volle Umlaute, KEINE Bindestriche im Fliesstext):
 - "stand": Wo stehen wir mit dieser Person gerade
 - "verblieben": Wie sind wir das letzte Mal verblieben (aus dem letzten WA/Mail/Chat)
 - "next": Was waere der natuerliche naechste Schritt

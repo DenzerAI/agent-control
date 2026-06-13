@@ -5,7 +5,7 @@ import { DEFAULT_VOICE_STATE, VoiceStateContext, type VoiceState } from './voice
 import { setVoiceActive } from '../uiSounds'
 
 // VoiceController bleibt leichtgewichtig. Die schwere Voice-Schicht wird erst
-// geladen, wenn Christian Voice wirklich startet.
+// geladen, wenn der Nutzer Voice wirklich startet.
 // Voice-Mode: reine ElevenLabs-ConvAI-Pipeline — ElevenLabs hoert, denkt (Claude
 // Sonnet via Custom-LLM-Agent) UND spricht als Agent. Ein System, kein Hybrid:
 // Turn-Taking und Echo-Unterdrueckung sind eingebaut, OpenAI ist komplett raus.
@@ -46,7 +46,7 @@ export function VoiceController({ active, onClose, children }: Props) {
 
   useEffect(() => {
     // Chat-Klingelton aus, solange Voice laeuft: Voice-Transkripte landen als
-    // Chat-Nachrichten, sonst pingt es bei jedem Satz von Agent oder Christian.
+    // Chat-Nachrichten, sonst pingt es bei jedem Satz von Agent oder der Nutzer.
     setVoiceActive(active)
     if (active) {
       wasActiveRef.current = true

@@ -1201,11 +1201,11 @@ async def regenerate_title(conv_id: str) -> str | None:
 
 _project_tasks: set = set()  # prevent GC of background project-match tasks
 _project_in_flight: set[str] = set()  # conv_ids gerade in Bearbeitung
-_project_rejected: dict[str, set[str]] = {}  # conv_id -> {project_id} die Christian abgelehnt hat
+_project_rejected: dict[str, set[str]] = {}  # conv_id -> {project_id} die der Nutzer abgelehnt hat
 
 
 def reject_project_suggestion(conv_id: str, project_id: str):
-    """Christian hat 'Nein' auf einen Projekt-Vorschlag gesagt — nicht nochmal anbieten."""
+    """der Nutzer hat 'Nein' auf einen Projekt-Vorschlag gesagt — nicht nochmal anbieten."""
     if not conv_id or not project_id:
         return
     _project_rejected.setdefault(conv_id, set()).add(project_id)

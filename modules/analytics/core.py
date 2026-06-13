@@ -192,10 +192,10 @@ def _denzer_analytics_window(days: int) -> int:
     return int((time.time() - days * 86400) * 1000)
 
 
-# Christians eigene Geraete werden ausgeblendet (visitor_id-Praefix), damit er
+# des Nutzers eigene Geraete werden ausgeblendet (visitor_id-Praefix), damit er
 # nicht seine eigenen Besuche zaehlt. Neue visitor_id pro Geraet/geleertem
 # localStorage; bei Bedarf eine weitere NOT-LIKE-Zeile unten ergaenzen.
-# Filtert Smoke-Tests und Christians eigene Geraete aus allen Auswertungen.
+# Filtert Smoke-Tests und des Nutzers eigene Geraete aus allen Auswertungen.
 _DENZER_SMOKE_SQL = (
     " AND visitor_id != 'test-vid'"
     " AND visitor_id NOT LIKE '00000000-000%'"  # Betreiber-Desktop ausfiltern

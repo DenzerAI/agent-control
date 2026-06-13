@@ -878,7 +878,7 @@ def run(args: argparse.Namespace) -> int:
     write_json(INSTANCE_CONFIG_PATH, instance_config, args.dry_run)
     write_json(MODULES_REGISTRY_PATH, build_registry(profile, optional_enabled), args.dry_run)
     # Laufzeit-Quelle fuer den sichtbaren Agent-Namen — immer anlegen, damit der
-    # Server starten kann. Bestehende agents.json (z.B. Christians) bleibt unberuehrt.
+    # Server starten kann. Bestehende agents.json (z.B. des Nutzers) bleibt unberuehrt.
     write_agents_config(soul_answers, args.dry_run, args.force_soul)
     if not args.no_soul:
         write_soul_files(soul_answers, args.dry_run, args.force_soul)

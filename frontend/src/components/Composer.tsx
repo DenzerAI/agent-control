@@ -513,7 +513,7 @@ export function Composer({ agent: _agent, engine, project: _project, model, busy
     }
   }, [paneIndex])
   // Vorbefüllung aus Quick-Add-Pillen: Text in den Composer schreiben ohne abzusenden,
-  // damit Christian vor dem Enter noch editieren kann.
+  // damit der Nutzer vor dem Enter noch editieren kann.
   useEffect(() => {
     const handler = (e: Event) => {
       const d = (e as CustomEvent).detail || {}
@@ -708,7 +708,7 @@ export function Composer({ agent: _agent, engine, project: _project, model, busy
 
   // Agent-Mood: deaktiviert. Bleibt statisch bei 'idle' (Default-Auge).
   // Random-Tick + Idle-Decay liefen pro Composer-Instanz dauerhaft im Hintergrund —
-  // auf Mobile spürbar in der Gesamt-Performance, und Christian braucht die
+  // auf Mobile spürbar in der Gesamt-Performance, und der Nutzer braucht die
   // Animation nicht. lastActivity bleibt unbenutzt, kann später ggf. weg.
 
 

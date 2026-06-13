@@ -3,7 +3,7 @@ import { useMainAgentName } from '../agents'
 
 // "Agent ruft an" — pulsierendes Anruf-Overlay.
 //
-// Erscheint, wenn das Backend ein `voice.incoming_call`-Event broadcastet. Christian
+// Erscheint, wenn das Backend ein `voice.incoming_call`-Event broadcastet. der Nutzer
 // geht ran (startet die Voice-Session, die das Anruf-Briefing als zweite Prompt-
 // Schicht zieht) oder wischt weg. Die Kontrolle bleibt bei ihm: ein Klingeln, das
 // man ignorieren kann. Agent-Control-Dunkellook, Terracotta als Akzent.

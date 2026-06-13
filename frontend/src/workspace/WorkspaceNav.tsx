@@ -12,7 +12,7 @@ import { useMainAgentName } from '../agents'
 type NavItem = { id: WorkspaceMode; label: string; icon?: typeof FolderOpen; img?: string }
 type NavGroup = { label: string; items: NavItem[] }
 
-// Thematisch gebündelt statt nach Technik (Kernsystem/Agents/Custom): Christian
+// Thematisch gebündelt statt nach Technik (Kernsystem/Agents/Custom): der Nutzer
 // denkt in Lebensbereichen, nicht in Architektur. Agent sitzt solo oben als Kern,
 // darunter Wissen, Kommunikation, Geld, System. Eine Werkzeugwelt am selben Ort.
 const WORKSPACE_NAV_ALL: NavGroup[] = [
@@ -95,7 +95,7 @@ export function workspaceModeLabel(mode: WorkspaceMode): string {
 
 const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD lokal
 
-// Module mit frischem Tagesoutput leuchten Terracotta, bis Christian sie öffnet.
+// Module mit frischem Tagesoutput leuchten Terracotta, bis der Nutzer sie öffnet.
 // Zwei Signal-Arten: Inbox zählt offene Mails (leuchtet solange welche warten),
 // Radar merkt sich pro Tag, ob die heutige Zusammenfassung schon gesehen wurde.
 function useNotifyModes(activeId: WorkspaceMode): Set<WorkspaceMode> {

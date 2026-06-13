@@ -179,7 +179,7 @@ def _format_recent_noise_ping(metrics: dict, status: str) -> str:
         f"{metrics.get('duplicateSends', 0)} Duplikate, "
         f"{metrics.get('otherTracebacks', 0)} andere Tracebacks). "
         f"Vorher wären daraus {raw_hits} Worttreffer geworden.\n\n"
-        f"**Status:** {status}. **Muss Christian eingreifen?** {needs_christian}.\n\n"
+        f"**Status:** {status}. **Muss der Nutzer eingreifen?** {needs_christian}.\n\n"
         "**Gemacht:** Als ein Werkstatt-Signal gebündelt; gleiche Lage wird nicht erneut gepingt.\n\n"
         "**Nächste Spur:** Reconnect-Quelle prüfen und bei Wiederholung Socket sauberer schließen oder drosseln."
     )
@@ -410,7 +410,7 @@ def build_chatagent_report() -> dict:
         "Einige Nachbearbeitungen suchen noch im sichtbaren Chat, laufen aber nach Render-Änderungen und sind kein akuter Fehler." if query_scans >= 3 else "DOM-Walks sind niedrig.",
         str(query_scans),
         impact="Kann bei sehr langen Chats etwas Last erzeugen.",
-        action="Später gezielt entschärfen; Christian muss nichts tun.",
+        action="Später gezielt entschärfen; der Nutzer muss nichts tun.",
         attention=False,
     ))
 
@@ -443,7 +443,7 @@ def build_chatagent_report() -> dict:
         ) if polling_status != "ok" else "Polling wirkt begrenzt.",
         f"{chat_intervals}/{total_intervals}",
         impact="Zu viel Polling kann Akku und Mobilgefühl belasten.",
-        action="Klaus dünnt das bei Gelegenheit aus; Christian muss nichts tun.",
+        action="Klaus dünnt das bei Gelegenheit aus; der Nutzer muss nichts tun.",
         attention=polling_status == "critical",
     ))
 
@@ -565,7 +565,7 @@ def build_chatagent_report() -> dict:
         attention = {
             "level": "klaus",
             "label": "Klaus prüft",
-            "detail": "Es gibt einen technischen Hinweis, aber Christian muss nichts entscheiden.",
+            "detail": "Es gibt einen technischen Hinweis, aber der Nutzer muss nichts entscheiden.",
         }
     else:
         attention = {

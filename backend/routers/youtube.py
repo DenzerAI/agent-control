@@ -231,7 +231,7 @@ def _safe_feed(channel_id: str):
 # nach 7 Tagen mit invalid_grant ab (brain/INFRA.md). Deshalb wird die
 # Abo-Liste direkt nach dem Consent einmalig gezogen und in die lokalen
 # Follows gemerged; danach läuft der Feed wie bisher tokenfrei über RSS.
-# Redirect ist das registrierte http://localhost: Christian kopiert nach dem
+# Redirect ist das registrierte http://localhost: der Nutzer kopiert nach dem
 # Consent die volle Redirect-URL aus der Browserzeile zurück ins Modul
 # (gleiches Muster wie scripts/oauth-denzer-init.py, funktioniert von jedem
 # Gerät aus, kein erreichbarer Callback-Port nötig).
@@ -472,7 +472,7 @@ Was davon läuft bei uns bereits (Agent Control). Kurz, ehrlich, 1 bis 3 Bullets
 Konkrete übernehmbare Ideen, 1 bis 4 Bullets. Wenn nichts taugt, sag das.
 
 ## Bezug zu unseren Zielen
-2 bis 3 Sätze: lohnt sich das für Christian, und wofür genau.
+2 bis 3 Sätze: lohnt sich das für der Nutzer, und wofür genau.
 
 Keine Gedankenstriche im Text, keine Einleitung, keine Schlussfloskel. Echte Umlaute.
 

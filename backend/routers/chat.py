@@ -168,7 +168,7 @@ async def list_conversations(agent: str = '', project: str = '', limit: int = 30
 
 @router.post("/api/conversations/{conv_id}/seen")
 async def conv_seen(conv_id: str):
-    """Highlight (Klaus-initiierter Chat) auf 0 setzen, sobald Christian öffnet."""
+    """Highlight (Klaus-initiierter Chat) auf 0 setzen, sobald der Nutzer öffnet."""
     with get_db() as db:
         db.execute("UPDATE conversations SET highlight = 0 WHERE id = ?", (conv_id,))
     return JSONResponse({"ok": True})
@@ -244,7 +244,7 @@ async def retitle_conv(conv_id: str):
 
 @router.post("/api/conversations/{conv_id}/reject-project")
 async def reject_project(conv_id: str, request: Request):
-    """Christian hat einen Projekt-Vorschlag abgelehnt — nicht nochmal anbieten."""
+    """der Nutzer hat einen Projekt-Vorschlag abgelehnt — nicht nochmal anbieten."""
     from db import reject_project_suggestion
     body = await request.json()
     project_id = (body.get("projectId") or "").strip()

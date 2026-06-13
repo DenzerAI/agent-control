@@ -3,7 +3,7 @@ name: server-restart
 description: Agent-Server sicher neu starten
 category: Integrationen / Automation
 triggers:
-- 'Christian fragt nach: Agent-Server sicher neu starten'
+- 'der Nutzer fragt nach: Agent-Server sicher neu starten'
 inputs:
 - User request
 - Relevant local files, APIs or context named in the skill
@@ -24,7 +24,7 @@ status: active
 
 Der FastAPI-Server läuft unter launchd (`com.klaus.agent`), Logs unter `~/agent/logs/server.log` und `~/agent/logs/server.err.log`.
 
-## Primary path: Christian tippt im Composer
+## Primary path: der Nutzer tippt im Composer
 
 Wenn Code geändert wurde und der Server neu muss, **rufst du NIE selbst** `restart-server.sh` auf. Stattdessen beendest du deine Antwort mit einer Frage, die exakt das Muster matcht, das der Composer-Detektor erkennt:
 
@@ -32,19 +32,19 @@ Wenn Code geändert wurde und der Server neu muss, **rufst du NIE selbst** `rest
 
 oder leicht variiert mit Wörtern wie `restart`, `neustart`, `neu starten`. Wichtig: **Fragezeichen am Ende** und einer dieser Begriffe im letzten Satz. Der Frontend-Detektor in `frontend/src/components/ChatPane.tsx` (`detectRestartPrompt`) ersetzt dann den Confirm-Haken im Composer durch einen Restart-Button (`RotateCw`-Icon).
 
-Christian tippt den, Frontend feuert `POST /api/restart-safe` (macht `os._exit(0)`), launchd startet neu, das Frontend pollt `/api/system-status` bis HTTP 200 und meldet "Server ist wieder da." Komplett ohne AppleScript-Dialog, komplett remote nutzbar.
+der Nutzer tippt den, Frontend feuert `POST /api/restart-safe` (macht `os._exit(0)`), launchd startet neu, das Frontend pollt `/api/system-status` bis HTTP 200 und meldet "Server ist wieder da." Komplett ohne AppleScript-Dialog, komplett remote nutzbar.
 
 Auf Mobile genauso: der Restart-Button ersetzt den Confirm-Haken in der Composer-Mitte (RotateCw statt Check).
 
 ## Wenn du selbst restarten musst (Notfall)
 
-Nur wenn Christian explizit sagt "mach den Restart selbst" oder bei reinen Wartungs-Skripten ohne UI-Session:
+Nur wenn der Nutzer explizit sagt "mach den Restart selbst" oder bei reinen Wartungs-Skripten ohne UI-Session:
 
 ```bash
 bash /Users/klaus/agent/scripts/restart-server.sh
 ```
 
-Dieses Skript hat eine Restart-Policy (Default: gesperrt). Wenn du es nicht ausführen kannst, **frag Christian per Composer-Pille**, statt das `osascript`-Dialog-Skript `restart-control.sh allow` anzuwerfen — das öffnet einen Dialog nur lokal auf dem iMac, was bei Remote-Sessions Bildschirmfreigabe nötig macht und entsprechend Quatsch ist.
+Dieses Skript hat eine Restart-Policy (Default: gesperrt). Wenn du es nicht ausführen kannst, **frag der Nutzer per Composer-Pille**, statt das `osascript`-Dialog-Skript `restart-control.sh allow` anzuwerfen — das öffnet einen Dialog nur lokal auf dem iMac, was bei Remote-Sessions Bildschirmfreigabe nötig macht und entsprechend Quatsch ist.
 
 Policy-Status prüfen ist ok:
 
@@ -54,18 +54,18 @@ bash /Users/klaus/agent/scripts/restart-control.sh status
 
 ## Session-Koordination (Pflicht)
 
-Vor jedem Restart wird `/api/active-streams` geprüft. Wenn andere Claude-Streams laufen, bricht das Skript mit exit 2 ab und listet die `convId`s auf. Beim Composer-Button bekommt Christian den Block-Detail im Chat-Fehler. Parallele Sessions sind real — Christian arbeitet regelmäßig mit mehreren Claude-Instanzen gleichzeitig, ein blinder Kickstart kappt fremden Streams mitten im Satz die Pipe.
+Vor jedem Restart wird `/api/active-streams` geprüft. Wenn andere Claude-Streams laufen, bricht das Skript mit exit 2 ab und listet die `convId`s auf. Beim Composer-Button bekommt der Nutzer den Block-Detail im Chat-Fehler. Parallele Sessions sind real — der Nutzer arbeitet regelmäßig mit mehreren Claude-Instanzen gleichzeitig, ein blinder Kickstart kappt fremden Streams mitten im Satz die Pipe.
 
 Vorgehen bei Block:
 
 1. Schau dir die Liste der aktiven `convId`s an.
 2. **Nur dein eigener Stream drin**: bei Bash-Aufruf `--force` anhängen.
-3. **Andere `convId`s dabei:** nicht forcen. Kurz bei Christian nachfragen oder 10–30 Sekunden warten und nochmal prüfen.
+3. **Andere `convId`s dabei:** nicht forcen. Kurz bei der Nutzer nachfragen oder 10–30 Sekunden warten und nochmal prüfen.
 
 ### Auto-Resume paralleler Sessions (Composer-Restart)
 
 Beim Restart über den Composer-Button stupst das auslösende Frontend die anderen
-Sessions automatisch wieder an, damit Christian nicht mehr in jede Session
+Sessions automatisch wieder an, damit der Nutzer nicht mehr in jede Session
 einzeln "wir sind wieder da" tippen muss:
 
 1. **Vor** dem Kickstart snapshottet `handleRestart` `/api/active-streams` und merkt
@@ -84,11 +84,11 @@ gleicher convId in zwei Panes.
 
 ## Was beim Restart aus der Chat-Session passiert
 
-Dein `claude`-Subprocess läuft innerhalb von Uvicorn. Der Restart kappt die stdout-Pipe, deine gerade streamende Antwort geht verloren. **Für dich selbst okay** — das Backend invalidiert nach Restart alle Claude-Session-IDs und baut beim nächsten Send aus der DB frischen Kontext. Christian kann weiterschreiben, der Thread bleibt nutzbar. Für andere Sessions gilt dasselbe, aber nur wenn sie vorher wissen, dass es passiert — deshalb die Koordination oben.
+Dein `claude`-Subprocess läuft innerhalb von Uvicorn. Der Restart kappt die stdout-Pipe, deine gerade streamende Antwort geht verloren. **Für dich selbst okay** — das Backend invalidiert nach Restart alle Claude-Session-IDs und baut beim nächsten Send aus der DB frischen Kontext. der Nutzer kann weiterschreiben, der Thread bleibt nutzbar. Für andere Sessions gilt dasselbe, aber nur wenn sie vorher wissen, dass es passiert — deshalb die Koordination oben.
 
 ## Tabus
 
-- **Nie ungefragt selbst** `restart-server.sh` aufrufen, wenn Christian remote ist. Frag im Chat mit "Server neu starten?" — der Composer-Button ist da.
+- **Nie ungefragt selbst** `restart-server.sh` aufrufen, wenn der Nutzer remote ist. Frag im Chat mit "Server neu starten?" — der Composer-Button ist da.
 - **Nie:** `restart-control.sh allow` aus einer Klaus-Antwort heraus. Öffnet einen lokalen Dialog und blockiert Remote.
 - **Nie:** `pkill -9 -f uvicorn`, `kill $(lsof -ti :8890)`. Umgeht launchd und den Stream-Check.
-- **Sparsam:** Ein Restart pro Arbeitsblock, nicht nach jeder Änderung. Sag Christian vorher was kommt, damit er nicht mitten im Tippen die UI verliert.
+- **Sparsam:** Ein Restart pro Arbeitsblock, nicht nach jeder Änderung. Sag der Nutzer vorher was kommt, damit er nicht mitten im Tippen die UI verliert.

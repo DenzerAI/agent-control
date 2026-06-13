@@ -1,9 +1,9 @@
 """Opportunity-Scanner — ein Agent nach agents/STANDARD.md.
 
-Liest Christians eigene Daten (Kundenstamm, Markt-Radar) und sucht konkrete
-Service-as-Software-Gelegenheiten: welche Dienstleistung könnte Christian als
+Liest des Nutzers eigene Daten (Kundenstamm, Markt-Radar) und sucht konkrete
+Service-as-Software-Gelegenheiten: welche Dienstleistung könnte der Nutzer als
 "wir machen das für dich"-Service anbieten. Meldet zwei bis drei Funde knapp in
-den Klaus-Channel. Sendet nichts an Fremde, der Ping geht nur an Christian.
+den Klaus-Channel. Sendet nichts an Fremde, der Ping geht nur an der Nutzer.
 
 Sechs Bausteine: Trigger (manual/cron) · Schritte (collect/analyze/selfcheck/
 ping) · Routing (entfällt, eine Kette) · Selbst-Check · Freigabe (nur interner
@@ -34,7 +34,7 @@ def _load_learning() -> dict:
         d = json.loads(LEARN_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         d = {}
-    d.setdefault("dismissed", [])   # Ideen-Slugs, die Christian verworfen hat
+    d.setdefault("dismissed", [])   # Ideen-Slugs, die der Nutzer verworfen hat
     d.setdefault("confirmed", [])   # Slugs, die er gut fand (bevorzugen)
     d.setdefault("rules", [])       # freie Regeln, die der Prompt erbt
     return d
@@ -120,7 +120,7 @@ def _build_prompt(customers: str, market: str, learn: dict) -> str:
     avoid = ", ".join(learn["dismissed"][-20:]) or "noch nichts"
     liked = ", ".join(learn["confirmed"][-20:]) or "noch nichts"
     rules = "\n".join(f"- {r}" for r in learn["rules"]) or "- (keine)"
-    return f"""Du bist Klaus, Christians Geschäftspartner. Christian baut Denzer AI und
+    return f"""Du bist Klaus, des Nutzers Geschäftspartner. der Nutzer baut Denzer AI und
 will sich als AI-Dienstleister positionieren nach dem Service-as-Software-Modell:
 nicht Software verkaufen, sondern eine ganze Dienstleistung übernehmen (Buchhaltung,
 Recruiting, Marketing, IT-Support), die im Hintergrund auf AI läuft.
@@ -143,7 +143,7 @@ Zusätzliche Regeln:
 Antworte NUR mit JSON, keine Vorrede, kein Markdown-Zaun:
 {{"ideas":[{{"title":"kurzer Name der Opportunity","kategorie":"z.B. Buchhaltung",
 "zielkunde":"welcher Typ aus dem Stamm","warum":"ein Satz, woran du es festmachst",
-"erster_schritt":"ein konkreter erster Schritt fuer Christian"}}]}}
+"erster_schritt":"ein konkreter erster Schritt fuer der Nutzer"}}]}}
 Keine Bindestriche als Gedankenstriche im Text. Maximal drei Ideen."""
 
 

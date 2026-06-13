@@ -1,6 +1,6 @@
 """Rechnungs-Agent: mehrstufiger Workflow von der Zusage zur fertigen Rechnung.
 
-Trigger: manuell. Christian sagt "X hat zugesagt, Leistung Y, Betrag Z" (per
+Trigger: manuell. der Nutzer sagt "X hat zugesagt, Leistung Y, Betrag Z" (per
 Chat, WhatsApp oder Onboarding-Formular). Daraus baut der Agent eine prüfbare
 Vorschau, NICHT sofort eine echte Rechnung.
 

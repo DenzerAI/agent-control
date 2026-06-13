@@ -245,7 +245,7 @@ export function SystemagentWorkspace() {
     ? `${openDecisions} Punkt${openDecisions === 1 ? '' : 'e'} sind entscheidungsreif.`
     : eventRuns.length > 0 || jobIssues > 0
       ? 'Es gibt Hinweise, aber nichts wird versteckt.'
-      : 'Keine akute Aktion für Christian.'
+      : 'Keine akute Aktion für der Nutzer.'
 
   return (
     <div className="workspace-system">
@@ -266,7 +266,7 @@ export function SystemagentWorkspace() {
       {error && <div className="workspace-system-note">{error}</div>}
 
       <div className="workspace-system-strip">
-        <MetricCard label="Entscheidungen" value={String(openDecisions)} detail={openDecisions ? 'für Christian' : 'keine offen'} warn={openDecisions > 0} />
+        <MetricCard label="Entscheidungen" value={String(openDecisions)} detail={openDecisions ? 'für der Nutzer' : 'keine offen'} warn={openDecisions > 0} />
         <MetricCard label="Werkzeuge" value={String(bibliothekar.proposalCount)} detail={`${bibliothekar.skillsReady} Skills · ${bibliothekar.jobsReady} Jobs`} warn={bibliothekar.proposalCount > 0} />
         <MetricCard label="Jobs" value={`${jobRegistry.ready}/${jobRegistry.total}`} detail={`${jobRegistry.enabled} aktiv`} warn={jobIssues > 0} />
         <MetricCard label="Logbuch" value={String(eventRuns.length)} detail={`${recentRuns.length} letzte Läufe`} warn={eventRuns.length > 0} />

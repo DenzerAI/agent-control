@@ -826,7 +826,7 @@ async def fokus_quick_add_conversation(_payload: dict = Body(default={})):
 
 @router.post("/api/fokus/refine")
 async def fokus_refine(payload: dict = Body(...)):
-    """Christian tippt Freitext zu einem Fokus-Item, Claude überarbeitet dessen
+    """der Nutzer tippt Freitext zu einem Fokus-Item, Claude überarbeitet dessen
     Fokus-Metadaten. Body: {item_title, user_text}."""
     title = (payload.get("item_title") or "").strip()
     user_text = (payload.get("user_text") or "").strip()
@@ -846,7 +846,7 @@ async def fokus_refine(payload: dict = Body(...)):
     )
     today_iso = time.strftime("%Y-%m-%d")
     prompt = (
-        "Du bekommst die aktuelle Fokus-Zeile eines offenen Items und einen Update-Text von Christian. "
+        "Du bekommst die aktuelle Fokus-Zeile eines offenen Items und einen Update-Text von der Nutzer. "
         "Aktualisiere nur Triage, Datum, Titel und Metadaten gemäß seinem Update.\n\n"
         "Zeilenformat: `- \\`<T>\\` <DATE> — <TITEL> [· @[Name](#anchor)] [· *[Projekt](#anchor)*] [· #tag ...]`\n"
         "Triage-Marker T: `!` = jetzt, `>` = bald, `~` = später\n"
@@ -858,7 +858,7 @@ async def fokus_refine(payload: dict = Body(...)):
         "- Wenn keine Änderung sinnvoll: gib `NOOP` zurück.\n"
         "- Behalte existierende Person-/Projekt-/Tag-Links, wenn sie noch passen.\n\n"
         f"Aktuelle Zeile:\n{old_line}\n\n"
-        f"Christians Update:\n{user_text}\n\n"
+        f"des Nutzers Update:\n{user_text}\n\n"
         "Neue Zeile (oder DONE/DELETE/NOOP):"
     )
     from local_llm import call_with_haiku_fallback
@@ -1718,7 +1718,7 @@ async def _fokus_synthesize(item: dict, people_blocks: list, project_blocks: lis
     chat_txt = "\n".join(f"[{c.get('author','?')}] {(c.get('snippet') or '')[:300]}" for c in chat_traces[:5])
 
     today = datetime.now(ZoneInfo("Europe/Berlin")).strftime("%Y-%m-%d")
-    prompt = f"""Heute ist {today}. Du bekommst eine Aufgabe und Kontextfetzen aus Christians Wissensbasis (Personen-CRM, Projekt-Notizen, Daily-Logs, Chat-Spuren). Verdichte das zu einem klaren Status für die Fokus-Karten-Ansicht.
+    prompt = f"""Heute ist {today}. Du bekommst eine Aufgabe und Kontextfetzen aus des Nutzers Wissensbasis (Personen-CRM, Projekt-Notizen, Daily-Logs, Chat-Spuren). Verdichte das zu einem klaren Status für die Fokus-Karten-Ansicht.
 
 Aufgabe:
 {item.get('title','')}
@@ -1735,7 +1735,7 @@ Daily-Log-Erwähnungen (älteste zuletzt):
 Chat-Spuren:
 {chat_txt or '—'}
 
-Schreibe vier sehr kurze Felder, jeweils ein Satz, in Christians warmer Sprache (deutsch, keine Bindestriche im Fließtext, volle Umlaute):
+Schreibe vier sehr kurze Felder, jeweils ein Satz, in des Nutzers warmer Sprache (deutsch, keine Bindestriche im Fließtext, volle Umlaute):
 - "worum": worum geht es im Kern, in einem Satz, ohne den Aufgaben-Titel zu wiederholen
 - "stand": was ist der letzte bekannte Stand laut Daily-Logs/Chat
 - "haengt": woran hängt es gerade, was ist offen
@@ -2031,7 +2031,7 @@ async def fokus_scan(conv_id: str = "", limit: int = 30, hours: int = 24):
         if not text:
             continue
         text = text[:500]
-        who = "Christian" if (author or "").lower() in {"du", "user", "christian"} else "Klaus"
+        who = "der Nutzer" if (author or "").lower() in {"du", "user", "christian"} else "Klaus"
         if not conv_id and conv != last_conv:
             transcript_lines.append(f"--- Chat {(conv or '')[:8]} ---")
             last_conv = conv
@@ -2119,7 +2119,7 @@ Wenn nichts passt: {{"done":[],"add":[]}}"""
             pass
 
     # Auto-Done: was Klaus als erledigt erkannt hat, wird direkt entfernt.
-    # Christian will nicht selbst klicken. Falsch-Positive macht er manuell rückgängig.
+    # der Nutzer will nicht selbst klicken. Falsch-Positive macht er manuell rückgängig.
     for d in done_items:
         try:
             await fokus_done({"bucket": d["bucket"], "title": d["title"]})

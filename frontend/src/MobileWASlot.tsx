@@ -480,10 +480,10 @@ export default function MobileWASlot({ composerHeight: _ch, active = true }: { c
   // angezeigt, statt still zu verpuffen.
   const [draftError, setDraftError] = useState<string | null>(null)
   // Hinweis vom Backend, z.B. wenn Codex ausfiel und das lokale Modell eingesprungen
-  // ist — kein stiller Tod, Christian sieht woher der Entwurf kam.
+  // ist — kein stiller Tod, der Nutzer sieht woher der Entwurf kam.
   const [draftNotice, setDraftNotice] = useState<string | null>(null)
   const [draftLoading, setDraftLoading] = useState(false)
-  // Mail-Antwort unterwegs / gerade raus: Christian sieht den Sendevorgang statt
+  // Mail-Antwort unterwegs / gerade raus: der Nutzer sieht den Sendevorgang statt
   // "kein Laden, kein nichts". mailThreadRefresh signalisiert dem MailThreadView,
   // den Verlauf neu zu ziehen, damit die gesendete Antwort als Bubble auftaucht.
   const [mailSending, setMailSending] = useState(false)
@@ -511,7 +511,7 @@ export default function MobileWASlot({ composerHeight: _ch, active = true }: { c
   useEffect(() => { brainLevelRef.current = brainLevel }, [brainLevel])
 
   // Brain-Knopf an: Agent konsolidiert den Verlauf sofort (worum geht's, was will
-  // der andere, was ist offen) in die private Agent-Bubble — bevor Christian diktiert.
+  // der andere, was ist offen) in die private Agent-Bubble — bevor der Nutzer diktiert.
   const requestBrainAdvice = useCallback((chatId: string, level: 'light' | 'full' = 'light') => {
     brainAdviceRequestRef.current += 1
     const reqId = brainAdviceRequestRef.current
@@ -719,7 +719,7 @@ export default function MobileWASlot({ composerHeight: _ch, active = true }: { c
   // previousDraft erlaubt iteratives Nachschärfen eines bestehenden Entwurfs.
   useEffect(() => {
     // Nur wenn das Overlay sichtbar ist, kapert WhatsApp den Composer. Ist es versteckt
-    // (Christian in einer Agent-Pane), sendet der Composer wieder an Agent — der Draft-State
+    // (der Nutzer in einer Agent-Pane), sendet der Composer wieder an Agent — der Draft-State
     // bleibt aber erhalten, läuft im Hintergrund fertig und steht beim Zurückkommen noch da.
     if (active && view === 'thread' && selected) {
       window.dispatchEvent(new CustomEvent('deck:waSendTarget', {
@@ -1430,7 +1430,7 @@ export default function MobileWASlot({ composerHeight: _ch, active = true }: { c
         triage: m.replied ? 'replied' : 'waiting_on_me',
       }
     }
-    // Eine Mail bleibt in "Wartet", bis Christian wirklich geantwortet hat.
+    // Eine Mail bleibt in "Wartet", bis der Nutzer wirklich geantwortet hat.
     // Lesen allein demotet sie nicht mehr. Beantwortete Mails rutschen runter
     // in die "E-Mails"-Gruppe und werden dort neutral (weiss).
     const mailWaiting: MobileInboxItem[] = mailInboxItems.filter(m => !m.replied).map(toMailRow)

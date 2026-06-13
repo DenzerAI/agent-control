@@ -26,7 +26,7 @@ Skelett und Loader sind vorhanden. `backend/module_loader.py` liest `modules/mod
 
 - `core`: neutraler Grundkasten
 - `client-basic`: Kundenstart mit People und Kalender
-- `christian`: Christians volle lokale Instanz
+- `christian`: des Nutzers volle lokale Instanz
 
 `scripts/agent-control-setup.py` schreibt daraus `config/agent-control.json` und `modules/modules.json`.
 

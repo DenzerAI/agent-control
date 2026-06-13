@@ -8,7 +8,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # Geteilte Umgebung (Label/Port/venv-Python) laden, falls vorhanden. Setzt
-# AC_LABEL/AC_PORT/AC_PY/AC_ROOT. Faellt fuer Christians Checkout auf exakt
+# AC_LABEL/AC_PORT/AC_PY/AC_ROOT. Faellt fuer des Nutzers Checkout auf exakt
 # com.klaus.agent / 8890 zurueck (Abwaertskompatibilitaet bleibt erhalten).
 if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
   # shellcheck source=lib/agent-control-env.sh
@@ -76,7 +76,7 @@ for cid in d.get('convIds', []):
 " 2>/dev/null
     echo ""
     echo "Wenn das nur dein eigener Stream ist: $0 --force"
-    echo "Wenn andere dran sind: erst abwarten oder Christian fragen."
+    echo "Wenn andere dran sind: erst abwarten oder der Nutzer fragen."
     exit 2
   fi
 fi

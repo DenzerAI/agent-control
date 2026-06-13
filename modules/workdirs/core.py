@@ -213,7 +213,7 @@ aktiv
 🟡 In Planung
 
 ## Nächste Schritte
-- Ziel und Phasen mit Christian besprechen
+- Ziel und Phasen mit der Nutzer besprechen
 
 ## Änderungsprotokoll
 - {time.strftime('%Y-%m-%d')} — Projekt angelegt
