@@ -247,8 +247,29 @@ load_brew_shellenv() {
 # Liefert 0 bei Erfolg, 1 bei Fehlschlag.
 auto_install_homebrew() {
   step "Homebrew wird installiert…" "Der Paketmanager für den Mac."
-  echo "${C_DIM}  Gleich fragt der Mac einmal nach deinem Passwort. Das ist normal und sicher.${C_RESET}"
-  if NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+
+  # Homebrew braucht einmal das Mac-Passwort (sudo). Im 'curl | bash'-Lauf ist
+  # die normale Eingabe vom Pipe belegt, darum holen wir das Passwort bewusst
+  # direkt vom Terminal und halten es kurz warm. Ohne diesen Schritt bricht der
+  # Homebrew-Installer still ab und wir landen fälschlich in der Stopp-Box.
+  local rc=0 keepalive=""
+  if has_tty; then
+    echo "${C_GOLD}  Der Mac fragt jetzt einmal nach deinem Passwort.${C_RESET}"
+    echo "${C_DIM}  Tipp es ein und drücke Enter. Es bleibt beim Tippen unsichtbar, das ist normal.${C_RESET}"
+    if ! sudo -v </dev/tty; then
+      echo "${C_GOLD}  Ohne bestätigtes Passwort kann Homebrew nicht installiert werden.${C_RESET}"
+      return 1
+    fi
+    # sudo-Zeitstempel warmhalten, solange die Installation läuft.
+    ( while true; do sudo -n true 2>/dev/null; sleep 50; done ) &
+    keepalive=$!
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/tty || rc=$?
+    [[ -n "$keepalive" ]] && kill "$keepalive" 2>/dev/null || true
+  else
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || rc=$?
+  fi
+
+  if [[ "$rc" -eq 0 ]]; then
     if load_brew_shellenv; then
       echo "${C_GREEN}✓ Homebrew installiert.${C_RESET}"
       return 0
