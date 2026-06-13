@@ -4,6 +4,13 @@
 # Usage: ./start.sh
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# Geteilte Umgebung laden (setzt AC_PORT, Default 8890). So laesst sich der
+# Port per env (AC_PORT) ueberschreiben, etwa fuer eine zweite Test-Instanz.
+if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
+    # shellcheck source=lib/agent-control-env.sh
+    source "$PROJECT_ROOT/scripts/lib/agent-control-env.sh"
+fi
+PORT="${AC_PORT:-8890}"
 cd "$PROJECT_ROOT/backend"
 source "$PROJECT_ROOT/.venv/bin/activate"
 
@@ -15,8 +22,8 @@ if [ ! -x "$PY" ]; then
 fi
 
 while true; do
-    echo "[AC] Starting server on port 8890..."
-    uvicorn server:app --host 0.0.0.0 --port 8890 --ws-ping-interval 0 &
+    echo "[AC] Starting server on port $PORT..."
+    uvicorn server:app --host 0.0.0.0 --port "$PORT" --ws-ping-interval 0 &
     echo $! > "$PIDFILE"
     wait $!
     EXIT_CODE=$?

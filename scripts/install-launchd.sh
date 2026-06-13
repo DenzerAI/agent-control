@@ -73,6 +73,16 @@ printf '%s\n' "$AC_LABEL" > "$AC_ROOT/config/launchd-label"
 
 PATH_VALUE="$HOME/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
+# Port nur dann ins plist schreiben, wenn er vom Default abweicht. So bleibt
+# des Nutzers bestehende plist (8890) Byte-fuer-Byte unveraendert, eine zweite
+# Instanz mit AC_PORT bekommt aber ihren eigenen Port in die Autostart-Umgebung.
+PORT_ENV_XML=""
+if [ -n "${AC_PORT:-}" ] && [ "${AC_PORT}" != "8890" ]; then
+  PORT_ENV_XML="    <key>AC_PORT</key>
+    <string>${AC_PORT}</string>
+"
+fi
+
 cat > "$AC_PLIST" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -92,7 +102,7 @@ cat > "$AC_PLIST" <<PLIST
     <string>$PATH_VALUE</string>
     <key>HOME</key>
     <string>$HOME</string>
-  </dict>
+$PORT_ENV_XML  </dict>
 
   <key>WorkingDirectory</key>
   <string>$AC_ROOT/backend</string>

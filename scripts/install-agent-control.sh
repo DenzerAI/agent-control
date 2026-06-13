@@ -89,6 +89,8 @@ Options:
   --profile=<core|client-demo|client-basic|christian>
   --engine=<codex|claude|gemini|openai-api|anthropic-api|gemini-api|xai-api|lmstudio|ollama|manual>
   --name=<instance name>
+  --agent-name=<agent name>   Visible agent name (non-interactive, works with --yes).
+  --owner-name=<owner name>   Name the agent addresses you by (non-interactive).
   --enable-module=<module>
   --server-url=<url>
   --deps-only
@@ -338,6 +340,8 @@ for arg in "$@"; do
     --profile=*) PROFILE="${arg#*=}" ;;
     --engine=*) ENGINE="${arg#*=}" ;;
     --name=*) NAME="${arg#*=}" ;;
+    --agent-name=*) SETUP_ARGS+=("--agent-name" "${arg#*=}") ;;
+    --owner-name=*) SETUP_ARGS+=("--owner-name" "${arg#*=}") ;;
     --enable-module=*|--server-url=*|--skip-doctor|--force-env|--no-demo-data|--force-demo-data|--no-soul|--force-soul|--package-plan) SETUP_ARGS+=("$arg") ;;
     *) echo "Unknown argument: $arg" >&2; exit 2 ;;
   esac

@@ -8,8 +8,17 @@ set -e
 ulimit -n 8192
 echo "[launchd-start] $(date '+%Y-%m-%d %H:%M:%S') FD-Limit=$(ulimit -n) PID=$$"
 
-cd /Users/klaus/agent/backend
-exec /Users/klaus/agent/.venv/bin/uvicorn server:app \
+# Pfade und Port aus der geteilten Umgebung ableiten, damit dieselbe Datei fuer
+# jede Instanz funktioniert (des Nutzers Checkout in $HOME/agent ebenso wie ein
+# Fresh-Install in einem anderen Ordner). AC_PORT (Default 8890) kann das
+# launchd-EnvironmentVariables-Dict ueberschreiben.
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/agent-control-env.sh
+source "$HERE/lib/agent-control-env.sh"
+PORT="${AC_PORT:-8890}"
+
+cd "$AC_ROOT/backend"
+exec "$AC_PY" -m uvicorn server:app \
   --host 0.0.0.0 \
-  --port 8890 \
+  --port "$PORT" \
   --ws-ping-interval 0

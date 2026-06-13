@@ -4,6 +4,10 @@ set -euo pipefail
 REPO_URL="${AGENT_CONTROL_REPO_URL:-https://github.com/DenzerAI/agent-control.git}"
 BRANCH="${AGENT_CONTROL_BRANCH:-main}"
 DEST="${AGENT_CONTROL_HOME:-$HOME/agent-control}"
+# Server-Port. Default 8890, per AC_PORT ueberschreibbar (z. B. fuer eine
+# zweite Test-Instanz auf 8899). Wird an scripts/start.sh durchgereicht und
+# fuer Health-Check und das automatische Oeffnen des Browsers genutzt.
+PORT="${AC_PORT:-8890}"
 
 # Auto-Install standardmäßig an. Mit --no-auto-install (oder
 # AGENT_CONTROL_NO_AUTO_INSTALL=1) fällt der Installer auf das alte
@@ -357,7 +361,7 @@ preflight() {
 }
 
 wait_for_server() {
-  local url="http://127.0.0.1:8890/api/system-status"
+  local url="http://127.0.0.1:${PORT}/api/system-status"
   for _ in $(seq 1 40); do
     if curl -fsS "$url" >/dev/null 2>&1; then
       return 0
@@ -463,11 +467,11 @@ fi
 
 if yes_no "Agent Control jetzt starten?" "Y"; then
   mkdir -p logs
-  if curl -fsS http://127.0.0.1:8890/api/system-status >/dev/null 2>&1; then
+  if curl -fsS "http://127.0.0.1:${PORT}/api/system-status" >/dev/null 2>&1; then
     echo "${C_GREEN}✓ Agent Control läuft bereits.${C_RESET}"
   else
-    step "Agent Control starten" "Der lokale Chat wird unter http://127.0.0.1:8890 geöffnet."
-    nohup bash scripts/start.sh > logs/start.log 2> logs/start.err.log &
+    step "Agent Control starten" "Der lokale Chat wird unter http://127.0.0.1:${PORT} geöffnet."
+    AC_PORT="$PORT" nohup bash scripts/start.sh > logs/start.log 2> logs/start.err.log &
     echo $! > .server.pid
     if wait_for_server; then
       echo "${C_GREEN}✓ Agent Control läuft.${C_RESET}"
@@ -476,17 +480,17 @@ if yes_no "Agent Control jetzt starten?" "Y"; then
     fi
   fi
   if [[ "$(uname -s)" == "Darwin" ]] && command -v open >/dev/null 2>&1; then
-    open http://127.0.0.1:8890 >/dev/null 2>&1 || true
+    open "http://127.0.0.1:${PORT}" >/dev/null 2>&1 || true
   fi
 fi
 
 echo
 rule
 echo "${C_ACCENT}${C_BOLD}✓ Fertig. Du kannst jetzt chatten.${C_RESET}"
-echo "${C_BOLD}  Chat öffnen:${C_RESET} http://127.0.0.1:8890"
+echo "${C_BOLD}  Chat öffnen:${C_RESET} http://127.0.0.1:${PORT}"
 rule
 echo "${C_DIM}  Ordner:        $DEST${C_RESET}"
-echo "${C_DIM}  Neu starten:   cd \"$DEST\" && bash scripts/start.sh${C_RESET}"
+echo "${C_DIM}  Neu starten:   cd \"$DEST\" && AC_PORT=${PORT} bash scripts/start.sh${C_RESET}"
 echo
 }
 

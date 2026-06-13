@@ -275,10 +275,25 @@ def soul_defaults(profile: dict[str, Any]) -> dict[str, str]:
     return defaults
 
 
-def collect_soul_answers(profile: dict[str, Any], yes: bool) -> dict[str, str]:
+def collect_soul_answers(
+    profile: dict[str, Any],
+    yes: bool,
+    agent_name: str | None = None,
+    owner_name: str | None = None,
+) -> dict[str, str]:
     defaults = soul_defaults(profile)
+    # Explizit uebergebene Namen gewinnen immer und ueberspringen die Frage —
+    # auch im interaktiven Modus. So lassen sich Agent- und Inhaber-Name
+    # vollstaendig nicht-interaktiv setzen (z. B. fuer Test-Installationen).
+    forced: dict[str, str] = {}
+    if agent_name:
+        forced["agent_name"] = agent_name
+    if owner_name:
+        forced["owner_name"] = owner_name
     if yes:
-        return defaults
+        result = dict(defaults)
+        result.update(forced)
+        return result
     section(
         "Schritt 2 von 2: Dein Agent",
         "Vier kurze Fragen. Bei jeder steht ein Vorschlag. Mit Enter übernimmst du ihn.",
@@ -289,12 +304,12 @@ def collect_soul_answers(profile: dict[str, Any], yes: bool) -> dict[str, str]:
     # fließen weiter in die Soul-Dateien ein, nur ohne eigene Frage.
     answers = dict(defaults)
     answers.update({
-        "agent_name": prompt_text(
+        "agent_name": forced.get("agent_name") or prompt_text(
             "Wie soll dein Agent heißen?",
             defaults["agent_name"],
             hint="Der Name, mit dem er sich meldet und im Chat auftaucht.",
         ),
-        "owner_name": prompt_text(
+        "owner_name": forced.get("owner_name") or prompt_text(
             "Wie heißt du?",
             defaults["owner_name"],
             hint="Mit diesem Namen spricht dich dein Agent an.",
@@ -844,7 +859,12 @@ def run(args: argparse.Namespace) -> int:
     if args.doctor:
         return doctor(cfg, profile, optional_enabled, default_engine or "manual", args.server_url)
 
-    soul_answers = collect_soul_answers(profile, args.yes)
+    soul_answers = collect_soul_answers(
+        profile,
+        args.yes,
+        agent_name=getattr(args, "agent_name", None),
+        owner_name=getattr(args, "owner_name", None),
+    )
     ensure_dirs(args.dry_run)
     ensure_env(args.dry_run, args.force_env)
 
@@ -902,6 +922,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Configure an Agent Control instance")
     parser.add_argument("--profile", choices=["core", "client-demo", "client-basic", "christian"], help="Setup profile")
     parser.add_argument("--name", help="Instance name")
+    parser.add_argument("--agent-name", help="Visible agent name (skips the interactive prompt, works with --yes)")
+    parser.add_argument("--owner-name", help="Owner/user name the agent addresses you by (skips the interactive prompt, works with --yes)")
     parser.add_argument("--engine", choices=ENGINE_PROFILE_IDS, help="Default engine profile")
     parser.add_argument("--enable-module", action="append", default=[], help="Enable optional module")
     parser.add_argument("--yes", action="store_true", help="Use defaults and do not prompt")
