@@ -8,7 +8,7 @@ function playWorkspaceOpen(mode: WorkspaceMode) {
   playUISound(mode === 'filesystem' ? 'workspace-reveal' : 'workspace-open', 0.45)
 }
 
-const PUBLIC_WORKSPACE_MODES = new Set<WorkspaceMode>(['agent', 'inbox', 'knowledge', 'tasks', 'connectors', 'filesystem'])
+const PUBLIC_WORKSPACE_MODES = new Set<WorkspaceMode>(['agent', 'inbox', 'knowledge', 'tasks', 'connectors', 'privacy', 'filesystem'])
 
 const PARENT_MODE_BY_MODE: Partial<Record<WorkspaceMode, WorkspaceMode>> = {
   chatagent: 'tasks',
