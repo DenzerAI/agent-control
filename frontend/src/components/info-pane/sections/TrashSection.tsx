@@ -80,7 +80,7 @@ export function TrashSection({ mobile, indent }: { mobile?: boolean; indent?: bo
           )}
           {items.map(it => {
             const meta = [formatBytes(it.size), formatRelTime(it.deleted_at || it.mtime)].filter(Boolean).join(' · ')
-            const origin = it.original_path ? it.original_path.replace(`${'/Users/klaus/agent/'}`, '~/agent/') : ''
+            const origin = it.original_path ? it.original_path.replace(`${'/workspace/'}`, '~/workspace/') : ''
             return (
               <div key={it.trash_path} className="group relative flex items-center hover:bg-white/[0.06] transition-colors">
                 <div className="flex-1 flex items-center pr-3 pl-1 py-[7px] info-text-body text-[var(--t2)] truncate">

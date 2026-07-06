@@ -1,16 +1,13 @@
-import { ArrowLeft, Loader2, Mic, PanelLeftClose, PanelLeftOpen, Phone, Search, Square } from 'lucide-react'
+import { ArrowLeft, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
 import type { WorkspaceFile, WorkspaceMode, WorkspaceSpan } from './types'
 import { WorkspaceNav, workspaceModeLabel } from './WorkspaceNav'
-import { useMeetingRecorder } from './useMeetingRecorder'
-import { useMainAgentName } from '../agents'
 import { PreviewPane } from './PreviewPane'
 import { DocumentPane } from './DocumentPane'
 import { WorkspaceHome } from './WorkspaceHome'
-import { KlausWorkspace } from './KlausWorkspace'
+import { AgentWorkspace } from './AgentWorkspace'
 import { HealthWorkspace } from './HealthWorkspace'
 import { LimitsWorkspace } from './LimitsWorkspace'
 import { SystemagentWorkspace } from './SystemagentWorkspace'
-import { MailagentWorkspace } from './MailagentWorkspace'
 import { ChatagentWorkspace } from './ChatagentWorkspace'
 import { LoopWorkspace } from './LoopWorkspace'
 import { PioniereWorkspace } from './PioniereWorkspace'
@@ -24,11 +21,10 @@ import { PeopleWorkspace } from './PeopleWorkspace'
 import { SkillsWorkspace } from './SkillsWorkspace'
 import { EnginesWorkspace } from './EnginesWorkspace'
 import { InboxWorkspace } from './InboxWorkspace'
-import { MailWorkspace } from './MailWorkspace'
+import { CompanyMemoryWorkspace } from './CompanyMemoryWorkspace'
 import { ArtifactsWorkspace } from './ArtifactsWorkspace'
 import { RadarWorkspace } from './RadarWorkspace'
 import { IdeasWorkspace } from './IdeasWorkspace'
-import { MeetingsWorkspace } from './MeetingsWorkspace'
 import { CalendarWorkspace } from './CalendarWorkspace'
 import { PipelineWorkspace } from './WorkspacePipeline'
 import { ProjectsWorkspace } from './ProjectsWorkspace'
@@ -38,9 +34,9 @@ import { AgentKanbanWorkspace } from './AgentKanbanWorkspace'
 import { PrivacyWorkspace } from './PrivacyWorkspace'
 
 // Workspace als permanente linke Spalte: die schmale Nav-Rail ersetzt die alte
-// InfoPane (Menü, Suche, Voice). Ein Klick öffnet den Body rechts daneben, der
+// InfoPane. Ein Klick öffnet den Body rechts daneben, der
 // die Chats schmaler schiebt. Erneuter Klick auf den aktiven Reiter schließt ihn.
-export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file, filesystemPath, onClose, onModeChange, onBack, onSpanChange, onToggleCollapsed, onOpenFile, onRevealPath, onOpenSearch, voiceReady, voiceActive, onToggleVoice }: {
+export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file, filesystemPath, onClose, onModeChange, onBack, onSpanChange, onToggleCollapsed, onOpenFile, onRevealPath, onOpenSearch }: {
   open: boolean
   mode: WorkspaceMode
   returnMode?: WorkspaceMode | null
@@ -56,13 +52,7 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
   onOpenFile: (path: string) => boolean
   onRevealPath: (path: string) => void
   onOpenSearch?: () => void
-  voiceReady?: boolean
-  voiceActive?: boolean
-  onToggleVoice?: () => void
 }) {
-  const { recState, recTimer, toggleRecording } = useMeetingRecorder()
-  const agentName = useMainAgentName()
-
   return (
     <aside className={`workspace-dock workspace-span-${span}${open ? ' is-open' : ''}${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace">
       <div className="workspace-rail">
@@ -84,30 +74,6 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
               <Search className="h-[14px] w-[14px]" />
             </button>
           )}
-          {onToggleVoice && (
-            <button
-              type="button"
-              className={`workspace-rail-tool${voiceActive ? ' is-active-terra' : ''}`}
-              onClick={onToggleVoice}
-              disabled={!voiceReady && !voiceActive}
-              title={voiceActive ? 'Voice beenden' : `Mit ${agentName} sprechen`}
-            >
-              <Phone className="h-[14px] w-[14px]" />
-            </button>
-          )}
-          <button
-            type="button"
-            className={`workspace-rail-tool${recState !== 'idle' ? ' is-active-terra' : ''}`}
-            onClick={toggleRecording}
-            disabled={recState === 'uploading'}
-            title={recState === 'recording' ? `Aufnahme stoppen (${recTimer})` : recState === 'uploading' ? 'Meeting wird verarbeitet' : 'Meeting aufnehmen'}
-          >
-            {recState === 'uploading'
-              ? <Loader2 className="h-[14px] w-[14px] animate-spin" />
-              : recState === 'recording'
-                ? <Square className="h-[14px] w-[14px]" />
-                : <Mic className="h-[14px] w-[14px]" />}
-          </button>
         </div>
       </div>
 
@@ -147,11 +113,11 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
             {mode === 'preview' && <PreviewPane file={file?.kind === 'html' ? file : null} onRevealPath={onRevealPath} />}
             {mode === 'document' && <DocumentPane file={file?.kind === 'markdown' ? file : null} onRevealPath={onRevealPath} />}
             {mode === 'filesystem' && <WorkspaceHome onOpenFile={onOpenFile} onClose={onClose} onRevealPath={onRevealPath} path={filesystemPath} filePath={file && file.kind !== 'html' ? file.path : null} />}
-            {mode === 'klaus' && <KlausWorkspace />}
+            {mode === 'agent' && <AgentWorkspace />}
+            {mode === 'companyMemory' && <CompanyMemoryWorkspace />}
             {mode === 'health' && <HealthWorkspace />}
             {mode === 'limits' && <LimitsWorkspace />}
             {mode === 'systemagent' && <SystemagentWorkspace />}
-            {mode === 'mailagent' && <MailagentWorkspace />}
             {mode === 'chatagent' && <ChatagentWorkspace />}
             {mode === 'loops' && <LoopWorkspace initialView="werkbank" lockedView />}
             {mode === 'offers' && <LoopWorkspace initialView="offers" lockedView />}
@@ -166,14 +132,12 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
             {mode === 'skills' && <SkillsWorkspace />}
             {mode === 'engines' && <EnginesWorkspace />}
             {mode === 'inbox' && <InboxWorkspace />}
-            {mode === 'mail' && <MailWorkspace />}
             {mode === 'artifacts' && <ArtifactsWorkspace />}
             {mode === 'radar' && <RadarWorkspace />}
             {mode === 'ideas' && <IdeasWorkspace />}
-            {mode === 'meetings' && <MeetingsWorkspace />}
             {mode === 'calendar' && <CalendarWorkspace />}
             {mode === 'privacy' && <PrivacyWorkspace />}
-            {mode === 'automation' && <AutomationWorkspace onOpenMode={onModeChange} />}
+            {mode === 'automation' && <AutomationWorkspace />}
             {mode === 'settings' && <SettingsWorkspace />}
             {mode === 'kanban' && <AgentKanbanWorkspace />}
             {mode === 'pipeline' && <PipelineWorkspace />}

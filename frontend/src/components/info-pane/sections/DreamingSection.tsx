@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Brain, ChevronRight, Moon, RefreshCw } from 'lucide-react'
 import { playUISound } from '../../../uiSounds'
 
-const READ_KEY = 'klaus.dreaming.latestReadMtime'
+const READ_KEY = 'agent.dreaming.latestReadMtime'
 
 type DreamingInfo = {
   ok: boolean

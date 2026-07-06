@@ -289,7 +289,7 @@ export function Spotlight({ onClose, mobile = false }: { onClose: () => void; mo
       )
     }
     if (h.kind === 'docs') {
-      const rel = h.path.replace('/Users/klaus/agent/', '~/agent/')
+      const rel = h.path.replace('/workspace/', '~/workspace/')
       return (
         <button key={`d-${i}`} onClick={() => open(h)} onMouseEnter={() => setActiveIdx(i)} className={base}>
           <FileText className="w-4 h-4 text-[var(--t3)] flex-shrink-0 mt-0.5" />
@@ -304,7 +304,7 @@ export function Spotlight({ onClose, mobile = false }: { onClose: () => void; mo
       )
     }
     if (h.kind === 'skills') {
-      const rel = h.path.replace('/Users/klaus/agent/', '~/agent/')
+      const rel = h.path.replace('/workspace/', '~/workspace/')
       return (
         <button key={`s-${i}`} onClick={() => open(h)} onMouseEnter={() => setActiveIdx(i)} className={base}>
           <Wrench className="w-4 h-4 text-[var(--t3)] flex-shrink-0 mt-0.5" />
@@ -319,7 +319,7 @@ export function Spotlight({ onClose, mobile = false }: { onClose: () => void; mo
       )
     }
     // files
-    const rel = h.path.replace('/Users/klaus/agent/', '~/agent/')
+    const rel = h.path.replace('/workspace/', '~/workspace/')
     return (
       <button key={`f-${i}`} onClick={() => open(h)} onMouseEnter={() => setActiveIdx(i)} className={base}>
         <FileCog className="w-4 h-4 text-[var(--t3)] flex-shrink-0 mt-0.5" />

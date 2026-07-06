@@ -39,7 +39,7 @@ function splitTextSignature(raw: string): { body: string; signature: string } {
   }
   const lines = text.split('\n')
   const isGreeting = (line: string) => /^(mit freundlichen grüßen|freundliche grüße|viele grüße|beste grüße|liebe grüße|kind regards|best regards|regards|mfg)[,.\s]*$/i.test(line.trim())
-  const isContactLine = (line: string) => /(@|https?:\/\/|www\.|tel\.?|telefon|mobil|phone|linkedin|xing|straße|strasse|gmbh|ust|register|denzer ai)/i.test(line)
+  const isContactLine = (line: string) => /(@|https?:\/\/|www\.|tel\.?|telefon|mobil|phone|linkedin|xing|straße|strasse|gmbh|ust|register|company ai)/i.test(line)
   const start = Math.max(0, lines.length - 14)
   for (let i = start; i < lines.length - 2; i += 1) {
     const tail = lines.slice(i).filter(l => l.trim())

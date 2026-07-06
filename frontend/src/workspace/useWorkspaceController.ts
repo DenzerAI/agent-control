@@ -8,9 +8,10 @@ function playWorkspaceOpen(mode: WorkspaceMode) {
   playUISound(mode === 'filesystem' ? 'workspace-reveal' : 'workspace-open', 0.45)
 }
 
+const PUBLIC_WORKSPACE_MODES = new Set<WorkspaceMode>(['agent', 'inbox', 'companyMemory', 'dreaming', 'automation', 'filesystem'])
+
 const PARENT_MODE_BY_MODE: Partial<Record<WorkspaceMode, WorkspaceMode>> = {
   chatagent: 'automation',
-  mailagent: 'automation',
   systemagent: 'automation',
   kanban: 'automation',
 }
@@ -20,13 +21,13 @@ export function useWorkspaceController(): WorkspaceController {
     try { return localStorage.getItem('workspace:open') === '1' } catch { return false }
   })
   const [mode, setMode] = useState<WorkspaceMode>(() => {
-    // Zuhause ist Artefakte. preview/document brauchen eine offene Datei, die nach
-    // Hard Refresh fehlt — darum fallen sie aufs Zuhause zurück statt leer zu starten.
+    // Zuhause ist Chat. preview/document brauchen eine offene Datei, die nach
+    // Hard Refresh fehlt, alte Modul-Modi fallen auf den sichtbaren Kern zurück.
     try {
       const saved = localStorage.getItem('workspace:mode') as WorkspaceMode | null
-      if (!saved || saved === 'preview' || saved === 'document') return 'artifacts'
+      if (!saved || saved === 'preview' || saved === 'document' || !PUBLIC_WORKSPACE_MODES.has(saved)) return 'agent'
       return saved
-    } catch { return 'artifacts' }
+    } catch { return 'agent' }
   })
   // Letzte Breite überlebt den Hard Refresh: gespeicherten Span wieder einlesen,
   // damit der Workspace nicht stur auf 1 zurückspringt.

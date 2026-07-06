@@ -36,7 +36,7 @@ type CalEvent = {
   bucket?: 'now' | 'soon' | 'later'
 }
 
-type CalCategory = 'klaus' | 'privat' | 'fch' | 'ai-workshop' | 'ai-agent' | 'ai-beratung' | 'gecko' | 'ptdesk' | 'admin'
+type CalCategory = 'agent' | 'privat' | 'fch' | 'ai-workshop' | 'ai-agent' | 'ai-beratung' | 'gecko' | 'ptdesk' | 'admin'
 
 type DraftEvent = {
   date: string

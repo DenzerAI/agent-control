@@ -1,6 +1,6 @@
 """Files router: Datei- und Memory-Zugriff für die Workspace-Schicht.
 
-Extrahiert aus server.py als Schnitt 4a der Modularisierung (nach voice.py,
+Extrahiert aus server.py als Schnitt 4a der Modularisierung (nach
 deck.py und chat.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade
 bleiben byte-identisch.
 

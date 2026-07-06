@@ -176,7 +176,7 @@
   display: none;
 }
 
-/* Werkzeugleiste unten in der Rail: Lupe, Klaus sprechen, Meeting aufnehmen.
+/* Werkzeugleiste unten in der Rail: Lupe, Agent sprechen, Meeting aufnehmen.
    Getrennt von der Navigation durch eine ruhige Haarlinie, klebt am Fuss. */
 .workspace-rail-top {
   position: relative;
@@ -335,7 +335,7 @@
   color: var(--t1);
 }
 
-/* denzer.-Wortmarke unten in der Rail, Punkt in Markenfarbe. */
+/* company.-Wortmarke unten in der Rail, Punkt in Markenfarbe. */
 .workspace-rail-foot {
   margin-top: auto;
   padding: 12px 16px 14px;
@@ -411,9 +411,9 @@
   opacity: 0.7;
 }
 
-/* Das Klaus-Bild hat ein helles Gesicht eingebacken und leuchtet sonst raus:
+/* Das Agent-Bild hat ein helles Gesicht eingebacken und leuchtet sonst raus:
    im Ruhezustand zusätzlich abdunkeln, damit es so leise sitzt wie der Rest. */
-.workspace-nav button .workspace-nav-klaus {
+.workspace-nav button .workspace-nav-agent {
   opacity: 0.55;
   filter: brightness(0.78);
 }
@@ -425,8 +425,8 @@
   opacity: 1;
 }
 
-.workspace-nav button:hover .workspace-nav-klaus,
-.workspace-nav button.is-active .workspace-nav-klaus {
+.workspace-nav button:hover .workspace-nav-agent,
+.workspace-nav button.is-active .workspace-nav-agent {
   filter: none;
 }
 
@@ -554,7 +554,7 @@
   border-radius: 8px;
 }
 
-/* Workspaces mit reinem bg-Wurzelcontainer (Klaus, Engines, Skills, Inbox, Mail,
+/* Workspaces mit reinem bg-Wurzelcontainer (Agent, Engines, Skills, Inbox, Mail,
    Artefakte, Settings, Agent-Ansichten) bekommen einen gerahmten, abgerundeten
    Panel-Look, damit der Hintergrund nicht eckig abgeschnitten wirkt. */
 .workspace-body > .bg-\[var\(--bg\)\] {
@@ -1639,67 +1639,67 @@
   border-bottom: 0;
 }
 
-/* Klaus-Workspace reagiert auf die eigene Spaltenbreite (Container-Query),
+/* Agent-Workspace reagiert auf die eigene Spaltenbreite (Container-Query),
    nicht aufs Fenster — sonst bricht das Raster bei einer schmalen Pane. */
-.klaus-cq {
+.agent-cq {
   container-type: inline-size;
 }
 
-.klaus-avatar {
+.agent-avatar {
   height: 2.75rem;
   width: 2.75rem;
 }
 
-.klaus-title {
+.agent-title {
   font-size: 1.5rem;
 }
 
 /* Jede Stat-Box ist ihr eigener Messpunkt: die Zahl skaliert mit der Box-Breite
    (cqi), nicht mit dem ganzen Workspace. So laufen die Zahlen auch bei drei
    schmalen Spalten (Breite 1) nicht mehr aus der Box. */
-.klaus-stat {
+.agent-stat {
   container-type: inline-size;
 }
 
-.klaus-bignum {
+.agent-bignum {
   font-size: clamp(0.8rem, 22cqi, 2.4rem);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 @container (min-width: 520px) {
-  .klaus-avatar {
+  .agent-avatar {
     height: 3.5rem;
     width: 3.5rem;
   }
-  .klaus-title {
+  .agent-title {
     font-size: 1.875rem;
   }
 }
 
-.klaus-grid {
+.agent-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
-.klaus-soul {
+.agent-soul {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
 @container (min-width: 440px) {
-  .klaus-soul {
+  .agent-soul {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @container (min-width: 760px) {
-  .klaus-grid {
+  .agent-grid {
     grid-template-columns: minmax(0, 1fr) 320px;
   }
-  .klaus-span-all {
+  .agent-span-all {
     grid-column: 1 / -1;
   }
 }
@@ -2498,7 +2498,7 @@
   color: var(--t1);
 }
 
-/* Das "o" in Control ist das bewegte Klaus-Logo, wie im Agent Control Atlas. */
+/* Das "o" in Control ist das bewegte Agent-Logo, wie im Agent Control Atlas. */
 .workspace-empty-o {
   display: inline-block;
   white-space: nowrap;
@@ -4809,14 +4809,14 @@ html, body, #root {
   color: var(--t2);
 }
 
-.klaus-proactive-wrap {
+.agent-proactive-wrap {
   margin-top: 0.2rem;
   margin-bottom: 0.25rem;
 }
 
 /* Kein Kachel-Container mehr: gleicher Chatfluss wie eine normale Antwort,
    nur typografisch als andere Nachrichtengattung markiert (Editorial-Kicker). */
-.klaus-proactive-card {
+.agent-proactive-card {
   position: relative;
   width: min(100%, 760px);
   max-width: calc(100vw - 28px);
@@ -4828,7 +4828,7 @@ html, body, #root {
 
 /* Editorial-Header: zentriertes Label, eingefasst von ruhigen Linien
    links und rechts (wie der Antwort-Separator). */
-.klaus-proactive-kicker {
+.agent-proactive-kicker {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4837,15 +4837,15 @@ html, body, #root {
   line-height: 1;
 }
 
-.klaus-proactive-kicker::before,
-.klaus-proactive-kicker::after {
+.agent-proactive-kicker::before,
+.agent-proactive-kicker::after {
   content: "";
   flex: 1 1 0;
   height: 1px;
   background: color-mix(in srgb, var(--cc-orange) 38%, transparent);
 }
 
-.klaus-proactive-label {
+.agent-proactive-label {
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 500;
@@ -4855,17 +4855,17 @@ html, body, #root {
   color: color-mix(in srgb, var(--cc-orange) 78%, var(--t2) 22%);
 }
 
-:root[data-theme="light"] .klaus-proactive-label {
+:root[data-theme="light"] .agent-proactive-label {
   color: color-mix(in srgb, var(--cc-orange) 78%, var(--t2) 22%);
 }
 
 /* Headline: NUR echte Markdown-Überschriften setzen sich hell und leicht größer
    ab. Der erste Absatz wird bewusst NICHT mehr promotet — sonst wird ein Ping,
    der als eine durchgehende Prosa kommt, komplett groß und weiß. */
-.klaus-proactive-card .chat-md-agent > h1:first-child,
-.klaus-proactive-card .chat-md-agent > h2:first-child,
-.klaus-proactive-card .chat-md-agent > h3:first-child,
-.klaus-proactive-card .chat-md-agent > h4:first-child {
+.agent-proactive-card .chat-md-agent > h1:first-child,
+.agent-proactive-card .chat-md-agent > h2:first-child,
+.agent-proactive-card .chat-md-agent > h3:first-child,
+.agent-proactive-card .chat-md-agent > h4:first-child {
   color: var(--t1);
   font-weight: 650;
   font-size: 1.1em;
@@ -4874,11 +4874,11 @@ html, body, #root {
   margin-bottom: 9px;
 }
 
-.klaus-proactive-card .chat-md-agent strong {
+.agent-proactive-card .chat-md-agent strong {
   font-weight: 650;
 }
 
-.klaus-proactive-card .chat-md-agent a {
+.agent-proactive-card .chat-md-agent a {
   color: var(--t1);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--t1) 38%, transparent 62%);
@@ -4886,21 +4886,21 @@ html, body, #root {
 }
 
 /* In einer hellen Headline kein doppelter Akzent: Highlights bleiben einfach weiß */
-.klaus-proactive-card .chat-md-agent > h1:first-child strong,
-.klaus-proactive-card .chat-md-agent > h2:first-child strong {
+.agent-proactive-card .chat-md-agent > h1:first-child strong,
+.agent-proactive-card .chat-md-agent > h2:first-child strong {
   color: var(--t1);
 }
 
-.klaus-proactive-card .chat-md-agent > *:last-child {
+.agent-proactive-card .chat-md-agent > *:last-child {
   margin-bottom: 0;
 }
 
 @media (max-width: 640px) {
-  .klaus-proactive-card {
+  .agent-proactive-card {
     max-width: 100%;
   }
 
-  .klaus-proactive-label {
+  .agent-proactive-label {
     font-size: 13.5px;
   }
 }
@@ -5221,12 +5221,12 @@ pre.path-block code {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes klaus-listen-breath {
+@keyframes agent-listen-breath {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(1.05); }
 }
-.klaus-listen-breath {
-  animation: klaus-listen-breath 2s ease-in-out infinite;
+.agent-listen-breath {
+  animation: agent-listen-breath 2s ease-in-out infinite;
   transform-origin: center;
 }
 
@@ -5280,13 +5280,13 @@ pre.path-block code {
   animation: highlight-pulse 2.2s ease-in-out infinite;
 }
 
-/* Klaus-Avatar während Recording: Helligkeits-Pulse, keine Aura, kein Glow. */
-@keyframes klaus-record-brightness {
+/* Agent-Avatar während Recording: Helligkeits-Pulse, keine Aura, kein Glow. */
+@keyframes agent-record-brightness {
   0%, 100% { filter: brightness(0.55); }
   50%      { filter: brightness(1.05); }
 }
-.klaus-record-brightness {
-  animation: klaus-record-brightness 1.8s ease-in-out infinite;
+.agent-record-brightness {
+  animation: agent-record-brightness 1.8s ease-in-out infinite;
 }
 
 /* Busy-Pille (Sekundenzahl alleine, ohne Pille drunter): leiser Helligkeits-Pulse. */
@@ -6316,7 +6316,7 @@ pre.path-block code {
 
 /* ── Voice — Composer Mini-Equalizer ──────────────────── */
 /* Live audio-level driven. CSS vars --voice-input-level und --voice-output-level
-   werden vom VoiceController per RAF gesetzt (0..1). */
+   werden vom AudioController per RAF gesetzt (0..1). */
 :root {
   --voice-input-level: 0;
   --voice-output-level: 0;
@@ -6351,7 +6351,7 @@ pre.path-block code {
   height: var(--vb-min);
 }
 
-/* Große Variante — der Flanger IST Klaus' zentriertes Composer-Icon im Voice-Modus.
+/* Große Variante — der Flanger IST Agent' zentriertes Composer-Icon im Voice-Modus.
    Füllt den 50px-Slot, breitere Bars und größere Amplitude als der Mini-Indikator. */
 .voice-bars--lg {
   width: 44px;
@@ -6388,7 +6388,7 @@ pre.path-block code {
   50%      { opacity: 0.95; }
 }
 
-/* Listening (Klaus hört dich): input-level, graue Ruhefarbe, leises Atmen */
+/* Listening (Agent hört dich): input-level, graue Ruhefarbe, leises Atmen */
 .voice-bars--listening {
   --vb-level: var(--voice-input-level);
   color: var(--t2);
@@ -6400,7 +6400,7 @@ pre.path-block code {
 .voice-bars--listening .voice-bar:nth-child(4) { height: var(--vb-d); }
 .voice-bars--listening .voice-bar:nth-child(5) { height: var(--vb-e); }
 
-/* Speaking (Klaus redet): output-level, warmes Orange.
+/* Speaking (Agent redet): output-level, warmes Orange.
    Bars leicht versetzt damit er nicht wie ein Block pumpt. */
 .voice-bars--speaking {
   --vb-level: var(--voice-output-level);
@@ -6428,7 +6428,7 @@ pre.path-block code {
 .voice-bars--speaking .voice-bar:nth-child(4) { animation-delay: 0.14s; }
 .voice-bars--speaking .voice-bar:nth-child(5) { animation-delay: 0.05s; }
 
-/* Thinking (Klaus ruft ein Tool): sanftes Teal-Grün, ruhiger Welleneffekt
+/* Thinking (Agent ruft ein Tool): sanftes Teal-Grün, ruhiger Welleneffekt
    statt Level-getrieben. Ersetzt das fehlende "ähm" visuell. */
 @keyframes voice-bar-think {
   0%, 100% { height: 4px; opacity: 0.55; }
@@ -6465,7 +6465,7 @@ pre.path-block code {
   opacity: 0.5;
 }
 
-/* Muted (PTT-Rechts-Cmd gedrückt): Klaus hört bewusst nicht zu.
+/* Muted (PTT-Rechts-Cmd gedrückt): Agent hört bewusst nicht zu.
    Stark gedimmt, gräulich, keine Animation — signalisiert Pause. */
 .voice-bars--muted {
   color: var(--t3);
@@ -6686,17 +6686,17 @@ pre.path-block code {
   transform-origin: center;
 }
 
-/* Klaus-Tab Schimmer: sanftes Atmen + heller Sweep, der von rechts nach links
+/* Agent-Tab Schimmer: sanftes Atmen + heller Sweep, der von rechts nach links
    durch den Text wandert. Edler als Blink, weniger Notification-haft. */
-@keyframes klaus-tab-shimmer {
+@keyframes agent-tab-shimmer {
   0%   { background-position: 180% 0; }
   100% { background-position: -80% 0; }
 }
-@keyframes klaus-tab-breath {
+@keyframes agent-tab-breath {
   0%, 100% { opacity: 0.78; }
   50%      { opacity: 1; }
 }
-.klaus-tab-pulse {
+.agent-tab-pulse {
   background: linear-gradient(
     90deg,
     #d97757 0%,
@@ -6711,8 +6711,8 @@ pre.path-block code {
   -webkit-text-fill-color: transparent;
   color: transparent;
   animation:
-    klaus-tab-shimmer 3.8s ease-in-out infinite,
-    klaus-tab-breath  3.2s ease-in-out infinite;
+    agent-tab-shimmer 3.8s ease-in-out infinite,
+    agent-tab-breath  3.2s ease-in-out infinite;
 }
 
 /* AgentFlowPane: ruhiger Pulse-Ring für den aktiven Step */

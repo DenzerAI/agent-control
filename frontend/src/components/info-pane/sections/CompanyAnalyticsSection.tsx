@@ -78,9 +78,9 @@ function trendArrow(today: number, yest: number) {
   return { sym: '↘', cls: 'text-[var(--red,#ef4444)]', label: `${pct}%` }
 }
 
-export function DenzerAnalyticsSection({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace?: () => void }) {
+export function CompanyAnalyticsSection({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace?: () => void }) {
   if (onOpenWorkspace) return <AnalyticsWorkspaceEntry mobile={mobile} onOpenWorkspace={onOpenWorkspace} />
-  return <DenzerAnalyticsInlineSection mobile={mobile} />
+  return <CompanyAnalyticsInlineSection mobile={mobile} />
 }
 
 function AnalyticsWorkspaceEntry({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace: () => void }) {
@@ -99,7 +99,7 @@ function AnalyticsWorkspaceEntry({ mobile, onOpenWorkspace }: { mobile?: boolean
   )
 }
 
-function DenzerAnalyticsInlineSection({ mobile }: { mobile?: boolean }) {
+function CompanyAnalyticsInlineSection({ mobile }: { mobile?: boolean }) {
   const [data, setData] = useState<AnalyticsOverview | null>(null)
   const [compare, setCompare] = useState<AnalyticsCompare | null>(null)
   const [recent, setRecent] = useState<AnalyticsRecentSession[]>([])
@@ -118,14 +118,14 @@ function DenzerAnalyticsInlineSection({ mobile }: { mobile?: boolean }) {
   const [referrersOpen, setReferrersOpen] = useState(true)
 
   const load = useCallback(() => {
-    fetch(`/api/denzer/analytics/overview?days=${days}`).then(r => r.json()).then(setData).catch(() => {})
-    fetch('/api/denzer/analytics/compare').then(r => r.json()).then(setCompare).catch(() => {})
-    fetch('/api/denzer/analytics/recent?limit=15').then(r => r.json()).then(d => setRecent(d.sessions || [])).catch(() => {})
+    fetch(`/api/company/analytics/overview?days=${days}`).then(r => r.json()).then(setData).catch(() => {})
+    fetch('/api/company/analytics/compare').then(r => r.json()).then(setCompare).catch(() => {})
+    fetch('/api/company/analytics/recent?limit=15').then(r => r.json()).then(d => setRecent(d.sessions || [])).catch(() => {})
   }, [days])
 
   const sync = useCallback(() => {
     setSyncing(true)
-    fetch('/api/denzer/analytics/sync', { method: 'POST' })
+    fetch('/api/company/analytics/sync', { method: 'POST' })
       .then(r => r.json())
       .finally(() => { setSyncing(false); load() })
   }, [load])
@@ -136,7 +136,7 @@ function DenzerAnalyticsInlineSection({ mobile }: { mobile?: boolean }) {
   useEffect(() => { try { localStorage.setItem('infopane:analyticsDays', String(days)) } catch {} }, [days])
 
   const loadPage = useCallback((path: string) => {
-    fetch(`/api/denzer/analytics/page?days=${days}&path=${encodeURIComponent(path)}`)
+    fetch(`/api/company/analytics/page?days=${days}&path=${encodeURIComponent(path)}`)
       .then(r => r.json())
       .then(d => setPageData(prev => ({ ...prev, [path]: d })))
       .catch(() => {})

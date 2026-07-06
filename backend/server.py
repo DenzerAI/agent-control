@@ -37,8 +37,7 @@ import yaml
 from db import (get_db, init_db, save_msg, get_msgs, create_conversation, reindex_all, index_file,
                 get_channel_id, get_conversation, auto_title,
                 calendar_list, calendar_create, calendar_update, calendar_delete,
-                calendar_set_gcal_id, calendar_get_gcal_id, calendar_get_gcal_ref,
-                VOICE_CHANNEL_ID, VOICE_CHANNEL_AGENT)
+                calendar_set_gcal_id, calendar_get_gcal_id, calendar_get_gcal_ref)
 from auth import client_ip_trusted, current_token, token_matches, monitor_token_valid, mint_monitor_token, revoke_monitor_tokens, list_monitor_tokens, revoke_monitor_token, monitor_mode_for, set_monitor_mode
 from restart_policy import status_payload as restart_policy_status, allow_restarts as restart_policy_allow
 import entities as _entities
@@ -48,8 +47,6 @@ from identity import get_agent_profile, public_identity_payload
 app = FastAPI()
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
-from routers.voice import router as voice_router
-app.include_router(voice_router)
 from routers.deck import router as deck_router
 app.include_router(deck_router)
 from routers.chat import router as chat_router
@@ -58,8 +55,6 @@ from routers.files import router as files_router
 app.include_router(files_router)
 from routers.skills import router as skills_router
 app.include_router(skills_router)
-from routers.voice_tools import router as voice_tools_router
-app.include_router(voice_tools_router)
 from routers.performance import router as performance_router
 app.include_router(performance_router)
 from routers.state import router as state_router
@@ -134,8 +129,8 @@ async def _net_and_token_gate(request: Request, call_next):
     # ES-Modul-Import sonst ins Token-Gate, das Cookie kommt bei Sub-Chunks nicht
     # zuverlässig mit, ein einziger 401 bricht die Modul-Kette und der Monitor bleibt
     # schwarz. Schutz bleibt vollständig auf /api/* und /ws.
-    if deck_root or path.startswith("/assets/") or path.startswith("/sounds/") or path.startswith("/present/") or path in ("/philipp-datenschutz", "/philipp-datenschutz/", "/login", "/manifest.json", "/manifest-mobile.json", "/manifest-focus.json", "/favicon.svg", "/favicon.ico", "/apple-touch-icon.png", "/fokus-icon.png", "/robots.txt", "/api/health-export", "/api/pane-input", "/api/pane-focus", "/api/voice/stop-audio", "/api/system-status", "/api/build-id", "/tv", "/api/deck/pair/new", "/api/deck/pair/poll", "/api/deck/pair/qr"):
-        # /api/pane-input und /api/voice/stop-audio haben einen eigenen Bearer-Token (KLAUSFLOW_PANE_TOKEN)
+    if deck_root or path.startswith("/assets/") or path.startswith("/sounds/") or path.startswith("/present/") or path in ("/philipp-datenschutz", "/philipp-datenschutz/", "/login", "/manifest.json", "/manifest-mobile.json", "/manifest-focus.json", "/favicon.svg", "/favicon.ico", "/apple-touch-icon.png", "/fokus-icon.png", "/robots.txt", "/api/health-export", "/api/pane-input", "/api/pane-focus", "/api/system-status", "/api/build-id", "/tv", "/api/deck/pair/new", "/api/deck/pair/poll", "/api/deck/pair/qr"):
+        # /api/pane-input hat einen eigenen Bearer-Token (PANE_TOKEN)
         # /api/system-status ist Health-Check fuer Waechter und Frontend-Topbar,
         # gibt nur Cron-Counts zurueck und ist durch IP-Gate geschuetzt.
         # /tv + pair/new|poll|qr: Monitor-Pairing-Screen hat noch kein Token, der
@@ -175,7 +170,7 @@ async def _net_and_token_gate(request: Request, call_next):
 PROJECT_ROOT = Path(__file__).parent.parent
 DIST_DIR = PROJECT_ROOT / "frontend" / "dist"
 UPLOADS_DIR = PROJECT_ROOT / "data" / "uploads"
-UPLOADS_DIR.mkdir(exist_ok=True)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Project roots
 PROJECTS_ROOTS = [Path.home() / "Projects"]
@@ -281,11 +276,6 @@ from routers.privacy import router as privacy_router
 app.include_router(privacy_router)
 
 
-# ── KlausFlow Pane-PTT: Schublade in modules/klausflow/ ──
-#    (Routen /api/pane-input und /api/voice/stop-audio; Auth-Bypass in Middleware oben)
-from modules.klausflow import router as _klausflow_router
-app.include_router(_klausflow_router)
-
 
 # ── UI-Command Push ──   (Route /api/ui-command in backend/routers/misc.py)
 
@@ -350,19 +340,6 @@ async def startup():
     except Exception as e:
         print(f"[STARTUP] pipeline-memberships-Migration: {e}")
     asyncio.create_task(_reindex_loop())
-    # Voice-Tools auf ElevenLabs-Agent einmalig synchronisieren (best effort)
-    async def _sync_voice_tools_bg():
-        try:
-            res = await _sync_elevenlabs_tools()
-            if res.get("ok"):
-                print(f"[VOICE] Tools synced: {', '.join(res.get('tools', []))}")
-            else:
-                print(f"[VOICE] Tool-Sync fehlgeschlagen: {res}")
-        except Exception as e:
-            print(f"[VOICE] Tool-Sync Exception: {e}")
-    asyncio.create_task(_sync_voice_tools_bg())
-    asyncio.create_task(_summary_worker())
-    asyncio.create_task(_classify_worker())
     start_queue_worker()
     # TEMP DEAKTIVIERT: Embed-Loops locken DB nach Wipe + Reindex (busy_timeout=0).
     # Reindex spaeter manuell oder nach db.py-Fix wieder anschalten.
@@ -379,16 +356,6 @@ async def startup():
                 print(f"[modules] {_modname}: background tasks gestartet")
         except Exception as _bg_err:
             print(f"[modules] {_modname}: background-task start failed: {_bg_err}")
-    # Mail direkt eingebunden (kein module_loader) → explizit aufrufen
-    try:
-        _mail_routes = sys.modules.get("modules.mail.routes")
-        _mail_starter = getattr(_mail_routes, "start_background_tasks", None) if _mail_routes else None
-        if callable(_mail_starter):
-            _mail_starter()
-            print("[mail] Attention-Cache-Warmup gestartet")
-    except Exception as _mail_bg_err:
-        print(f"[mail] Warmup fehlgeschlagen: {_mail_bg_err}")
-
 
 async def _reindex_loop():
     """Rebuild file search index every 5 minutes."""
@@ -629,11 +596,6 @@ app.include_router(content_router)
 from modules.projects import router as _projects_router
 app.include_router(_projects_router)
 
-# ── Meeting-Recorder ──
-from meetings import router as _meetings_router
-app.include_router(_meetings_router)
-
-
 # ── Workshops in modules/workshops/ ausgelagert ──
 
 
@@ -650,22 +612,6 @@ app.include_router(_meetings_router)
 # include_router(misc_router) oben bereits vollständig geladen.
 from routers.misc import _get_groq_key  # noqa: E402,F401
 
-
-# ── TTS / ElevenLabs Agent Tool-Sync (ausgelagert) ──
-# Tool-Definitionen, Identity-Prompt und der Agent-Sync wohnen jetzt in
-# backend/voice_sync.py (Plain-Modul, keine Routen). Re-Import hält die alten
-# `server._foo`-Zugriffe am Leben (routers/voice_tools.py zieht
-# `from server import _get_openai_key` und `from server import
-# _sync_elevenlabs_tools`) und versorgt den Startup-Aufruf unten. voice_sync
-# importiert server NICHT auf Top-Level, daher zirkelfrei.
-from voice_sync import (  # noqa: E402,F401
-    _get_elevenlabs_key,
-    _get_openai_key,
-    _get_elevenlabs_agent_id,
-    _VOICE_TOOL_DEFS,
-    _build_voice_system_prompt,
-    _sync_elevenlabs_tools,
-)
 
 # ── Agent Detail + Job/Cron-Cluster (ausgelagert) ──
 # Profil-/MD-Helfer und der gesamte Job/Cron/launchd-Cluster wohnen jetzt in
@@ -728,11 +674,6 @@ app.include_router(_fs_router)
 # ── Scrape / Upload / Serve ──   (Routen in backend/routers/files.py)
 
 
-# ── WhatsApp ──   (Logik in backend/whatsapp.py)
-from whatsapp import router as _whatsapp_router, _summary_worker, _classify_worker
-app.include_router(_whatsapp_router)
-
-
 # ── People CRM: Schublade in modules/people/ ──   (Logik in modules/people/core.py)
 from modules.people.core import (
     router as _people_router,
@@ -747,10 +688,6 @@ from modules.people.core import (
 )
 app.include_router(_people_router)
 
-
-# ── Mail: Schublade in modules/mail/ ──   (Logik in modules/mail/core.py, Routen in modules/mail/routes.py)
-from modules.mail.routes import router as _mail_router
-app.include_router(_mail_router)
 
 # ── Lexware/Finance: Schublade in modules/lexware/ ──   (Logik in modules/lexware/core.py)
 from modules.lexware.core import router as _lexware_router

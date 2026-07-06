@@ -1,7 +1,7 @@
 """State router: geräteübergreifender UI- und Sync-Zustand.
 
 Extrahiert aus server.py als weiterer Schnitt der Modularisierung (nach
-voice.py, deck.py, chat.py, files.py, skills.py, voice_tools.py und
+deck.py, chat.py, files.py, skills.py und
 performance.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade bleiben
 byte-identisch.
 

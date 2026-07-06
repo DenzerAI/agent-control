@@ -12,7 +12,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@elevenlabs/react": "^1.1.1",
     "@paper-design/shaders-react": "^0.0.76",
     "@tailwindcss/vite": "^4.2.2",
     "highlight.js": "^11.11.1",

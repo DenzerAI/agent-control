@@ -6,13 +6,13 @@
       "name": "mail",
       "kind": "provider",
       "provides": "mail",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "whatsapp",
       "kind": "provider",
       "provides": "whatsapp",
-      "enabled": true
+      "enabled": false
     },
     {
       "name": "lexware",

@@ -1,6 +1,6 @@
 """Skills router: Skill-/Job-Registry, Bibliothekar-Pflegeschleife und Job-CRUD.
 
-Extrahiert aus server.py als Schnitt 4b der Modularisierung (nach voice.py,
+Extrahiert aus server.py als Schnitt 4b der Modularisierung (nach
 deck.py, chat.py und files.py). KEIN Verhalten geändert, nur verschoben.
 Routen-Pfade bleiben byte-identisch.
 

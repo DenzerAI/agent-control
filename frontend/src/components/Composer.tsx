@@ -1,29 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { ArrowUp, Square, X, Plus, Paperclip, FileText, Image, Mic, Play, Pause, Lightbulb, Brain, Settings as SettingsIcon, Trash2, Hourglass, Check, Keyboard, ChevronDown, MessagesSquare, Inbox, Search, RotateCw, Target, MonitorSmartphone, HeartPulse, ClipboardPaste, PhoneOff, Sun, Moon, Hammer } from 'lucide-react'
+import { ArrowUp, Square, X, Plus, Paperclip, FileText, Image, Mic, Play, Pause, Lightbulb, Brain, Settings as SettingsIcon, Trash2, Hourglass, Check, Keyboard, ChevronDown, MessagesSquare, Inbox, Search, RotateCw, Target, MonitorSmartphone, HeartPulse, ClipboardPaste, PhoneOff, Sun, Moon, Hammer, Bot } from 'lucide-react'
 import { getThemeMode, setThemeMode, resolveTheme } from '../theme'
 import { getAgents, useMainAgentName, ownerFirstName, type Engine } from '../agents'
 import { useVoiceState, type VoiceState } from './voiceState'
-import KlausVoiceOrb from './KlausVoiceOrb'
 import { playUISound } from '../uiSounds'
 import { triggerSafeRestart } from '../lib/restart'
 import { SLASH_COMMANDS, matchEngine, type SlashCommand } from '../slashCommands'
 import { useWerkbankNavSignal } from '../workspace/werkbankSignal'
 import { INBOX_SEEN_CHANGED_EVENT, hasUnseenInboxWaiting, inboxMailWaitingKey, inboxWaWaitingKey, markInboxWaitingSeen } from '../inboxSeen'
-
-type KlausMood =
-  | 'idle'
-  | 'sleepy'
-  | 'peek-right'
-  | 'peek-left'
-  | 'peek-up'
-  | 'peek-down'
-  | 'wink'
-  | 'nod'
-  | 'shake'
-  | 'angry'
-  | 'surprised'
-  | 'squint'
 
 function voiceClass(v: VoiceState): string {
   if (!v.active || v.phase !== 'live') return ''
@@ -647,7 +632,6 @@ export function Composer({ agent: _agent, engine, project: _project, model, busy
     return () => { cancelled = true }
   }, [mobile, isActive])
   const [focused, setFocused] = useState(false)
-  const mood: KlausMood = 'idle'
   const voice = useVoiceState()
   const [recordingSeconds, setRecordingSeconds] = useState(0)
   // Voice-First-Modus auf Mobile: ein globaler Schalter fuer alle Chat-Panes.
@@ -1424,7 +1408,7 @@ export function Composer({ agent: _agent, engine, project: _project, model, busy
                     title={voice.phase === 'connecting' ? `${agentName} verbindet …` : voice.isPaused ? 'Weiter' : 'Pause'}
                     aria-label={voice.isPaused ? 'Voice fortsetzen' : 'Voice pausieren'}
                   >
-                    <KlausVoiceOrb state={voice} size={52} />
+                    <Bot className="h-7 w-7 text-[var(--warm)]" strokeWidth={1.75} />
                   </button>
                 ) : !isRec && !voiceFirstCollapsed ? (
                   <textarea
@@ -1472,28 +1456,7 @@ export function Composer({ agent: _agent, engine, project: _project, model, busy
                         {recTimer}
                       </span>
                     ) : (
-                      <img
-                        src={(() => {
-                              const moodSvg: Partial<Record<KlausMood, string>> = {
-                                idle: '/agent.svg',
-                                sleepy: '/agent-sleepy.svg',
-                                'peek-right': '/agent-look-right.svg',
-                                'peek-left': '/agent-look-left.svg',
-                                'peek-up': '/agent-look-up.svg',
-                                'peek-down': '/agent-look-down.svg',
-                                wink: '/agent-wink.svg',
-                                nod: '/agent-nod.svg',
-                                shake: '/agent-shake.svg',
-                                angry: '/agent-angry.svg',
-                                surprised: '/agent-surprised.svg',
-                                squint: '/agent-squint.svg',
-                              }
-                              return moodSvg[mood] || '/agent.svg'
-                            })()}
-                        alt=""
-                        className="w-[52px] h-[52px] transition-opacity duration-150"
-                        draggable={false}
-                      />
+                      <Bot className="h-8 w-8 text-[var(--warm)]" strokeWidth={1.75} />
                     )}
                   </button>
                 )}

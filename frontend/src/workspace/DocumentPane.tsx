@@ -7,7 +7,7 @@ import { FilePathHeader } from './FilePathHeader'
 export function DocumentPane({ file, onRevealPath }: { file: WorkspaceFile | null; onRevealPath?: (path: string) => void }) {
   const [content, setContent] = useState('')
   const [error, setError] = useState('')
-  const path = file?.path || '~/agent/brain/threads.md'
+  const path = file?.path || '~/workspace/brain/threads.md'
 
   useEffect(() => {
     setContent('')

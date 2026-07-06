@@ -1,84 +1,31 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Activity, BarChart3, BriefcaseBusiness, CalendarDays, Film, FolderOpen, Gauge, HeartPulse, History,
-  Inbox, Layers, Lightbulb, Mail, Moon, Newspaper, Radar, Receipt, ScrollText, Settings, ShieldCheck,
-  Users, Wallet, Wrench, RotateCw, Hammer, KanbanSquare, LayoutGrid, Video,
+  Activity, Bot, Building2, FolderOpen, Inbox, Moon, RotateCw,
 } from 'lucide-react'
 import type { WorkspaceMode } from './types'
 import { triggerSafeRestart, isRestartInFlight } from '../lib/restart'
 import { useWerkbankNavSignal } from './werkbankSignal'
-import { useMainAgentName } from '../agents'
 
-type NavItem = { id: WorkspaceMode; label: string; icon?: typeof FolderOpen; img?: string }
+type NavItem = { id: WorkspaceMode; label: string; icon?: typeof FolderOpen }
 type NavGroup = { label: string; items: NavItem[] }
 
-// Thematisch gebündelt statt nach Technik (Kernsystem/Agents/Custom): der Nutzer
-// denkt in Lebensbereichen, nicht in Architektur. Agent sitzt solo oben als Kern,
-// darunter Wissen, Kommunikation, Geld, System. Eine Werkzeugwelt am selben Ort.
 const WORKSPACE_NAV_ALL: NavGroup[] = [
   {
     label: '',
     items: [
-      { id: 'klaus', label: 'Agent', img: '/agent.svg' },
-    ],
-  },
-  {
-    label: 'Steuerung',
-    items: [
-      { id: 'loops', label: 'Werkbank', icon: Hammer },
-      { id: 'automation', label: 'Automation', icon: Activity },
-      { id: 'pipeline', label: 'Pipeline', icon: KanbanSquare },
-      { id: 'calendar', label: 'Kalender', icon: CalendarDays },
-    ],
-  },
-  {
-    label: 'Wissen',
-    items: [
-      { id: 'radar', label: 'Radar', icon: Radar },
-      { id: 'ideas', label: 'Ideen', icon: Lightbulb },
-      { id: 'projects', label: 'Projekte', icon: LayoutGrid },
-      { id: 'artifacts', label: 'Artefakte', icon: History },
-      { id: 'meetings', label: 'Meetings', icon: ScrollText },
-      { id: 'skills', label: 'Skills', icon: Wrench },
-      { id: 'dreaming', label: 'Dreaming', icon: Moon },
-      { id: 'youtube', label: 'YouTube', icon: Video },
-    ],
-  },
-  {
-    label: 'Kommunikation',
-    items: [
+      { id: 'agent', label: 'Chat', icon: Bot },
       { id: 'inbox', label: 'Inbox', icon: Inbox },
-      { id: 'mail', label: 'Mail', icon: Mail },
-      { id: 'social', label: 'Social', icon: Film },
-      { id: 'pionierplaner', label: 'Pioniere', icon: Newspaper },
-      { id: 'people', label: 'Personen', icon: Users },
-    ],
-  },
-  {
-    label: 'Geld',
-    items: [
-      { id: 'invoice', label: 'Rechnungen', icon: Receipt },
-      { id: 'offers', label: 'Angebote', icon: BriefcaseBusiness },
-      { id: 'finance', label: 'Finanzen', icon: Wallet },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
+      { id: 'companyMemory', label: 'Firmengedächtnis', icon: Building2 },
+      { id: 'dreaming', label: 'Dreaming', icon: Moon },
+      { id: 'automation', label: 'Automationen', icon: Activity },
       { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
-      { id: 'engines', label: 'Engines', icon: Layers },
-      { id: 'health', label: 'Health', icon: HeartPulse },
-      { id: 'limits', label: 'Limits', icon: Gauge },
-      { id: 'privacy', label: 'DSGVO', icon: ShieldCheck },
-      { id: 'settings', label: 'Settings', icon: Settings },
     ],
   },
 ]
 
 const LABEL_BY_MODE = new Map<WorkspaceMode, string>()
 // Public-Core: Chat-first. Weitere Module kommen bewusst pro Kunde dazu.
-const PUBLIC_CORE_IDS = new Set<string>(['klaus', 'calendar', 'inbox', 'mail', 'people', 'skills', 'filesystem', 'settings', 'limits', 'privacy', 'engines'])
+const PUBLIC_CORE_IDS = new Set<string>(['agent', 'inbox', 'companyMemory', 'dreaming', 'automation', 'filesystem'])
 export const WORKSPACE_NAV: NavGroup[] = WORKSPACE_NAV_ALL
   .map(group => ({ ...group, items: group.items.filter(item => PUBLIC_CORE_IDS.has(item.id)) }))
   .filter(group => group.items.length > 0)
@@ -154,7 +101,6 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
   const activeId: WorkspaceMode = mode === 'document' || mode === 'preview' ? 'filesystem' : mode
   const notify = useNotifyModes(activeId)
   const werkbankSignal = useWerkbankNavSignal()
-  const agentName = useMainAgentName()
   return (
     <nav className={`workspace-nav${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace Navigation">
       {WORKSPACE_NAV.map((group, gi) => (
@@ -172,14 +118,12 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
               ].filter(Boolean).join(' ')}
               onClick={() => onModeChange(item.id)}
               aria-current={activeId === item.id ? 'page' : undefined}
-              title={collapsed ? (item.id === 'klaus' ? agentName : item.label) : item.id === 'loops'
+              title={collapsed ? item.label : item.id === 'loops'
                 ? werkbankSignal.active > 0 ? `Werkbank läuft · ${werkbankSignal.active}` : werkbankSignal.waiting > 0 ? `Werkbank wartet · ${werkbankSignal.waiting}` : werkbankSignal.attention > 0 ? `Werkbank braucht Blick · ${werkbankSignal.attention}` : undefined
                 : undefined}
             >
-              {item.img
-                ? <img src={item.img} alt="" className="workspace-nav-klaus h-[18px] w-[18px] shrink-0" draggable={false} />
-                : item.icon ? <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : null}
-              <span>{item.id === 'klaus' ? agentName : item.label}</span>
+              {item.icon ? <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : null}
+              <span>{item.label}</span>
               {item.id === 'loops' && (werkbankSignal.active > 0 || werkbankSignal.waiting > 0) && !collapsed && (
                 <span className="workspace-nav-count" aria-label={werkbankSignal.active > 0 ? `${werkbankSignal.active} laufende Aufträge` : `${werkbankSignal.waiting} wartende Aufträge`}>{werkbankSignal.active || werkbankSignal.waiting}</span>
               )}

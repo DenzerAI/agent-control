@@ -923,17 +923,17 @@ function parseContent(content: string): { context?: string; message: string } {
   return { message: cleaned }
 }
 
-interface KlausPingMeta {
+interface AgentPingMeta {
   source: string
   label: string
   tone: 'digest' | 'notice' | 'decision' | 'signal'
 }
 
-function parseKlausPingMeta(content: string): KlausPingMeta | null {
+function parseAgentPingMeta(content: string): AgentPingMeta | null {
   const marker = content.match(/<!--klaus-channel:([^:>]*):([^>]*)-->/)
   if (!marker) return null
   const source = (marker[1] || '').trim()
-  const labelMap: Record<string, { label: string; tone: KlausPingMeta['tone'] }> = {
+  const labelMap: Record<string, { label: string; tone: AgentPingMeta['tone'] }> = {
     morgenbriefing: { label: 'Morgenbriefing', tone: 'digest' },
     'health-chat': { label: 'Gesundheitscheck', tone: 'signal' },
     'radar-intraday': { label: 'Radarhinweis', tone: 'signal' },
@@ -2357,12 +2357,12 @@ export function Chat({ messages, onQuote, onOpenRef, onSpeak, onResend, onEditMe
               ) : (() => {
                 const { context, message } = parseContent(m.content)
                 const isUser = m.author === 'Du'
-                const klausPing = isUser ? null : parseKlausPingMeta(m.content)
+                const klausPing = isUser ? null : parseAgentPingMeta(m.content)
                 const hasContextMenu = mobile && contextMenuIdx === i
                 const speechText = isUser ? m.content : getAgentSpeechText(m, message)
                 return (
                   <div
-                    className={`relative group ${klausPing ? 'klaus-proactive-wrap' : ''} ${showHeader ? 'pt-6' : 'pt-0.5'} ${showHeader ? 'pb-2' : 'pb-0.5'} ${
+                    className={`relative group ${klausPing ? 'agent-proactive-wrap' : ''} ${showHeader ? 'pt-6' : 'pt-0.5'} ${showHeader ? 'pb-2' : 'pb-0.5'} ${
                       isUser ? 'flex justify-end' : ''
                     }`}
                     onClick={mobile ? () => setContextMenuIdx(prev => prev === i ? null : i) : undefined}
@@ -2446,9 +2446,9 @@ export function Chat({ messages, onQuote, onOpenRef, onSpeak, onResend, onEditMe
                    })() : (
                     <>
                     {klausPing ? (
-                      <div className={`klaus-proactive-card klaus-proactive-${klausPing.tone}`}>
-                        <div className="klaus-proactive-kicker">
-                          <span className="klaus-proactive-label">{klausPing.label}</span>
+                      <div className={`agent-proactive-card agent-proactive-${klausPing.tone}`}>
+                        <div className="agent-proactive-kicker">
+                          <span className="agent-proactive-label">{klausPing.label}</span>
                         </div>
                         {context && <ContextBlock context={context} />}
                         {m.thinking && <ThinkingBlock text={m.thinking} />}

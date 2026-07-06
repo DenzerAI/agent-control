@@ -1,6 +1,6 @@
 {
   "name": "Agent Control Mobile",
-  "short_name": "Klaus",
+  "short_name": "AC",
   "start_url": "/mobile",
   "display": "standalone",
   "background_color": "#1F1F1E",

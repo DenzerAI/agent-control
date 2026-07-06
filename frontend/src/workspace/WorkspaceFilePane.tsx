@@ -115,8 +115,8 @@ export function WorkspaceFilePane({ path, onBack, onRevealPath }: {
     setTtsDuration(0)
     setTtsLoading(true)
     try {
-      const voiceId = (localStorage.getItem('control:voice') || localStorage.getItem('control:voice:klaus') || localStorage.getItem('control:voice:main') || '').trim()
-      const body: Record<string, unknown> = { text: cleanForTTS(content), agent: 'klaus' }
+      const voiceId = (localStorage.getItem('control:voice') || localStorage.getItem('control:voice:agent') || localStorage.getItem('control:voice:main') || '').trim()
+      const body: Record<string, unknown> = { text: cleanForTTS(content), agent: 'agent' }
       if (voiceId) {
         body.voiceId = voiceId
         try {

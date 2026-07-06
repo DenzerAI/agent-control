@@ -179,7 +179,7 @@ export function PreviewPane({ file, onRevealPath }: {
       ) : (
         <div className="workspace-empty">
           <h1 className="workspace-empty-mark">
-            Agent C<span className="workspace-empty-o"><img src="/agent-thinking.svg" alt="o" /></span>ntrol
+            Agent Control
           </h1>
           <p className="workspace-empty-sub">Wähle links ein Modul oder öffne eine Datei.</p>
         </div>

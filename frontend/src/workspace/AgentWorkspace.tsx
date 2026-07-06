@@ -22,7 +22,7 @@ type AgentData = {
   files: { brain: string; identity: string; soul: string; agents: string }
 }
 
-const CACHE_KEY = 'workspace:klaus:agent'
+const CACHE_KEY = 'workspace:agent:profile'
 
 function readCache(): AgentData | null {
   try {
@@ -73,7 +73,7 @@ function section(text: string, heading: string): string {
 }
 
 function shortPath(path?: string): string {
-  return String(path || '').replace('/Users/klaus/agent/', '~/agent/')
+  return String(path || '').replace('/workspace/', '~/workspace/')
 }
 
 // Grosse, lebendige Zahl als Herz der Seite: der Nutzer liebt es zu sehen, wie
@@ -81,15 +81,15 @@ function shortPath(path?: string): string {
 // warmen Akzent, die Nebenzahlen bleiben ruhig.
 function BigStat({ label, value, hint, accent }: { label: string; value: string | number; hint?: string; accent?: boolean }) {
   return (
-    <section className="klaus-stat flex flex-col rounded-lg border border-[var(--border)] bg-[var(--bg-1)] px-4 py-3">
-      <span className={`klaus-bignum whitespace-nowrap leading-none tabular-nums ${accent ? 'text-[var(--warm)]' : 'text-[var(--t1)]'}`}>{value}</span>
+    <section className="agent-stat flex flex-col rounded-lg border border-[var(--border)] bg-[var(--bg-1)] px-4 py-3">
+      <span className={`agent-bignum whitespace-nowrap leading-none tabular-nums ${accent ? 'text-[var(--warm)]' : 'text-[var(--t1)]'}`}>{value}</span>
       <span className="mt-2 text-[11px] uppercase tracking-[0.14em] text-[var(--t3)]">{label}</span>
       {hint && <span className="mt-0.5 text-[11px] text-[var(--t3)]">{hint}</span>}
     </section>
   )
 }
 
-export function KlausWorkspace() {
+export function AgentWorkspace() {
   const agentName = useMainAgentName()
   const [data, setData] = useState<AgentData | null>(() => readCache())
   const [loading, setLoading] = useState(false)
@@ -127,15 +127,15 @@ export function KlausWorkspace() {
   ].filter(item => item.path)), [data])
 
   return (
-    <div className="klaus-cq flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
+    <div className="agent-cq flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
       <header className="shrink-0 border-b border-[var(--border)] px-5 py-4">
         <div className="flex min-w-0 items-start gap-4">
-          <div className="klaus-avatar flex shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-            <img src="/agent.svg" alt="" className="h-8 w-8 opacity-90" draggable={false} />
+          <div className="agent-avatar flex shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
+            <img src="/agent-control-logo.png" alt="" className="h-8 w-8 opacity-90" draggable={false} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--warm)]">Main Agent · Persona</div>
-            <h2 className="klaus-title mt-1 truncate font-medium leading-none text-[var(--t1)]">{data?.name || agentName}</h2>
+            <h2 className="agent-title mt-1 truncate font-medium leading-none text-[var(--t1)]">{data?.name || agentName}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--t2)]">
               {data?.role || 'des Nutzers persönlicher Agent.'} Kein Modell-Showroom, sondern die sichtbare Identität hinter diesem Workspace.
             </p>
@@ -155,8 +155,8 @@ export function KlausWorkspace() {
       <main className="min-h-0 flex-1 overflow-auto px-4 py-4">
         {!data && loading && <div className="flex h-full min-h-[220px] items-center justify-center text-sm text-[var(--t3)]">Lade {agentName}</div>}
         {data && (
-          <div className="klaus-grid">
-            <section className="klaus-soul">
+          <div className="agent-grid">
+            <section className="agent-soul">
               {soulCards.map(card => <PersonaCard key={card.label} icon={card.icon} label={card.label} text={card.text} />)}
             </section>
 
@@ -183,7 +183,7 @@ export function KlausWorkspace() {
               </div>
             </section>
 
-            <section className="klaus-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
+            <section className="agent-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
               <PanelHead icon={MessageSquare} title={`Zuletzt von ${agentName}`} meta={`${data.recentMessages?.length || 0}`} />
               <div className="divide-y divide-[var(--border)]">
                 {(data.recentMessages || []).map(message => (
@@ -199,7 +199,7 @@ export function KlausWorkspace() {
               </div>
             </section>
 
-            <section className="klaus-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
+            <section className="agent-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
               <PanelHead icon={FileText} title="Identitätsdateien" meta={shortPath(data.workspace)} />
               <div className="divide-y divide-[var(--border)]">
                 {files.map(file => (

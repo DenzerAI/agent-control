@@ -25,7 +25,7 @@ type CalEvent = {
 }
 
 const CAL_CATEGORY_COLORS: Record<string, string> = {
-  klaus: '#d97757',
+  agent: '#d97757',
   privat: '#9a978f',
   fch: '#5fc845',
   'ai-workshop': '#a37acf',
@@ -81,7 +81,7 @@ function eventBadge(ev: CalEvent): string {
   if (ev.source === 'ptdesk') return 'PT'
   const cat = (ev.category || '').toLowerCase()
   const map: Record<string, string> = {
-    klaus: 'LO', privat: 'PR', fch: 'FCH',
+    agent: 'LO', privat: 'PR', fch: 'FCH',
     'ai-workshop': 'AIW', 'ai-agent': 'AIA', 'ai-beratung': 'AIB',
     gecko: 'GKO', admin: 'ADM',
   }

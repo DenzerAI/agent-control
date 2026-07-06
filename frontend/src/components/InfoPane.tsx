@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
-import { Search, X, FileText, ChevronRight, FolderOpen, FolderClosed, Shield, Clock, Check, Pencil, ChevronLeft, MessageSquare, Inbox, Mail, Settings, Play, Loader2, ExternalLink, Paperclip, Trash2, History, Film, Star, FolderInput, Mic, Phone, Square, ScrollText, Activity } from 'lucide-react'
+import { Search, X, FileText, ChevronRight, FolderOpen, FolderClosed, Shield, Clock, Check, Pencil, ChevronLeft, MessageSquare, Inbox, Mail, Settings, Play, Loader2, ExternalLink, Paperclip, Trash2, History, Film, Star, FolderInput, Activity, Bot } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import { getAllAgentsIncludingHidden, useMainAgentName } from '../agents'
 import { playUISound } from '../uiSounds'
@@ -22,7 +22,7 @@ import { INBOX_SEEN_CHANGED_EVENT, hasUnseenInboxWaiting, inboxMailWaitingKey, i
 // lazyWithRetry: bei Stale-Chunk nach Deploy einmal Page-Reload, dann frische Hashes.
 const LimitsSection = lazyWithRetry(() => import('./info-pane/sections/LimitsSection').then(m => ({ default: m.LimitsSection })))
 const WaChatView = lazyWithRetry(() => import('./info-pane/sections/WaChatView').then(m => ({ default: m.WaChatView })))
-const DenzerAnalyticsSection = lazyWithRetry(() => import('./info-pane/sections/DenzerAnalyticsSection').then(m => ({ default: m.DenzerAnalyticsSection })))
+const CompanyAnalyticsSection = lazyWithRetry(() => import('./info-pane/sections/CompanyAnalyticsSection').then(m => ({ default: m.CompanyAnalyticsSection })))
 const PeopleSection = lazyWithRetry(() => import('./info-pane/sections/PeopleSection').then(m => ({ default: m.PeopleSection })))
 const FinanceSection = lazyWithRetry(() => import('./info-pane/sections/FinanceSection').then(m => ({ default: m.FinanceSection })))
 const HealthSection = lazyWithRetry(() => import('./info-pane/sections/HealthSection').then(m => ({ default: m.HealthSection })))
@@ -124,8 +124,6 @@ function mergeMailInboxItems<T extends { account?: string; uid: string; ts?: num
 // interface Rule { source: string; label: string; color: string; name: string; path: string; category: string; protected?: boolean }
 interface SearchResult { source: string; path: string; title: string; snippet: string }
 interface ChatSearchResult { author: string; content: string; ts: number; agent: string; conversationId: string }
-
-interface MeetingItem { id: string; date: string; title: string; has_transcript: boolean; transcript_preview: string; transcript_path?: string; chat_id?: string; chat_title?: string; person_id?: string; person_label?: string; suggested_person_id?: string; suggested_person_label?: string }
 
 interface Reel {
   id: string
@@ -235,9 +233,9 @@ function PaneGroupHeader({ label, mobile }: { label: string; mobile?: boolean })
 type SectionGroup = 'core' | 'agents' | 'custom'
 
 const DEFAULT_SECTION_ORDER: Record<SectionGroup, string[]> = {
-  core: ['agent-flow', 'workspace', 'klaus', 'dreaming', 'heartbeat', 'engines', 'skills', 'tool-approvals', 'whatsapp', 'mail', 'artifacts', 'settings'],
+  core: ['agent-flow', 'workspace', 'agent', 'dreaming', 'heartbeat', 'engines', 'skills', 'tool-approvals', 'whatsapp', 'mail', 'artifacts', 'settings'],
   agents: ['rechnung', 'pionierplaner', 'posteingang', 'systemkreis', 'chatagent'],
-  custom: ['health', 'limits', 'social', 'finance', 'denzer-analytics', 'people', 'meetings'],
+  custom: ['health', 'limits', 'social', 'finance', 'company-analytics', 'people'],
 }
 
 const SHOW_AGENT_FLOW = false
@@ -350,7 +348,7 @@ interface SysStatus {
   crons: { total: number; ok: number; errors: number }
 }
 
-export function InfoPane({ activeAgent, activeConversationId, visibleConversationIds, externalFile, onExternalFileConsumed, externalWaChat, onExternalWaChatConsumed, externalMailThread, onExternalMailThreadConsumed, sysStatus: _sysStatus, onScrollToMessage, onSwitchConversation: _onSwitchConversation, onNewChat: _onNewChat, onOpenSearch, onClose, mobile, voiceReady, voiceActive, onToggleVoice, onOpenWorkspaceMode, onOpenWorkspaceFile }: {
+export function InfoPane({ activeAgent, activeConversationId, visibleConversationIds, externalFile, onExternalFileConsumed, externalWaChat, onExternalWaChatConsumed, externalMailThread, onExternalMailThreadConsumed, sysStatus: _sysStatus, onScrollToMessage, onSwitchConversation: _onSwitchConversation, onNewChat: _onNewChat, onOpenSearch, onClose, mobile, voiceReady: _voiceReady, voiceActive: _voiceActive, onToggleVoice: _onToggleVoice, onOpenWorkspaceMode, onOpenWorkspaceFile }: {
   activeAgent: string
   activeConversationId?: string
   visibleConversationIds?: string[]
@@ -568,93 +566,6 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
   const [karussells, setKarussells] = useState<Karussell[]>(() => readPaneCache('social:karussells', []))
   const [beitraege, setBeitraege] = useState<Beitrag[]>(() => readPaneCache('social:beitraege', []))
 
-  // ── Meeting-Recorder ──
-  const [recState, setRecState] = useState<'idle' | 'recording' | 'uploading'>('idle')
-  const [recSeconds, setRecSeconds] = useState(0)
-  const [recLiveTranscript, setRecLiveTranscript] = useState('')
-  const [, setMeetings] = useState<MeetingItem[]>([])
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const recTimerRef = useRef<number | null>(null)
-  const recSessionIdRef = useRef<string | null>(null)
-  const recIsStoppingRef = useRef(false)
-  const recSegmentTimerRef = useRef<number | null>(null)
-  const recStreamRef = useRef<MediaStream | null>(null)
-
-  const loadMeetings = useCallback(() => {
-    fetch('/api/meetings').then(r => r.json()).then(d => setMeetings(d.meetings || [])).catch(() => {})
-  }, [])
-
-  useEffect(() => { loadMeetings() }, [loadMeetings])
-
-  const startRecording = useCallback(async () => {
-    const res = await fetch('/api/meetings/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-    })
-    const { session_id } = await res.json()
-    recSessionIdRef.current = session_id
-    recIsStoppingRef.current = false
-    setRecLiveTranscript('')
-
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    recStreamRef.current = stream
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'
-
-    const sendChunk = async (blob: Blob, sid: string) => {
-      if (blob.size === 0) return
-      const form = new FormData()
-      form.append('file', blob, `chunk.webm`)
-      try {
-        const r = await fetch(`/api/meetings/${sid}/chunk`, { method: 'POST', body: form })
-        const d = await r.json()
-        if (d.transcript) setRecLiveTranscript(d.transcript)
-      } catch {}
-    }
-
-    const startSegment = () => {
-      const chunks: Blob[] = []
-      const mr = new MediaRecorder(stream, { mimeType })
-      mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
-      mr.onstop = async () => {
-        const blob = new Blob(chunks, { type: mimeType })
-        const sid = recSessionIdRef.current
-        if (sid) await sendChunk(blob, sid)
-        if (!recIsStoppingRef.current) {
-          startSegment()
-        } else {
-          const finalSid = recSessionIdRef.current
-          if (finalSid) await fetch(`/api/meetings/${finalSid}/finish`, { method: 'POST' })
-          stream.getTracks().forEach(t => t.stop())
-          recStreamRef.current = null
-          setRecState('idle')
-          loadMeetings()
-        }
-      }
-      mr.start()
-      mediaRecorderRef.current = mr
-      recSegmentTimerRef.current = window.setTimeout(() => {
-        if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop()
-      }, 30000)
-    }
-
-    startSegment()
-    setRecState('recording')
-    setRecSeconds(0)
-    recTimerRef.current = window.setInterval(() => setRecSeconds(s => s + 1), 1000)
-  }, [loadMeetings])
-
-  const stopRecording = useCallback(() => {
-    recIsStoppingRef.current = true
-    if (recTimerRef.current !== null) { clearInterval(recTimerRef.current); recTimerRef.current = null }
-    if (recSegmentTimerRef.current !== null) { clearTimeout(recSegmentTimerRef.current); recSegmentTimerRef.current = null }
-    setRecState('uploading')
-    const mr = mediaRecorderRef.current
-    if (mr && mr.state !== 'inactive') mr.stop()
-  }, [])
-
-  const recTimer = `${Math.floor(recSeconds / 60)}:${String(recSeconds % 60).padStart(2, '0')}`
-
   const [expandedKarussell, setExpandedKarussell] = useState<string | null>(null)
   const [expandedBeitrag, setExpandedBeitrag] = useState<string | null>(null)
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(null)
@@ -719,7 +630,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
       attention: 'Aufmerksamkeit',
       primary: 'Rest',
       rest: 'Rest',
-      denzer: 'Denzer AI',
+      company: 'Company AI',
       fch: 'FCH',
       amazon: 'Amazon',
       rechnung: 'Rechnung',
@@ -810,7 +721,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
         writePaneCache('mail:accounts', accs)
         const hasUnified = accs.some((a: { key: string }) => a.key === 'all')
         const currentValid = accs.some((a: { key: string }) => a.key === mailAccount)
-        const preferred = hasUnified ? 'all' : accs.find((a: { key: string }) => a.key === 'denzer')?.key || accs[0]?.key || ''
+        const preferred = hasUnified ? 'all' : accs.find((a: { key: string }) => a.key === 'company')?.key || accs[0]?.key || ''
         const nextAccount = hasUnified ? 'all' : (currentValid ? mailAccount : preferred)
         if (nextAccount && nextAccount !== mailAccount) setMailAccount(nextAccount)
       }).catch(() => {})
@@ -1151,11 +1062,10 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
       if (stack.length > 0) clearStack()
       if (section === 'whatsapp' && onOpenWorkspaceMode) { markCurrentInboxSeen(); onOpenWorkspaceMode('inbox'); return }
       else if (section === 'whatsapp') { markCurrentInboxSeen(); setSubOpen(p => ({ ...p, whatsapp: true })) }
-      else if (section === 'mail' && onOpenWorkspaceMode) { onOpenWorkspaceMode('mail'); return }
+      else if (section === 'mail' && onOpenWorkspaceMode) { onOpenWorkspaceMode('inbox'); return }
       else if (section === 'mail') setSubOpen(p => ({ ...p, gmail: true }))
       else if (section === 'artifacts' && onOpenWorkspaceMode) { onOpenWorkspaceMode('artifacts'); return }
       else if (section === 'artifacts') setSubOpen(p => ({ ...p, recentArtifacts: true }))
-      else if (section === 'meetings' && onOpenWorkspaceMode) { onOpenWorkspaceMode('meetings'); return }
       else if (section === 'automation' && onOpenWorkspaceMode) { onOpenWorkspaceMode('automation'); return }
       else if ((section === 'pionierplaner' || section === 'redaktion') && onOpenWorkspaceMode) { onOpenWorkspaceMode('pionierplaner'); return }
       else if (section === 'daily-log') setSubOpen(p => ({ ...p, dailyLogs: true }))
@@ -1277,9 +1187,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                 style={{ marginLeft: -4.5 }}
                 draggable={false}
               />
-            <div className={`flex items-center gap-1 transition-opacity ${
-              voiceActive || recState !== 'idle' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}>
+            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
               <button
                 type="button"
                 onClick={onOpenSearch}
@@ -1288,45 +1196,6 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                 title="Suchen"
               >
                 <Search className="w-4 h-4" />
-              </button>
-              {onToggleVoice && (
-              <button
-                type="button"
-                onClick={onToggleVoice}
-                disabled={!voiceReady}
-                className={`grid h-7 w-7 place-items-center rounded-md transition-colors ${
-                  voiceReady
-                    ? voiceActive
-                      ? 'text-[var(--warm)] hover:bg-white/[0.06]'
-                      : 'text-[var(--t3)] hover:bg-white/[0.06] hover:text-[var(--t1)]'
-                    : 'text-[var(--t3)]/35 cursor-default'
-                }`}
-                aria-label={voiceActive ? 'Voice ausschalten' : 'Voice einschalten'}
-                title={voiceActive ? 'Voice ausschalten' : 'Voice einschalten'}
-              >
-                <Phone className="w-4 h-4" strokeWidth={1.8} fill="none" />
-              </button>
-              )}
-              <button
-                type="button"
-                onClick={recState === 'idle' ? startRecording : recState === 'recording' ? stopRecording : undefined}
-                disabled={recState === 'uploading'}
-                className={`grid h-7 w-7 place-items-center rounded-md transition-colors ${
-                  recState === 'recording'
-                    ? 'text-[var(--cc-orange)] hover:bg-white/[0.06]'
-                    : recState === 'uploading'
-                      ? 'text-[var(--t3)]/35 cursor-default'
-                      : 'text-[var(--t3)] hover:bg-white/[0.06] hover:text-[var(--t1)]'
-                }`}
-                aria-label={recState === 'recording' ? 'Meeting-Aufnahme stoppen' : recState === 'uploading' ? 'Meeting wird verarbeitet' : 'Meeting aufnehmen'}
-                title={recState === 'recording' ? `Aufnahme stoppen (${recTimer})` : recState === 'uploading' ? 'Meeting wird verarbeitet' : 'Meeting aufnehmen'}
-              >
-                {recState === 'uploading'
-                  ? <Loader2 className="w-4 h-4 animate-spin" strokeWidth={1.8} />
-                  : recState === 'recording'
-                    ? <Square className="w-3.5 h-3.5 fill-current" strokeWidth={1.8} />
-                    : <Mic className="w-4 h-4" strokeWidth={1.8} />
-                }
               </button>
             </div>
           </div>
@@ -1576,11 +1445,11 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
 
                 {/* ── Agent — Agent-Übersicht, Identität und Arbeitszustand ── */}
                 <SortableSection
-                  sectionId="klaus"
-                  dataInfoSection="klaus"
+                  sectionId="agent"
+                  dataInfoSection="agent"
                   group="core"
                   mobile={mobile}
-                  order={getSectionOrder('core', 'klaus')}
+                  order={getSectionOrder('core', 'agent')}
                   dragging={draggingSection}
                   dropTarget={dropTargetSection}
                   onDragStartSection={handleSectionDragStart}
@@ -1591,11 +1460,11 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   <div>
                     <button
                       type="button"
-                      onClick={() => onOpenWorkspaceMode?.('klaus')}
+                      onClick={() => onOpenWorkspaceMode?.('agent')}
                       className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
                       title={`${agentName} im Workspace öffnen`}
                     >
-                      <img src="/agent.svg" alt="" className="info-icon-md mr-2 flex-shrink-0 opacity-80 group-hover:opacity-100" draggable={false} />
+                      <Bot className="info-icon-md mr-2 flex-shrink-0 text-[var(--warm)]" strokeWidth={1.75} />
                       <span className="text-[var(--t2)] font-medium flex-1">{agentName}</span>
                     </button>
                   </div>
@@ -1791,12 +1660,12 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                     <div>
                       <button
                         type="button"
-                        onClick={() => onOpenWorkspaceMode?.('mail')}
+                        onClick={() => onOpenWorkspaceMode?.('inbox')}
                         className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
-                        title="Mail im Workspace öffnen"
+                        title="Inbox im Workspace öffnen"
                       >
                         <Mail className="info-icon-md mr-2 flex-shrink-0 text-[var(--t3)] group-hover:text-[var(--t2)]" />
-                        <span className="text-[var(--t2)] font-medium flex-1">Mail</span>
+                        <span className="text-[var(--t2)] font-medium flex-1">Inbox</span>
                       </button>
                       {isExpanded && (
                         <div className="pb-2"><Guided>
@@ -1931,7 +1800,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                                             if (mailShowBlocked) setMailShowBlocked(false)
                                             playUISound(isActive ? 'tab-click' : 'section-open')
                                             setMailCategory(folderKey)
-                                            const acc = mailAccount || mailAccounts.find(a => a.key === 'all')?.key || mailAccounts.find(a => a.key === 'denzer')?.key || mailAccounts[0]?.key || ''
+                                            const acc = mailAccount || mailAccounts.find(a => a.key === 'all')?.key || mailAccounts.find(a => a.key === 'company')?.key || mailAccounts[0]?.key || ''
                                             if (acc) loadMailThreads(acc, folderKey)
                                           }}
                                           className={`flex w-full items-center pr-3 ${mobile ? 'py-2' : 'py-[5px]'} info-text-body text-left cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors`}>
@@ -2086,7 +1955,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   onDragEndSection={clearSectionDrag}
                 >
                 <Suspense fallback={SectionFallback}>
-                  <PosteingangSection mobile={mobile} onOpenWorkspace={() => onOpenWorkspaceMode?.('mailagent')} />
+                  <PosteingangSection mobile={mobile} onOpenWorkspace={() => onOpenWorkspaceMode?.('inbox')} />
                 </Suspense>
                 </SortableSection>
 
@@ -2682,11 +2551,11 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
 
                 {/* ── Analytics — eigenes Tracking, Pageviews/Klicks/Funnel ── */}
                 <SortableSection
-                  sectionId="denzer-analytics"
-                  dataInfoSection="denzer-analytics"
+                  sectionId="company-analytics"
+                  dataInfoSection="company-analytics"
                   group="custom"
                   mobile={mobile}
-                  order={getSectionOrder('custom', 'denzer-analytics')}
+                  order={getSectionOrder('custom', 'company-analytics')}
                   dragging={draggingSection}
                   dropTarget={dropTargetSection}
                   onDragStartSection={handleSectionDragStart}
@@ -2695,7 +2564,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   onDragEndSection={clearSectionDrag}
                 >
                 <Suspense fallback={SectionFallback}>
-                  <DenzerAnalyticsSection mobile={mobile} onOpenWorkspace={() => onOpenWorkspaceMode?.('analytics')} />
+                  <CompanyAnalyticsSection mobile={mobile} onOpenWorkspace={() => onOpenWorkspaceMode?.('analytics')} />
                 </Suspense>
                 </SortableSection>
 
@@ -2732,32 +2601,6 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   </button>
                 )}
 
-                {/* ── Meetings — Aufnahmen und Transkripte im Workspace ── */}
-                <SortableSection
-                  sectionId="meetings"
-                  dataInfoSection="meetings"
-                  group="custom"
-                  mobile={mobile}
-                  order={getSectionOrder('custom', 'meetings')}
-                  dragging={draggingSection}
-                  dropTarget={dropTargetSection}
-                  onDragStartSection={handleSectionDragStart}
-                  onDragOverSection={handleSectionDragOver}
-                  onDropSection={handleSectionDrop}
-                  onDragEndSection={clearSectionDrag}
-                >
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => onOpenWorkspaceMode?.('meetings')}
-                      className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
-                      title={recLiveTranscript || 'Meetings im Workspace öffnen'}
-                    >
-                      <ScrollText className={`info-icon-md mr-2 flex-shrink-0 ${recState === 'recording' ? 'text-[var(--cc-orange)] animate-pulse' : 'text-[var(--t3)] group-hover:text-[var(--t2)]'}`} />
-                      <span className="text-[var(--t2)] font-medium flex-1">Meetings</span>
-                    </button>
-                  </div>
-                </SortableSection>
                 </div>
 
               </>

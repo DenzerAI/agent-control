@@ -7,7 +7,7 @@ import { Guided } from '../utils/tree'
 
 // ── Leads-Inbox — alle example.com-Anmeldungen + Kontaktformular, gespiegelt aus KV ──
 
-type DenzerLead = {
+type CompanyLead = {
   key: string
   ts_kv: number
   ts_iso: string
@@ -38,7 +38,7 @@ function leadSourceLabel(source: string): string {
 }
 
 export function LeadsInboxSection({ mobile }: { mobile?: boolean }) {
-  const [leads, setLeads] = useState<DenzerLead[] | null>(null)
+  const [leads, setLeads] = useState<CompanyLead[] | null>(null)
   const [unseen, setUnseen] = useState(0)
   const [open, setOpen] = useState<boolean>(() => {
     try { return localStorage.getItem('infopane:leadsOpen') === '1' } catch { return false }
@@ -47,7 +47,7 @@ export function LeadsInboxSection({ mobile }: { mobile?: boolean }) {
   const [syncing, setSyncing] = useState(false)
 
   const load = useCallback(() => {
-    fetch('/api/denzer/leads?limit=100')
+    fetch('/api/company/leads?limit=100')
       .then(r => r.json())
       .then(d => { setLeads(d.leads || []); setUnseen(d.unseen || 0) })
       .catch(() => {})
@@ -55,14 +55,14 @@ export function LeadsInboxSection({ mobile }: { mobile?: boolean }) {
 
   const sync = useCallback(() => {
     setSyncing(true)
-    fetch('/api/denzer/leads/sync', { method: 'POST' })
+    fetch('/api/company/leads/sync', { method: 'POST' })
       .then(r => r.json())
       .finally(() => { setSyncing(false); load() })
   }, [load])
 
   useEffect(() => {
     // Stats laden auch wenn zu, damit die Counter-Pille sichtbar ist.
-    fetch('/api/denzer/leads/stats')
+    fetch('/api/company/leads/stats')
       .then(r => r.json())
       .then(d => setUnseen(d.unseen || 0))
       .catch(() => {})
@@ -78,7 +78,7 @@ export function LeadsInboxSection({ mobile }: { mobile?: boolean }) {
   }, [open, unseen])
 
   const markSeen = (key: string) => {
-    fetch('/api/denzer/leads/seen', {
+    fetch('/api/company/leads/seen', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ keys: [key] }),
@@ -88,7 +88,7 @@ export function LeadsInboxSection({ mobile }: { mobile?: boolean }) {
     })
   }
   const markAllSeen = () => {
-    fetch('/api/denzer/leads/seen', {
+    fetch('/api/company/leads/seen', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ all: true }),

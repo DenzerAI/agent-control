@@ -1827,7 +1827,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
       return
     }
 
-    // KlausFlow Pane-PTT: ein lokal-aufgezeichnetes Transkript landet im Composer
+    // AgentFlow Pane-PTT: ein lokal-aufgezeichnetes Transkript landet im Composer
     // von Pane N (1-basiert). Jeder ChatPane hat eine eigene WS, also nur dispatchen
     // wenn dieses Pane gemeint ist — sonst gaeben es 4 Dispatches pro Event.
     // Mobile ignoriert komplett: Pane-Layouts existieren nur am Desktop, sonst
@@ -1841,7 +1841,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
       return
     }
 
-    // KlausFlow Pane-Focus: erster PTT-Druck (Aufnahme-Start) meldet nur das
+    // AgentFlow Pane-Focus: erster PTT-Druck (Aufnahme-Start) meldet nur das
     // Ziel-Pane, damit der Desktop sofort dorthin springt — noch ohne Text.
     // Nur das gemeinte Pane dispatcht, sonst 4× pro Event. Mobile ignoriert.
     if (msg.type === 'pane.focus' && typeof msg.pane === 'number' && msg.pane === paneIndex + 1) {
@@ -3226,7 +3226,7 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
     return () => window.removeEventListener('deck:voiceSend', handler)
   }, [defaultAgent, agent, busy, send, enqueue, paneIndex, consumePendingAttachments])
 
-  // KlausFlow Pane-PTT: Transkripte vom lokalen Swift-Client landen hier.
+  // AgentFlow Pane-PTT: Transkripte vom lokalen Swift-Client landen hier.
   // handleWsMessage filtert bereits auf paneIndex, also kommt das Event nur an,
   // wenn dieses Pane gemeint ist. Busy → in die Queue, sonst direkt senden.
   useEffect(() => {

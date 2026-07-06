@@ -1,6 +1,6 @@
 import type { WorkspaceFileKind } from './types'
 
-const WORKSPACE_ROOT = '/Users/klaus/agent'
+const WORKSPACE_ROOT = '/workspace'
 
 export function workspaceFileKind(path: string): WorkspaceFileKind | null {
   const p = String(path || '')
@@ -23,7 +23,7 @@ export function workspacePathParts(path: string): { dir: string; name: string } 
 export function workspaceDirectory(path: string): string {
   const raw = String(path || '').trim()
   if (!raw) return ''
-  const clean = raw.startsWith('~/agent') ? raw.replace(/^~\/agent/, WORKSPACE_ROOT) : raw
+  const clean = raw.startsWith('~/workspace') ? raw.replace(/^~\/agent/, WORKSPACE_ROOT) : raw
   if (!clean.startsWith('/')) return ''
   const dir = clean.includes('/') ? clean.replace(/\/[^/]+$/, '') : clean
   return dir || WORKSPACE_ROOT

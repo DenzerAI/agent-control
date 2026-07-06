@@ -39,7 +39,7 @@ const technicalRefLabels: Record<string, string> = {
   'mail-scanner': 'Mail Scanner',
   'lead-reconciler': 'Lead Abgleich',
   'lead-digest': 'Lead Digest',
-  'denzer-leads-pull': 'Denzer Leads',
+  'company-leads-pull': 'Company Leads',
   'server-ping': 'Server Ping',
   'health-watchdog': 'Health Watchdog',
   'backup-freshness': 'Backup Frische',

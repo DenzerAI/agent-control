@@ -535,7 +535,7 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
       )}
       {sorted.map(it => {
         const isSelected = sel?.selected === it.path
-        const isTopLevel = cwd === '/Users/klaus/agent' && it.type === 'folder'
+        const isTopLevel = cwd === '/workspace' && it.type === 'folder'
         const displayName = isTopLevel ? displayWorkspaceLabel(it.name, { topLevel: true }) : it.name
         const Icon = it.type === 'folder'
           ? (isTopLevel && TOP_LEVEL_ICON[it.name] ? TOP_LEVEL_ICON[it.name] : FolderClosed)
@@ -574,7 +574,7 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
 
 export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, initialPath }: { onOpenFile: (p: string) => void; mobile?: boolean; fullMode?: boolean; onToggleFull?: () => void; initialPath?: string | null }) {
   // cwd: aktueller Ordner für Breadcrumb und Listen-Modus.
-  const ROOT = '/Users/klaus/agent'
+  const ROOT = '/workspace'
   const ROOT_LABEL = 'Workspace'
   const [cwd, setCwd] = useState<string>(() => {
     // Vollmodus (Workspace) startet immer bei der Ordnerübersicht, nicht im letzten Zustand.
@@ -650,7 +650,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
   // ── Inline-Rename ──
   const [renaming, setRenaming] = useState<string | null>(null)
   const startRename = useCallback((p: string) => {
-    if (p === '/Users/klaus/agent') return // Root nicht umbenennen
+    if (p === '/workspace') return // Root nicht umbenennen
     setRenaming(p)
   }, [])
   const cancelRename = useCallback(() => setRenaming(null), [])
@@ -795,7 +795,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
       if (!cur) return
       const label = cur.path.split('/').pop() || cur.path
       // Root nicht löschen
-      if (cur.path === '/Users/klaus/agent') return
+      if (cur.path === '/workspace') return
       trashPath(cur.path, label)
       e.preventDefault(); return
     }
@@ -859,7 +859,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
             <div className="workspace-search-row info-text-body text-[var(--t3)] py-2">Keine Treffer.</div>
           )}
           {results.map(it => {
-            const rel = it.path.replace('/Users/klaus/agent/', '~/agent/')
+            const rel = it.path.replace('/workspace/', '~/workspace/')
             const meta = [formatBytes(it.size), formatRelTime(it.mtime)].filter(Boolean).join(' · ')
             const ResultIcon = it.type === 'folder' ? FolderClosed : fileIcon(it.name)
             return (
@@ -1028,7 +1028,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
         )}
       </div>
       {ctxMenu && (() => {
-        const isRoot = ctxMenu.path === '/Users/klaus/agent'
+        const isRoot = ctxMenu.path === '/workspace'
         const parentPath = ctxMenu.folder ? ctxMenu.path : ctxMenu.path.slice(0, ctxMenu.path.lastIndexOf('/'))
         const Item = ({ icon: Icon, label, onClick, danger }: { icon: typeof FileText; label: string; onClick: () => void; danger?: boolean }) => (
           <button

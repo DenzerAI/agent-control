@@ -64,7 +64,7 @@ export function IdentitySection({ mobile, onOpenFile }: { mobile?: boolean; onOp
               style={{ paddingLeft: '8px' }}
             >
               <ChevronRight className={`info-icon-sm mr-2 text-[var(--t3)] transition-transform duration-150 flex-shrink-0 ${isOpen ? 'rotate-90' : ''}`} />
-              <KlausIdentityIcon />
+              <AgentIdentityIcon />
               <span className="text-[var(--t2)] font-medium flex-1 truncate">{agent.name}</span>
             </button>
             {isOpen && (
@@ -82,7 +82,7 @@ export function IdentitySection({ mobile, onOpenFile }: { mobile?: boolean; onOp
   )
 }
 
-function KlausIdentityIcon() {
+function AgentIdentityIcon() {
   return (
     <svg
       viewBox="0 0 200 200"

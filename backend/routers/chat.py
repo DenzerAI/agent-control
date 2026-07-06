@@ -1,7 +1,7 @@
 """Chat router: Konversations- und Nachrichten-Kern.
 
 Extrahiert aus server.py als dritter Schnitt der Modularisierung (nach
-voice.py und deck.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade
+deck.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade
 bleiben byte-identisch.
 
 Routen:

@@ -1,7 +1,7 @@
 """Misc router: kleine, weitgehend unabhängige API-Routen.
 
 Extrahiert aus server.py als weiterer Schnitt der Modularisierung (nach
-files.py, skills.py, voice_tools.py, jobs.py). KEIN Verhalten geändert, nur
+files.py, skills.py und jobs.py). KEIN Verhalten geändert, nur
 verschoben. Routen-Pfade bleiben byte-identisch.
 
 Routen:
@@ -270,14 +270,6 @@ async def llm_limits():
         snap = limits_snapshot()
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
-    # ElevenLabs-Kontingent live anhängen (TTS-Zeichen statt LLM-Token),
-    # analog zu den Anthropic/OpenAI-Blöcken. Fehler hier brechen den
-    # Snapshot nicht, der ElevenLabs-Block kommt dann als {"ok": False}.
-    try:
-        from voice_sync import elevenlabs_usage
-        snap["elevenlabs"] = await elevenlabs_usage()
-    except Exception as e:
-        snap["elevenlabs"] = {"ok": False, "error": str(e)}
     return JSONResponse(snap)
 
 

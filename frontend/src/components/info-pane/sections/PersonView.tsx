@@ -1,24 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronLeft, Loader2, UserRound, ScrollText } from 'lucide-react'
+import { ChevronLeft, Loader2, UserRound } from 'lucide-react'
 import { formatWaTime } from '../utils/wa'
-
-type MeetingItem = {
-  id: string
-  date: string
-  title: string
-  has_transcript: boolean
-  transcript_preview: string
-  extract_status?: string
-  has_extract?: boolean
-}
-
-type MeetingExtract = {
-  title?: string
-  summary?: string
-  facts?: string[]
-  decisions?: string[]
-  action_items?: string[]
-}
 
 type Person = {
   id?: number
@@ -188,10 +170,6 @@ export function PersonView({ personId, onBack, mobile }: { personId: number; onB
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [meetings, setMeetings] = useState<MeetingItem[]>([])
-  const [meetingText, setMeetingText] = useState<string | null>(null)
-  const [meetingExtract, setMeetingExtract] = useState<MeetingExtract | null>(null)
-
   const person = data?.person || null
   const waContact = data?.wa_contact || null
   const identities = data?.identities || []
@@ -221,15 +199,6 @@ export function PersonView({ personId, onBack, mobile }: { personId: number; onB
         setError(String(e).slice(0, 160))
         setLoading(false)
       })
-    return () => { cancelled = true }
-  }, [personId])
-
-  useEffect(() => {
-    let cancelled = false
-    fetch(`/api/meetings?person_id=${encodeURIComponent(String(personId))}`)
-      .then(r => r.json())
-      .then(d => { if (!cancelled) setMeetings(d.meetings || []) })
-      .catch(() => {})
     return () => { cancelled = true }
   }, [personId])
 
@@ -496,56 +465,6 @@ export function PersonView({ personId, onBack, mobile }: { personId: number; onB
               </div>
             )}
 
-            {meetingText !== null ? (
-              <div className="pt-2 border-t border-[var(--border)]/40">
-                <button onClick={() => { setMeetingText(null); setMeetingExtract(null) }} className="info-text-meta text-[var(--t3)] hover:text-[var(--t1)] mb-1 flex items-center gap-1">
-                  <ChevronLeft className="w-3 h-3" /> Meetings
-                </button>
-                {meetingExtract && (
-                  <div className="mb-3 rounded border border-[var(--cc-orange)]/30 bg-[var(--cc-orange)]/[0.04] px-3 py-2 space-y-2">
-                    {meetingExtract.summary && (
-                      <div className="info-text-body text-[var(--t1)] leading-relaxed">{meetingExtract.summary}</div>
-                    )}
-                    {(meetingExtract.decisions || []).length > 0 && (
-                      <ExtractList label="Entscheidungen" items={meetingExtract.decisions || []} />
-                    )}
-                    {(meetingExtract.action_items || []).length > 0 && (
-                      <ExtractList label="To dos" items={meetingExtract.action_items || []} />
-                    )}
-                    {(meetingExtract.facts || []).length > 0 && (
-                      <ExtractList label="Fakten" items={meetingExtract.facts || []} />
-                    )}
-                  </div>
-                )}
-                <div className="info-text-meta uppercase tracking-wider text-[var(--t3)] font-medium mb-1">Volltext</div>
-                <div className="info-text-meta text-[var(--t2)] whitespace-pre-wrap leading-relaxed">{meetingText}</div>
-              </div>
-            ) : meetings.length > 0 && (
-              <ReadOnlyBlock title={`Meetings (${meetings.length})`}>
-                {meetings.map(m => (
-                  <button key={m.id} disabled={!m.has_transcript}
-                    onClick={() => {
-                      if (!m.has_transcript) return
-                      fetch(`/api/meetings/${m.id}/transcript`).then(r => r.json()).then(d => {
-                        setMeetingText(d.transcript || '')
-                        setMeetingExtract(d.extract || null)
-                      }).catch(() => {})
-                    }}
-                    className="w-full text-left flex items-start gap-2 py-0.5 hover:bg-white/[0.03] disabled:opacity-40 disabled:cursor-default transition-colors">
-                    <ScrollText className="w-3 h-3 text-[var(--t3)] flex-shrink-0 mt-0.5" />
-                    <div className="min-w-0 flex-1">
-                      <div className="info-text-body text-[var(--t1)] truncate">{m.title}</div>
-                      {m.transcript_preview && <div className="info-text-meta text-[var(--t3)] truncate">{m.transcript_preview}</div>}
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {m.has_extract && <span className="info-text-meta text-[var(--cc-orange)] tabular-nums">●</span>}
-                      <span className="info-text-meta text-[var(--t3)]">{m.date}</span>
-                    </div>
-                  </button>
-                ))}
-              </ReadOnlyBlock>
-            )}
-
             <div className="pt-2 border-t border-[var(--border)]/40 info-text-meta text-[var(--t3)] flex items-center gap-2 flex-wrap">
               {person.source && <span>Quelle: {person.source}</span>}
               {person.last_interaction_ts && <><span>·</span><span>Zuletzt: {formatWaTime(person.last_interaction_ts)}</span></>}
@@ -556,17 +475,6 @@ export function PersonView({ personId, onBack, mobile }: { personId: number; onB
           </>
         )}
       </div>
-    </div>
-  )
-}
-
-function ExtractList({ label, items }: { label: string; items: string[] }) {
-  return (
-    <div>
-      <div className="info-text-meta uppercase tracking-wider text-[var(--cc-orange)]/80 font-medium mb-0.5">{label}</div>
-      <ul className="info-text-body text-[var(--t2)] space-y-0.5 list-disc pl-4">
-        {items.map((it, i) => <li key={i}>{it}</li>)}
-      </ul>
     </div>
   )
 }

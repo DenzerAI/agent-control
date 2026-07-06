@@ -1,7 +1,7 @@
 """Jobs router: Job-/Cron-/launchd-Cluster der Agent-Control-Schicht.
 
 Extrahiert aus server.py als Schnitt C der Modularisierung (nach voice.py,
-deck.py, chat.py, files.py, skills.py, voice_tools.py, performance.py und
+deck.py, chat.py, files.py, skills.py, performance.py und
 state.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade bleiben
 byte-identisch.
 
@@ -24,7 +24,7 @@ Helper und State (alle hierher verschoben):
 - _get_local_jobs — Hauptlister der lokalen Jobs.
 - State: LOCAL_JOBS_DIR, LOCAL_LAUNCHD_DIR, LOCAL_JOB_UI_KEEP.
 
-Externe Aufrufer (routers/skills.py, routers/voice_tools.py, routers/files.py)
+Externe Aufrufer (routers/skills.py, routers/files.py)
 greifen weiter über `server._foo` bzw. `from server import LOCAL_JOBS_DIR` zu.
 Damit das intakt bleibt, re-importiert server.py diese Symbole aus diesem Modul.
 

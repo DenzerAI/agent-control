@@ -21,7 +21,7 @@ type ChatagentReport = {
   score: number
   status: ChatagentStatus
   actionRequired?: boolean
-  attention?: { level: 'none' | 'klaus' | 'christian'; label: string; detail: string }
+  attention?: { level: 'none' | 'agent' | 'owner'; label: string; detail: string }
   summary: { critical: number; warnings: number; maintenance?: number; ok: number; verdict: string }
   runtime: {
     connectedClients: number
@@ -278,7 +278,7 @@ export function ChatagentWorkspace() {
               <span />
               <div>
                 <strong>{primaryAction}</strong>
-                <em>{report.attention?.level === 'christian' ? 'der Nutzer' : report.attention?.level === 'klaus' ? 'Agent' : 'niemand'} muss aktuell handeln.</em>
+                <em>{report.attention?.level === 'owner' ? 'der Nutzer' : report.attention?.level === 'agent' ? 'Agent' : 'niemand'} muss aktuell handeln.</em>
               </div>
               <aside>
                 <button

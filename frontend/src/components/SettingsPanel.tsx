@@ -25,7 +25,7 @@ const DEFAULT_FALLBACK: VoiceSettings = { stability: 0.45, similarity_boost: 0.8
 
 function readGlobalVoice(): string {
   return localStorage.getItem('control:voice')
-    || localStorage.getItem('control:voice:klaus')
+    || localStorage.getItem('control:voice:agent')
     || localStorage.getItem('control:voice:main')
     || ''
 }
@@ -33,7 +33,7 @@ function readGlobalVoice(): string {
 function readGlobalAutoplay(): boolean {
   const g = localStorage.getItem('control:autoplay')
   if (g !== null) return g === 'true'
-  return localStorage.getItem('control:autoplay:klaus') === 'true'
+  return localStorage.getItem('control:autoplay:agent') === 'true'
     || localStorage.getItem('control:autoplay:main') === 'true'
 }
 

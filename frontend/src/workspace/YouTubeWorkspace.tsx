@@ -11,8 +11,8 @@ type YtVideo = {
   views: number | null
   timestamp: number | null
   thumbnail: string
-  klaus_pick?: boolean
-  klaus_reason?: string
+  agent_pick?: boolean
+  agent_reason?: string
 }
 
 type YtFollow = { channel_id: string; name: string }
@@ -24,7 +24,7 @@ type YtSaved = {
   channel_id?: string | null
   thumbnail: string
   duration: number | null
-  saved_by: 'christian' | 'klaus'
+  saved_by: 'owner' | 'agent'
   ts: number
 }
 
@@ -111,7 +111,7 @@ function VideoCard({ video, followed, saved, onPlay, onToggleFollow, onToggleSav
   onPlay: () => void
   onToggleFollow: (() => void) | null
   onToggleSave: () => void
-  savedBy?: 'christian' | 'klaus'
+  savedBy?: 'owner' | 'agent'
 }) {
   return (
     <div
@@ -155,11 +155,11 @@ function VideoCard({ video, followed, saved, onPlay, onToggleFollow, onToggleSav
         <div className="truncate text-xs text-[var(--t3)]">
           {[fmtViews(video.views), fmtDate(video.timestamp)].filter(Boolean).join(' · ') || ' '}
         </div>
-        {(savedBy === 'klaus' || video.klaus_pick) && (
+        {(savedBy === 'agent' || video.agent_pick) && (
           <div className="mt-1.5 inline-block rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--warm)]">von Agent markiert</div>
         )}
-        {video.klaus_pick && video.klaus_reason && (
-          <div className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--t2)]">{video.klaus_reason}</div>
+        {video.agent_pick && video.agent_reason && (
+          <div className="mt-1 line-clamp-2 text-xs leading-4 text-[var(--t2)]">{video.agent_reason}</div>
         )}
       </div>
     </div>

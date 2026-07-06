@@ -274,21 +274,21 @@ function RunBlock({ run, mobile }: { run: IntakeRun; mobile?: boolean }) {
 }
 
 export function PosteingangSection({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace?: () => void }) {
-  if (onOpenWorkspace) return <MailagentWorkspaceEntry mobile={mobile} onOpenWorkspace={onOpenWorkspace} />
+  if (onOpenWorkspace) return <InboxWorkspaceEntry mobile={mobile} onOpenWorkspace={onOpenWorkspace} />
   return <PosteingangInlineSection mobile={mobile} />
 }
 
-function MailagentWorkspaceEntry({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace: () => void }) {
+function InboxWorkspaceEntry({ mobile, onOpenWorkspace }: { mobile?: boolean; onOpenWorkspace: () => void }) {
   return (
     <div>
       <button
         type="button"
         onClick={onOpenWorkspace}
         className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
-        title="Mail-Agent im Workspace öffnen"
+        title="Inbox im Workspace öffnen"
       >
         <Inbox className="info-icon-md mr-2 flex-shrink-0 text-[var(--t3)] group-hover:text-[var(--t2)]" />
-        <span className="text-[var(--t2)] font-medium flex-1">Mail-Agent</span>
+        <span className="text-[var(--t2)] font-medium flex-1">Inbox</span>
       </button>
     </div>
   )
@@ -344,7 +344,7 @@ function PosteingangInlineSection({ mobile }: { mobile?: boolean }) {
       >
         <ChevronRight className={`info-icon-sm mr-2 text-[var(--t3)] transition-transform duration-150 flex-shrink-0 ${open ? 'rotate-90' : ''}`} />
         <Inbox className={`info-icon-md mr-2 flex-shrink-0 ${pending > 0 ? 'text-[var(--cc-orange)]' : 'text-[var(--t3)]'}`} />
-        <span className="text-[var(--t2)] font-medium">Mail-Agent</span>
+        <span className="text-[var(--t2)] font-medium">Inbox</span>
         {pending > 0 && <span className="ml-2 info-text-meta tabular-nums text-[var(--cc-orange)]">{pending}</span>}
         <span className="flex-1" />
         {open && (
@@ -352,7 +352,7 @@ function PosteingangInlineSection({ mobile }: { mobile?: boolean }) {
             type="button"
             onClick={(e) => { e.stopPropagation(); runNow() }}
             className="ml-2 p-1 rounded text-[var(--t2)] hover:text-[var(--t1)] hover:bg-white/[0.06] cursor-pointer flex-shrink-0 transition-colors"
-            title="Mail-Agent jetzt prüfen"
+            title="Inbox jetzt prüfen"
           >
             <RefreshCw className={`info-icon-sm ${loading || running ? 'animate-spin' : ''}`} />
           </button>

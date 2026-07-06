@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Clock, Eye, Moon, RefreshCw, Sparkles, type LucideIcon } from 'lucide-react'
 
-const READ_KEY = 'klaus.dreaming.latestReadMtime'
+const READ_KEY = 'agent.dreaming.latestReadMtime'
 const CACHE_KEY = 'workspace:dreaming:lastState'
 
 type DreamEntry = {

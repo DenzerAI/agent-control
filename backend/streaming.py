@@ -2069,22 +2069,6 @@ async def broadcast_pane_focus(pane: int) -> bool:
     return had_clients
 
 
-async def broadcast_stop_audio() -> bool:
-    """Tell every connected frontend to stop any TTS/audio playback immediately."""
-    had_clients = bool(_connected_clients)
-    await _broadcast(json.dumps({"type": "voice.stop"}))
-    return had_clients
-
-
-async def broadcast_incoming_call(briefing: dict) -> bool:
-    """Tell every connected frontend that Klaus is calling. Das Frontend zeigt ein
-    pulsierendes Anruf-Overlay; `briefing` trägt Teaser + Anrufgrund für die Anzeige.
-    Returns True iff mindestens ein WS-Client verbunden war."""
-    had_clients = bool(_connected_clients)
-    await _broadcast(json.dumps({"type": "voice.incoming_call", "briefing": briefing}))
-    return had_clients
-
-
 async def broadcast_ui_command(command: str, payload: dict | None = None) -> bool:
     """Push ein UI-Layout-Kommando an alle Frontends. command ∈
     {info, pane, info-section}, payload je nach Command. Wird vom Frontend

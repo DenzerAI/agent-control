@@ -72,7 +72,7 @@ export function ToolApprovalsSection({ mobile }: { mobile?: boolean }) {
       const res = await fetch(`/api/tools/approvals/${id}/decision`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decision, decided_by: 'christian', execute: decision === 'approved' }),
+        body: JSON.stringify({ decision, decided_by: 'owner', execute: decision === 'approved' }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()

@@ -2,9 +2,6 @@ import { useState, useEffect, useRef, useCallback, lazy, Suspense, type CSSPrope
 import { ChatPane } from './components/ChatPane'
 const Spotlight = lazy(() => import('./components/Spotlight').then(m => ({ default: m.Spotlight })))
 import { LinkPreview } from './components/LinkPreview'
-import { VoiceController } from './components/VoiceController'
-import { IncomingCallOverlay, type CallBriefing } from './components/IncomingCallOverlay'
-import { acquireWsHub } from './lib/wsHub'
 import { WorkspaceOverlay, useWorkspaceController, type WorkspaceSpan } from './workspace'
 import { GlobalYouTubePlayer } from './components/GlobalYouTubePlayer'
 import { Square, MessageSquare, Presentation, Radio, Settings, Plus, X, Pencil, Archive, ArchiveRestore, Search, Maximize2, Minimize2, Check, Wrench } from 'lucide-react'
@@ -26,7 +23,7 @@ interface Space {
 }
 
 const SPACES: Space[] = [
-  { id: 'chat', label: 'Agent', description: 'Dein Agent', icon: MessageSquare, iconSrc: '/agent.svg', ready: true },
+  { id: 'chat', label: 'Agent', description: 'Chat', icon: MessageSquare, ready: true },
   { id: 'workshops', label: 'Workshops', description: 'AI Strategy Sprints', icon: Presentation, ready: false },
   { id: 'signals', label: 'Signals', description: 'Markt & Technologie', icon: Radio, ready: false },
   { id: 'settings', label: 'Settings', description: 'System & Config', icon: Settings, ready: false },
@@ -402,7 +399,7 @@ function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, 
                             }
                             onConvChange(paneIndex, c.id, c.agent); setOpen(false)
                           }}
-                          className={`chat-picker-row-title flex-1 min-w-0 text-left truncate cursor-pointer ${isCurrent ? 'text-[var(--t1)] font-medium' : isHighlight ? 'klaus-tab-pulse font-medium' : isBusy ? 'text-[var(--t1)] group-hover:text-[var(--t1)]' : 'text-[var(--t2)] group-hover:text-[var(--t1)]'}`}
+                          className={`chat-picker-row-title flex-1 min-w-0 text-left truncate cursor-pointer ${isCurrent ? 'text-[var(--t1)] font-medium' : isHighlight ? 'agent-tab-pulse font-medium' : isBusy ? 'text-[var(--t1)] group-hover:text-[var(--t1)]' : 'text-[var(--t2)] group-hover:text-[var(--t1)]'}`}
                         >
                           {c.title || 'Neuer Chat'}
                         </button>
@@ -567,60 +564,8 @@ export default function App() {
   const [frameW, setFrameW] = useState(0)
   const [conversations, setConversations] = useState<ConvOption[]>([])
   const [archivedChats, setArchivedChats] = useState<ConvOption[]>([])
-  const [voiceReady, setVoiceReady] = useState(false)
-  const [voiceSession, setVoiceSession] = useState<{ convId: string; agent: string } | null>(null)
-  // "Agent ruft an": pending Anruf-Briefing, das ein pulsierendes Overlay zeigt.
-  const [incomingCall, setIncomingCall] = useState<CallBriefing | null>(null)
-  const voicePaneShortcutPausedRef = useRef(false)
-
-  const toggleKlausVoice = useCallback(() => {
-    if (!voiceReady) return
-    voicePaneShortcutPausedRef.current = false
-    setVoiceSession(s => {
-      if (s) { playUISound('voice-off', 0.6); return null }
-      playUISound('voice-on', 0.6)
-      return { convId: 'channel-voice', agent: 'main' }
-    })
-  }, [voiceReady])
-
-  // "Agent ruft an": eigener WS-Handler nur für das Anruf-Event. Der Hub bündelt
-  // alle Tab-Sockets, ein zusätzlicher Handler feuert sauber genau einmal.
-  useEffect(() => {
-    const hub = acquireWsHub({
-      onMessage: (raw) => {
-        const msg = raw as { type?: string; briefing?: CallBriefing }
-        if (msg?.type === 'voice.incoming_call') {
-          setIncomingCall(msg.briefing || {})
-          if (typeof document === 'undefined' || document.hasFocus()) playUISound('tell-message', 0.7)
-        }
-      },
-    })
-    return () => hub.release()
-  }, [])
-
-  const acceptIncomingCall = useCallback(() => {
-    setIncomingCall(null)
-    playUISound('voice-on', 0.6)
-    voicePaneShortcutPausedRef.current = false
-    // Voice-Session starten; VoiceActiveSession zieht das Anruf-Briefing per consume.
-    setVoiceSession({ convId: 'channel-voice', agent: 'main' })
-  }, [])
-
-  const dismissIncomingCall = useCallback(() => {
-    setIncomingCall(null)
-    playUISound('voice-off', 0.6)
-    fetch('/api/voice/call-briefing/dismiss', { method: 'POST' }).catch(() => {})
-  }, [])
 
   useEffect(() => { preloadUISounds() }, [])
-
-  // Check voice configuration on mount
-  useEffect(() => {
-    fetch('/api/voice/status')
-      .then(r => r.json())
-      .then(d => setVoiceReady(!!d.ready))
-      .catch(() => setVoiceReady(false))
-  }, [])
 
   // archived chat support is used by PaneHeader
   const loadArchivedChats = useCallback(() => {
@@ -680,8 +625,8 @@ export default function App() {
   // Auto-Spawn erst beim nächsten echten Post wieder triggert.
   // Konzept: brain/ideas/klaus-channel.md.
   useEffect(() => {
-    const klaus = conversations.find(c => c.id === 'klaus-channel' && c.highlight)
-    if (!klaus) return
+    const agent = conversations.find(c => c.id === 'klaus-channel' && c.highlight)
+    if (!agent) return
     const pane0 = paneConfigs[0]
     if (!pane0) return
     const klausIdx = pane0.tabs.findIndex(t => t.conversationId === 'klaus-channel')
@@ -969,48 +914,6 @@ export default function App() {
     return () => window.removeEventListener('deck:slotsUpdate', onSlotsUpdate)
   }, [activeSlot1, applyIncomingSlots, padIncomingSlots])
 
-  // Voice-Focus + UI-State: push aktiven Chat UND Pane-Snapshot ans Backend.
-  // Hidden Tabs werden nicht gepusht — Agent sieht visuell nur den aktiven Tab pro Pane.
-  useEffect(() => {
-    if (!voiceSession) return
-    const cfg = paneConfigs[activePane]
-
-    if (cfg) {
-      const at = activeTab(cfg)
-      const activeConv = conversations.find(c => c.id === at.conversationId)
-      fetch('/api/voice/focus', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agent: at.agent,
-          convId: at.conversationId || '',
-          title: activeConv?.title || '',
-        }),
-      }).catch(() => {})
-    }
-
-    // Voller Layout-Snapshot für get_ui_state — pro Pane der aktive Tab
-    const panes = paneConfigs.map((p, idx) => {
-      const at = activeTab(p)
-      const conv = conversations.find(c => c.id === at.conversationId)
-      return {
-        id: String(idx),
-        agent: at.agent,
-        convId: at.conversationId || '',
-        title: conv?.title || '',
-      }
-    })
-    fetch('/api/voice/ui-state', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        panes,
-        activePaneId: String(activePane),
-        layout,
-      }),
-    }).catch(() => {})
-  }, [voiceSession, activePane, paneConfigs, conversations, layout])
-
   // Esc im Fokus-Modus: Pane wieder verkleinern, aber nur wenn kein anderes Overlay offen ist
   useEffect(() => {
     if (focusedPaneIdx === null) return
@@ -1181,8 +1084,8 @@ export default function App() {
     // nächsten echten Post (Backend setzt highlight wieder auf 1).
     const closing = paneConfigs[paneIndex]?.tabs[tabIndex]
     if (closing?.conversationId === 'klaus-channel') {
-      const klaus = conversations.find(c => c.id === 'klaus-channel')
-      if (klaus?.highlight) {
+      const agent = conversations.find(c => c.id === 'klaus-channel')
+      if (agent?.highlight) {
         fetch('/api/conversations/klaus-channel/seen', { method: 'POST' }).catch(() => {})
         setConversations(prev => prev.map(c => c.id === 'klaus-channel' ? { ...c, highlight: false } : c))
       }
@@ -1440,7 +1343,7 @@ export default function App() {
     const mail = (e: Event) => {
       const d = (e as CustomEvent).detail
       if (!d?.account || !d?.uid) return
-      workspace.openMode('mail')
+      workspace.openMode('inbox')
     }
     window.addEventListener('deck:openWaChat', wa)
     window.addEventListener('deck:openMailThread', mail)
@@ -1545,14 +1448,6 @@ export default function App() {
         const map: Record<string, Layout> = { '1': '1', '2': '2', '3': '3', '4': '4' }
         if (map[e.key]) {
           e.preventDefault()
-          if (voiceSession) {
-            voicePaneShortcutPausedRef.current = !voicePaneShortcutPausedRef.current
-            window.dispatchEvent(new CustomEvent('deck:voicePause', {
-              detail: { paused: voicePaneShortcutPausedRef.current, source: 'pane-shortcut' },
-            }))
-          } else {
-            voicePaneShortcutPausedRef.current = false
-          }
           window.dispatchEvent(new CustomEvent('deck:stopAudio'))
           // Im Kollaps-Modus wechselt CMD+N nicht das Layout, sondern springt
           // direkt zu Pane N (0-basiert: CMD+1 → Pane 0), solange sie existiert.
@@ -1586,7 +1481,7 @@ export default function App() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [activeAgent, showInfo, voiceSession])
+  }, [activeAgent, showInfo])
 
   // Layout: Workspace ist die permanente linke Spalte (ersetzt die alte InfoPane).
   // Geschlossen zeigt sie nur die schmale Nav-Rail; offen kommt der Body dazu und
@@ -1903,14 +1798,10 @@ export default function App() {
       onOpenFile={workspace.openFile}
       onRevealPath={workspace.revealPath}
       onOpenSearch={() => setSearch(true)}
-      voiceReady={voiceReady}
-      voiceActive={!!voiceSession}
-      onToggleVoice={toggleKlausVoice}
     />
   )
 
   return (
-    <VoiceController active={!!voiceSession} onClose={() => setVoiceSession(null)}>
     <div className="h-screen flex flex-col">
       {/* ── Content: Workspace links (Nav + Body) + Chat-Panes ── */}
       <div
@@ -1954,18 +1845,9 @@ export default function App() {
         />
       )}
 
-      {incomingCall && (
-        <IncomingCallOverlay
-          briefing={incomingCall}
-          onAccept={acceptIncomingCall}
-          onDismiss={dismissIncomingCall}
-        />
-      )}
-
       {/* YouTube läuft global weiter, beim Modulwechsel als Mini-Player */}
       <GlobalYouTubePlayer onOpenModule={() => workspace.openMode('youtube')} />
     </div>
-    </VoiceController>
   )
 }
 

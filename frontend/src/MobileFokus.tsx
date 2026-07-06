@@ -123,7 +123,7 @@ function eventBadgeMobile(ev: CalEvent): string {
   if (ev.source === 'ptdesk') return 'PT'
   const cat = (ev.category || '').toLowerCase()
   const labelMap: Record<string, string> = {
-    klaus: 'LO', privat: 'PR', fch: 'FCH',
+    agent: 'LO', privat: 'PR', fch: 'FCH',
     'ai-workshop': 'AIW', 'ai-agent': 'AIA', 'ai-beratung': 'AIB',
     gecko: 'GKO', admin: 'ADM',
   }

@@ -545,11 +545,6 @@ AGENT_CHANNELS = {
     'claude': 'channel-claude',
 }
 
-# Dedizierter Voice-Channel (nicht per-agent): alle Voice-Sessions laufen hier.
-VOICE_CHANNEL_ID = 'channel-voice'
-VOICE_CHANNEL_AGENT = 'main'
-VOICE_CHANNEL_TITLE = 'Voice'
-
 # Anzeigenamen fuer Channel-Titel. Der Hauptname kommt aus config/agents.json,
 # damit der Kern namens-neutral bleibt (Default-Platzhalter "Agent"). Die
 # Neben-Agenten haengen ihren Bereich an den Hauptnamen.
@@ -583,15 +578,6 @@ def ensure_channels():
                     (channel_id, agent_id, '', name, now, now)
                 )
                 print(f"[AC] Channel erstellt: {channel_id} ({name})")
-        # Dedizierter Voice-Channel
-        row = db.execute("SELECT id FROM conversations WHERE id = ?", (VOICE_CHANNEL_ID,)).fetchone()
-        if not row:
-            db.execute(
-                "INSERT INTO conversations (id, agent, project, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (VOICE_CHANNEL_ID, VOICE_CHANNEL_AGENT, '', VOICE_CHANNEL_TITLE, now, now)
-            )
-            print(f"[AC] Voice-Channel erstellt: {VOICE_CHANNEL_ID}")
-
 
 def get_channel_id(agent_id: str) -> str:
     """Get the stable default channel conversation ID for an agent."""

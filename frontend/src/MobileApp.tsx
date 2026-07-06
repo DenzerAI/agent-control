@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef, useCallback, Suspense, type CSSProperties, type TouchEvent } from 'react'
 import { ArrowLeft, Check, X } from 'lucide-react'
 import { ChatPane } from './components/ChatPane'
-import { VoiceController } from './components/VoiceController'
 import { LoopWorkspace } from './workspace/LoopWorkspace'
 import { lazyWithRetry } from './components/info-pane/utils/lazyWithRetry'
-// lazyWithRetry: nach einem Deploy haelt die offene App noch alte Chunk-URLs —
-// der erste Lazy-Import (WhatsApp/Fokus oeffnen) schlug dann mit "Importing a
-// module script failed" fehl. Jetzt einmal Reload, frische Hashes, statt rotem Schirm.
-const MobileWASlot = lazyWithRetry(() => import('./MobileWASlot'))
 const MobileFokus = lazyWithRetry(() => import('./MobileFokus'))
 const MobileHealth = lazyWithRetry(() => import('./MobileHealth'))
 const Spotlight = lazyWithRetry(() => import('./components/Spotlight').then(m => ({ default: m.Spotlight })))
@@ -454,16 +449,8 @@ export default function MobileApp() {
   const [slotState, setSlotState] = useState<SlotState>(loadSlotState)
   const { slots, activeSlot } = slotState
 
-  // page: 0 = Agent-Chat sichtbar, 1 = WhatsApp-Overlay über dem Agent-Composer.
-  // Composer bleibt unten sichtbar und ist sowohl Agent- als auch WA-Composer (Hijack
-  // via deck:waSendTarget — siehe Composer.tsx).
   const [page, setPage] = useState<0 | 1>(0)
-  // WA-Overlay bleibt nach dem ersten Öffnen gemountet (nur per display versteckt), damit ein
-  // laufender Draft beim Wechsel in eine Agent-Pane nicht verloren geht: Agent formuliert im
-  // Hintergrund fertig, der Entwurf steht beim Zurückkommen noch da.
-  const [waEverOpened, setWaEverOpened] = useState(false)
-  useEffect(() => { if (page === 1) setWaEverOpened(true) }, [page])
-  // Fokus-Overlay: liegt wie das WA-Overlay über dem Chat, bis zum Composer.
+  // Fokus-Overlay liegt über dem Chat, bis zum Composer.
   // Schließt sich mit WA gegenseitig aus, Toggle über das Plus-Menü.
   const [fokusOpen, setFokusOpen] = useState(false)
   const [healthOpen, setHealthOpen] = useState(false)
@@ -544,8 +531,6 @@ export default function MobileApp() {
   // gestartete Streams davor, vom langsameren active-streams-Poll ausgeknipst zu
   // werden, bevor der Server-Snapshot sie kennt.
   const lastBusyPushRef = useRef<Map<string, number>>(new Map())
-  const [voiceReady, setVoiceReady] = useState(false)
-  const [voiceSession, setVoiceSession] = useState<{ convId: string; agent: string } | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [htmlPreviewPath, setHtmlPreviewPath] = useState<string | null>(null)
 
@@ -616,9 +601,6 @@ export default function MobileApp() {
     }))
   }, [page, fokusOpen, healthOpen, werkbankOpen, searchOpen, htmlPreviewPath])
 
-  useEffect(() => {
-    fetch('/api/voice/status').then(r => r.json()).then(d => setVoiceReady(!!d.ready)).catch(() => {})
-  }, [])
   useEffect(() => { preloadUISounds() }, [])
 
   // Backend-Sync: Beim Mount und bei jedem App-Reopen (visibilitychange) ziehen wir
@@ -800,30 +782,6 @@ export default function MobileApp() {
       window.removeEventListener('focus', refreshUnread)
     }
   }, [refreshUnread])
-
-  // Voice-Focus + UI-State pushen — wir reporten alle Slots als panes,
-  // damit Agent über `get_ui_state` konsistent Bescheid weiß.
-  useEffect(() => {
-    if (!voiceSession) return
-    const conv = conversations.find(c => c.id === conversationId)
-    fetch('/api/voice/focus', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent, convId: conversationId || '', title: conv?.title || '' }),
-    }).catch(() => {})
-    fetch('/api/voice/ui-state', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        panes: slots.map((s, i) => {
-          const c = conversations.find(x => x.id === s.convId)
-          return { id: String(i), agent: s.agent, convId: s.convId || '', title: c?.title || '' }
-        }),
-        activePaneId: String(activeSlot),
-        layout: 'mobile',
-      }),
-    }).catch(() => {})
-  }, [voiceSession, agent, conversationId, conversations, slots, activeSlot])
 
   // Validate saved slot conversations once conversations load
   const validatedRef = useRef(false)
@@ -1349,7 +1307,7 @@ export default function MobileApp() {
   const slotsForRender: RenderedSlot[] = canEphemeral
     ? [...slots, { agent: ephemeralAgent, convId: '', ephemeral: true }]
     : slots
-  const onWA = page === 1
+  const onWA = false
   const visibleSlotKey = (() => {
     const s = slotsForRender[visibleSlotIndex]
     if (!s) return null
@@ -1379,14 +1337,8 @@ export default function MobileApp() {
   }, [visibleSlotKey])
 
   useEffect(() => {
-    const open = () => { setSearchOpen(false); setFokusOpen(false); setHealthOpen(false); setWerkbankOpen(false); setPage(1) }
-    const toggle = () => {
-      setSearchOpen(false)
-      setFokusOpen(false)
-      setHealthOpen(false)
-      setWerkbankOpen(false)
-      setPage(p => (p === 1 ? 0 : 1))
-    }
+    const open = () => {}
+    const toggle = () => {}
     const toggleFokus = () => { setSearchOpen(false); setPage(0); setHealthOpen(false); setWerkbankOpen(false); setFokusOpen(o => !o) }
     const toggleHealth = () => { setSearchOpen(false); setPage(0); setFokusOpen(false); setWerkbankOpen(false); setHealthOpen(o => !o) }
     const toggleWerkbank = () => { setSearchOpen(false); setPage(0); setFokusOpen(false); setHealthOpen(false); setWerkbankOpen(o => !o) }
@@ -1475,7 +1427,6 @@ export default function MobileApp() {
   }, [cancelRecording, pauseRecording, resumeRecording])
 
   return (
-    <VoiceController active={!!voiceSession} onClose={() => setVoiceSession(null)}>
     <div className="mobile-app" style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', background: 'var(--bg)' }}>
         {/* Chat-Stack: bleibt im DOM, auch wenn InfoPane offen — der Composer (unten in
@@ -1531,8 +1482,6 @@ export default function MobileApp() {
                   onMobileArchiveChat={archiveChat}
                   onMobileRestoreChat={restoreChat}
                   onMobileLoadArchive={loadArchivedChats}
-                  onStartVoice={() => { setVoiceSession(s => s ? null : { convId: 'channel-voice', agent: 'main' }) }}
-                  voiceReady={voiceReady}
                   mobileSlotIndicator={!visible ? null : (
                     <MobileBottomDots
                       slots={slotsForRender}
@@ -1593,30 +1542,7 @@ export default function MobileApp() {
           })()}
         </div>
 
-        {/* WhatsApp-Overlay: stoppt visuell oberhalb des Composers (bottom: composerHeight),
-            damit derselbe Agent-Composer auch im WA-Modus benutzt wird (Composer-Hijack via
-            deck:waSendTarget). Schließen via Hamburger im Composer (deck:toggleInfoPane). */}
-        {waEverOpened && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: composerHeight,
-              zIndex: 20,
-              background: 'var(--bg)',
-              display: onWA ? undefined : 'none',
-            }}
-          >
-            <Suspense fallback={null}>
-              <MobileWASlot composerHeight={0} active={onWA} />
-            </Suspense>
-          </div>
-        )}
-
-        {/* Fokus-Overlay: gleiches Muster wie WhatsApp — stoppt über dem Composer,
-            eigener Hero oben, scrollt intern. Schließen über das Plus-Menü (deck:toggleFokus). */}
+        {/* Fokus-Overlay: stoppt über dem Composer, eigener Hero oben, scrollt intern. */}
         {fokusOpen && (
           <div
             style={{
@@ -1681,6 +1607,5 @@ export default function MobileApp() {
         </Suspense>
       )}
     </div>
-    </VoiceController>
   )
 }

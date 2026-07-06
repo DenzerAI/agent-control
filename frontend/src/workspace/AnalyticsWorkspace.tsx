@@ -187,7 +187,7 @@ export function AnalyticsWorkspace() {
   const loadOffer = useCallback((path: string) => {
     if (offerDetail[path]) return
     setOfferLoading(path)
-    fetchJsonWithTimeout<AnalyticsPage>(`/api/denzer/analytics/page?days=${days}&path=${encodeURIComponent(path)}`)
+    fetchJsonWithTimeout<AnalyticsPage>(`/api/company/analytics/page?days=${days}&path=${encodeURIComponent(path)}`)
       .then(page => setOfferDetail(prev => ({ ...prev, [path]: page })))
       .catch(() => {})
       .finally(() => setOfferLoading(null))
@@ -200,9 +200,9 @@ export function AnalyticsWorkspace() {
     setLoading(true)
     setError('')
     const [overviewRes, compareRes, recentRes] = await Promise.allSettled([
-      fetchJsonWithTimeout<AnalyticsOverview>(`/api/denzer/analytics/overview?days=${days}`),
-      fetchJsonWithTimeout<AnalyticsCompare>('/api/denzer/analytics/compare'),
-      fetchJsonWithTimeout<{ sessions?: AnalyticsRecentSession[] }>('/api/denzer/analytics/recent?limit=15'),
+      fetchJsonWithTimeout<AnalyticsOverview>(`/api/company/analytics/overview?days=${days}`),
+      fetchJsonWithTimeout<AnalyticsCompare>('/api/company/analytics/compare'),
+      fetchJsonWithTimeout<{ sessions?: AnalyticsRecentSession[] }>('/api/company/analytics/recent?limit=15'),
     ])
     const failures: string[] = []
     const next: AnalyticsCache = { ...cache, received_at: new Date().toISOString() }
@@ -222,7 +222,7 @@ export function AnalyticsWorkspace() {
     setSyncing(true)
     setError('')
     try {
-      await fetchJsonWithTimeout('/api/denzer/analytics/sync', { method: 'POST' }, 20000)
+      await fetchJsonWithTimeout('/api/company/analytics/sync', { method: 'POST' }, 20000)
       await load()
     } catch (e) {
       setError(`Sync nicht erreichbar, letzter Stand bleibt: ${(e as Error).message}`)

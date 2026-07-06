@@ -1,29 +1,21 @@
-import { createContext, useContext } from 'react'
-
-export type VoicePhase = 'init' | 'connecting' | 'live' | 'ending' | 'error'
-
-export interface VoiceState {
+export type VoiceState = {
   active: boolean
-  phase: VoicePhase
-  isSpeaking: boolean
-  isThinking: boolean
+  phase: 'idle' | 'init' | 'connecting' | 'live' | 'listening' | 'thinking' | 'speaking'
   isMuted: boolean
-  /** Manuelle Pause per Orb-Tap: Mikro aus + Agent verstummt, Session bleibt aber offen. */
+  isThinking: boolean
+  isSpeaking: boolean
   isPaused: boolean
-  lastLine: { role: 'user' | 'agent'; content: string } | null
-  errorMsg: string
 }
 
-export const DEFAULT_VOICE_STATE: VoiceState = {
+const idle: VoiceState = {
   active: false,
-  phase: 'init',
-  isSpeaking: false,
-  isThinking: false,
+  phase: 'idle',
   isMuted: false,
+  isThinking: false,
+  isSpeaking: false,
   isPaused: false,
-  lastLine: null,
-  errorMsg: '',
 }
 
-export const VoiceStateContext = createContext<VoiceState>(DEFAULT_VOICE_STATE)
-export const useVoiceState = () => useContext(VoiceStateContext)
+export function useVoiceState(): VoiceState {
+  return idle
+}

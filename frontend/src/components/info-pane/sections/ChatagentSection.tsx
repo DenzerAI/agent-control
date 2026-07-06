@@ -19,7 +19,7 @@ type ChatagentReport = {
   score: number
   status: 'ok' | 'warn' | 'critical'
   actionRequired?: boolean
-  attention?: { level: 'none' | 'klaus' | 'christian'; label: string; detail: string }
+  attention?: { level: 'none' | 'agent' | 'owner'; label: string; detail: string }
   summary: { critical: number; warnings: number; maintenance?: number; ok: number; verdict: string }
   runtime: {
     connectedClients: number

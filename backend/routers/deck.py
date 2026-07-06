@@ -1,7 +1,7 @@
 """Deck router: Monitor-/Präsentations-Schicht (Klaus Deck / TV).
 
 Extrahiert aus server.py als zweiter Schnitt der Modularisierung (nach
-voice.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade bleiben
+server.py). KEIN Verhalten geändert, nur verschoben. Routen-Pfade bleiben
 byte-identisch, darum funktioniert das Host-/Token-Gate in server.py (das die
 Deck-Pfade als String-Literale in seiner Allowlist führt) unverändert weiter.
 
@@ -32,7 +32,7 @@ Bewusst in server.py VERBLIEBEN (von nicht-verschobenem Code genutzt):
   String-Literale in seiner token-freien Allowlist; es liest KEINEN Deck-State.
 - INDEX_NO_CACHE / MAX_SLOTS: triviale geteilte Konstanten, die auch andere
   (in server.py verbliebene) Routen nutzen. Hier gespiegelt statt importiert,
-  analog zu den Key-Gettern in voice.py.
+  analog zu den übrigen Key-Gettern.
 
 State-Dicts (_deck_scroll/_deck_speak/_deck_audio/_deck_pairings) werden
 AUSSCHLIESSLICH von Deck-Routen gelesen/geschrieben (per grep über die ganze

@@ -29,7 +29,7 @@ type FocusEntry = {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  klaus: 'Agent',
+  agent: 'Agent',
   privat: 'Privat',
   fch: 'FCH',
   'ai-workshop': 'AI Workshop',
@@ -234,7 +234,7 @@ export function FokusSection({ mobile }: { mobile?: boolean }) {
       window.location.assign('/fokus')
       return
     }
-    const win = window.open('/fokus', 'klaus-fokus')
+    const win = window.open('/fokus', 'agent-fokus')
     win?.focus()
   }
 
