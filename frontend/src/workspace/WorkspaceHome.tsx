@@ -1,4 +1,5 @@
 import { BrainCircuit, Code2, FileText, FolderOpen, Hammer, Settings, Sparkles, Workflow } from 'lucide-react'
+import { WorkspaceShell } from './WorkspaceShell'
 
 const DEMO_TREE = [
   { name: 'soul/', text: 'Identität, Stimme und Grundregeln des Agenten', icon: Sparkles, children: ['SOUL.md', 'ROLLEN.md'] },
@@ -43,15 +44,13 @@ export function WorkspaceHome({ onOpenFile, onClose, onRevealPath, path, filePat
   void onOpenFile; void onClose; void onRevealPath; void path; void filePath
 
   return (
-    <div className="workspace-system workspace-files-root">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Dateien</p>
-          <h2>Lokaler Arbeitsbaum</h2>
-          <span>Optische Demo der festen Struktur. Die echte Dateiverbindung kommt später wieder dazu, ohne den alten Workspace-Kasten.</span>
-        </div>
-      </header>
+    <WorkspaceShell
+      className="workspace-files-root"
+      eyebrow="Dateien"
+      title="Lokaler Arbeitsbaum"
+      subtitle="Optische Demo der festen Struktur. Die echte Dateiverbindung kommt später wieder dazu, ohne den alten Workspace-Kasten."
+    >
       <DemoFolderTree />
-    </div>
+    </WorkspaceShell>
   )
 }

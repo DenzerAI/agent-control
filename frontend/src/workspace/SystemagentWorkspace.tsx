@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BookOpen, CircuitBoard, ClipboardList, MessageSquare, RefreshCw, Wrench } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { refreshPulses, useAutomation, type WorkflowRun } from '../pulses'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type CuratorProposal = {
   id: string
@@ -248,20 +249,21 @@ export function SystemagentWorkspace() {
       : 'Keine akute Aktion für der Nutzer.'
 
   return (
-    <div className="workspace-system">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Systemagent · Logbuch · Werkstatt · Entscheidungen</p>
-          <h2>{headline}</h2>
-          <span>{detail}</span>
-        </div>
+    <WorkspaceShell
+      eyebrow="Systemagent · Logbuch · Werkstatt · Entscheidungen"
+      title={headline}
+      subtitle={detail}
+      action={
+        <>
         <button type="button" onClick={load} disabled={loading} title="Neu laden">
           <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
         <button type="button" onClick={runSystemagent} disabled={running} title="Systemagent laufen lassen">
           <CircuitBoard className={running ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
-      </header>
+        </>
+      }
+    >
 
       {error && <div className="workspace-system-note">{error}</div>}
 
@@ -358,7 +360,7 @@ export function SystemagentWorkspace() {
           </div>
         </section>
       </div>
-    </div>
+    </WorkspaceShell>
   )
 }
 

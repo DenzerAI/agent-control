@@ -3,6 +3,7 @@ import { Archive, ArchiveRestore, Check, ChevronRight, Mail, MessageCircle, Refr
 import { WaChatView } from '../components/info-pane/sections/WaChatView'
 import { MailThreadView } from '../components/info-pane/sections/MailThreadView'
 import { renderInlinePreview } from '../lib/inlinePreview'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type WaChat = {
   id: string
@@ -370,17 +371,16 @@ export function InboxWorkspace() {
   }
 
   return (
-    <div className="workspace-system">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Inbox</p>
-          <h2>{attention > 0 ? `${attention} wartet` : 'Inbox ruhig'}</h2>
-          <span>{unreadTotal > 0 ? `${unreadTotal} ungelesene WhatsApp-Nachrichten` : 'WhatsApp, Mail und Kontakte liegen untereinander in einer ruhigen Arbeitsliste.'}</span>
-        </div>
+    <WorkspaceShell
+      eyebrow="Inbox"
+      title={attention > 0 ? `${attention} wartet` : 'Inbox ruhig'}
+      subtitle={unreadTotal > 0 ? `${unreadTotal} ungelesene WhatsApp-Nachrichten` : 'WhatsApp, Mail und Kontakte liegen untereinander in einer ruhigen Arbeitsliste.'}
+      action={
         <button type="button" onClick={() => { load(); loadArchived() }} disabled={loading} title="Neu laden">
             <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
-      </header>
+      }
+    >
 
       <div className="workspace-system-strip">
         <Stat label="Wartet" value={filtered.waiting.length} />
@@ -391,7 +391,7 @@ export function InboxWorkspace() {
       {error && <div className="workspace-system-note">{error}</div>}
 
       <main className="workspace-system-main workspace-system-stack">
-        <label className="workspace-system-panel flex items-center gap-2 px-3 py-2">
+        <label className="workspace-search-slim flex items-center gap-2">
           <Search className="h-4 w-4 shrink-0 text-[var(--t3)]" />
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Kontakt, Chat oder Mail suchen" className="min-w-0 flex-1 bg-transparent text-sm text-[var(--t1)] outline-none placeholder:text-[var(--t3)]" />
         </label>
@@ -432,6 +432,6 @@ export function InboxWorkspace() {
           </Panel>
         </div>
       </main>
-    </div>
+    </WorkspaceShell>
   )
 }

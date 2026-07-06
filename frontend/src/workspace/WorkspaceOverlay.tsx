@@ -1,6 +1,8 @@
-import { ArrowLeft, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ArrowLeft, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun } from 'lucide-react'
 import type { WorkspaceFile, WorkspaceMode, WorkspaceSpan } from './types'
-import { WorkspaceNav, workspaceModeLabel } from './WorkspaceNav'
+import { WorkspaceConnectionDot, WorkspaceNav, workspaceModeLabel } from './WorkspaceNav'
+import { setThemeMode } from '../theme'
 import { PreviewPane } from './PreviewPane'
 import { DocumentPane } from './DocumentPane'
 import { WorkspaceHome } from './WorkspaceHome'
@@ -32,6 +34,36 @@ import { SettingsWorkspace } from './SettingsWorkspace'
 import { AgentKanbanWorkspace } from './AgentKanbanWorkspace'
 import { PrivacyWorkspace } from './PrivacyWorkspace'
 import { ConnectorsWorkspace } from './ConnectorsWorkspace'
+
+function WorkspaceThemeToggle() {
+  const currentIsDark = () => document.documentElement.getAttribute('data-theme') !== 'light'
+  const [dark, setDark] = useState(() => currentIsDark())
+
+  useEffect(() => {
+    const sync = () => setDark(currentIsDark())
+    window.addEventListener('theme-changed', sync)
+    window.addEventListener('deck:prefsRemoteUpdate', sync)
+    return () => {
+      window.removeEventListener('theme-changed', sync)
+      window.removeEventListener('deck:prefsRemoteUpdate', sync)
+    }
+  }, [])
+
+  return (
+    <button
+      type="button"
+      className="workspace-theme-toggle"
+      onClick={() => setThemeMode(currentIsDark() ? 'light' : 'dark')}
+      title={dark ? 'Hell' : 'Dunkel'}
+      aria-label={dark ? 'Hell einschalten' : 'Dunkel einschalten'}
+      data-dark={dark ? 'true' : 'false'}
+    >
+      <Sun className="workspace-theme-sun" />
+      <Moon className="workspace-theme-moon" />
+      <span />
+    </button>
+  )
+}
 
 // Workspace als permanente linke Spalte: die schmale Nav-Rail ersetzt die alte
 // InfoPane. Ein Klick öffnet den Body rechts daneben, der
@@ -73,6 +105,8 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
               <Search className="h-[14px] w-[14px]" />
             </button>
           )}
+          <WorkspaceThemeToggle />
+          <WorkspaceConnectionDot />
         </div>
       </div>
 

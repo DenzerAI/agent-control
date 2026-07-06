@@ -1,4 +1,5 @@
 import { Archive, CircleCheck, CircleDashed, Lightbulb, ShieldCheck } from 'lucide-react'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type IdeaStatus = 'prüfen' | 'geparkt' | 'bauen'
 
@@ -86,16 +87,12 @@ function PanelHead({ title, meta, icon: Icon }: { title: string; meta: string; i
 
 export function IdeasWorkspace() {
   return (
-    <div className="workspace-system workspace-ideas">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Ideen & Konzepte</p>
-          <h2>Ideen, die warten dürfen</h2>
-          <span>
-            Ein ruhiger Parkplatz für besprochene Dinge. Nichts läuft von allein, nichts drängt sich vor.
-          </span>
-        </div>
-      </header>
+    <WorkspaceShell
+      className="workspace-ideas"
+      eyebrow="Ideen & Konzepte"
+      title="Ideen, die warten dürfen"
+      subtitle="Ein ruhiger Parkplatz für besprochene Dinge. Nichts läuft von allein, nichts drängt sich vor."
+    >
 
       <div className="workspace-system-strip">
         <Metric label="Ideen" value={`${IDEAS.length}`} detail="sichtbar geparkt" />
@@ -146,6 +143,6 @@ export function IdeasWorkspace() {
           </div>
         </section>
       </div>
-    </div>
+    </WorkspaceShell>
   )
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BarChart3, ChevronDown, FileText, Globe2, MousePointerClick, RefreshCw } from 'lucide-react'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type AnalyticsOverview = {
   days: number
@@ -254,20 +255,21 @@ export function AnalyticsWorkspace() {
     : 'Analytics laden'
 
   return (
-    <div className="workspace-system">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Analytics · example.com · {cache.received_at ? fmtAge(cache.received_at) : 'kein Stand'}</p>
-          <h2>{headline}</h2>
-          <span>{overview ? `${overview.visitors} Leute · ${offers.length} Angebote angesehen · ${offerLeads} mit Formular` : 'Letzter Stand wird geladen und bleibt danach sichtbar.'}</span>
-        </div>
+    <WorkspaceShell
+      eyebrow={`Analytics · example.com · ${cache.received_at ? fmtAge(cache.received_at) : 'kein Stand'}`}
+      title={headline}
+      subtitle={overview ? `${overview.visitors} Leute · ${offers.length} Angebote angesehen · ${offerLeads} mit Formular` : 'Letzter Stand wird geladen und bleibt danach sichtbar.'}
+      action={
+        <>
         <button type="button" onClick={load} disabled={loading || syncing} title="Neu laden">
           <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
         <button type="button" onClick={sync} disabled={loading || syncing} title="Aus KV ziehen">
           <BarChart3 className={syncing ? 'h-4 w-4 animate-pulse' : 'h-4 w-4'} />
         </button>
-      </header>
+        </>
+      }
+    >
 
       {error && <div className="workspace-system-note">{error}</div>}
 
@@ -394,7 +396,7 @@ export function AnalyticsWorkspace() {
           </section>
         </div>
       )}
-    </div>
+    </WorkspaceShell>
   )
 }
 

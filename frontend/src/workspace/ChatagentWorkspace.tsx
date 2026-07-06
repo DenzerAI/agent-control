@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MessageSquare, RefreshCw, ShieldCheck } from 'lucide-react'
 import { refreshPulses, useAutomation, type WorkflowRun } from '../pulses'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type ChatagentStatus = 'ok' | 'warn' | 'critical'
 
@@ -209,21 +210,20 @@ export function ChatagentWorkspace() {
 
   if (!report) {
     return (
-      <div className="workspace-system">
-        <div className="workspace-system-note">
-          {error || (loading ? 'Chatagent lädt ...' : 'Noch kein Chatagent-Stand geladen.')}
-        </div>
-        <header className="workspace-system-hero">
-          <div>
-            <p>Chatagent · Stabilität · Responsiveness</p>
-            <h2>Stand laden</h2>
-            <span>Die Ansicht bleibt leer, bis der erste Status oder Cache verfügbar ist.</span>
-          </div>
+      <WorkspaceShell
+        eyebrow="Chatagent · Stabilität · Responsiveness"
+        title="Stand laden"
+        subtitle="Die Ansicht bleibt leer, bis der erste Status oder Cache verfügbar ist."
+        action={
           <button type="button" onClick={load} disabled={loading} title="Neu laden">
             <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
           </button>
-        </header>
-      </div>
+        }
+      >
+        <div className="workspace-system-note">
+          {error || (loading ? 'Chatagent lädt ...' : 'Noch kein Chatagent-Stand geladen.')}
+        </div>
+      </WorkspaceShell>
     )
   }
 
@@ -233,17 +233,16 @@ export function ChatagentWorkspace() {
   const generatedAge = fmtAge(report.generatedAt || cached?.receivedAt)
 
   return (
-    <div className="workspace-system">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Chatagent · {statusLabel(report.status)} · {generatedAge}</p>
-          <h2>{headline}</h2>
-          <span>{detail}</span>
-        </div>
+    <WorkspaceShell
+      eyebrow={`Chatagent · ${statusLabel(report.status)} · ${generatedAge}`}
+      title={headline}
+      subtitle={detail}
+      action={
         <button type="button" onClick={load} disabled={loading || running} title="Neu laden">
           <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
-      </header>
+      }
+    >
 
       {error && <div className="workspace-system-note">{error}</div>}
 
@@ -355,7 +354,7 @@ export function ChatagentWorkspace() {
           </div>
         </section>
       </div>
-    </div>
+    </WorkspaceShell>
   )
 }
 

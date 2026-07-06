@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workspace-Modul-Konvention</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #1F1F1E;
+  --bg-1:        #2C2C2B;
+  --bg-2:        #353533;
+  --border:      #3A3A38;
+  --border-soft: #2A2A29;
+  --t1:          #E6E6E3;
+  --t2:          #A1A1A0;
+  --t3:          #8A8278;
+  --accent:      #D97757;
+  --accent-soft: rgba(217,119,87,0.12);
+  --warm:        #D6C9A8;
+  --max:         980px;
+  --ok:          #7FB069;
+  --ok-soft:     rgba(127,176,105,0.14);
+  --nav-bg:      rgba(31,31,30,0.82);
+}
+:root[data-theme="light"] {
+  --bg:          #FAF9F5;
+  --bg-1:        #F5F3EC;
+  --bg-2:        #F0EEE6;
+  --border:      #E4E0D2;
+  --border-soft: #ECEAE0;
+  --t1:          #1F1F1E;
+  --t2:          #5C5B57;
+  --t3:          #8A8983;
+  --accent:      #E07A4F;
+  --accent-soft: rgba(224,122,79,0.10);
+  --warm:        #9A8C68;
+  --ok:          #5C8A3C;
+  --ok-soft:     rgba(92,138,60,0.12);
+  --nav-bg:      rgba(250,249,245,0.85);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;color:var(--t1);font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.italic{font-family:Lora,Georgia,serif;font-style:italic;font-weight:400}
+.hero{padding:92px 0 72px}
+.eyebrow{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px}
+h1{font-size:clamp(42px,7vw,72px);font-weight:800;letter-spacing:-.02em;line-height:1.02;margin:0 0 18px}
+h2{font-size:32px;font-weight:700;letter-spacing:-.01em;margin:0 0 16px}
+p{margin:0;color:var(--t2)}
+.lead{font-size:20px;max-width:720px}
+section{padding:56px 0;border-top:1px solid var(--border-soft)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.card{border:1px solid var(--border);border-radius:14px;padding:24px;background:transparent}
+.card strong{display:block;font-size:24px;line-height:1.1;margin-bottom:8px}
+.card span{color:var(--t3);font-size:14px}
+.flow{width:100%;height:auto;margin-top:24px}
+.node{fill:transparent;stroke:var(--border);stroke-width:1.5}
+.line{stroke:var(--accent);stroke-width:1.8;stroke-linecap:round}
+.label{fill:var(--t2);font-size:13px}
+.big{fill:var(--t1);font-size:18px;font-weight:700}
+ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+li{position:relative;padding-left:20px;color:var(--t2)}
+li::before{content:"·";position:absolute;left:0;color:var(--accent);font-weight:800;font-size:18px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}.hero{padding:64px 0 48px}section{padding:42px 0}}
+</style>
+</head>
+<body>
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">Arbeitslauf abgeschlossen</div>
+  <h1>Der Workspace hat jetzt <span class="italic">eine</span> Modul-Regel.</h1>
+  <p class="lead">Alle sichtbaren Reiter laufen über dieselbe Shell: gleicher Kopf, gleicher Abstand, Inhalte untereinander. Damit wächst die Oberfläche künftig geordnet statt jedes Modul seinen eigenen kleinen Zirkus aufzubauen.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="grid">
+    <div class="card"><strong>11</strong><span>Workspace-Reiter auf dieselbe Shell gezogen</span></div>
+    <div class="card"><strong>11</strong><span>Konnektoren sichtbar, inklusive Telegram, SMS, WhatsApp und Custom Messenger</span></div>
+    <div class="card"><strong>1</strong><span>Verbindungspunkt unten links, kein Text mehr</span></div>
+    <div class="card"><strong>2</strong><span>Themes geprüft: dunkel und hell</span></div>
+  </div>
+  <svg class="flow" viewBox="0 0 900 210" role="img" aria-label="Vom uneinheitlichen Modulaufbau zur gemeinsamen Shell">
+    <path class="line" d="M190 104 H710"/>
+    <rect class="node" x="44" y="48" width="190" height="112" rx="14"/>
+    <rect class="node" x="355" y="48" width="190" height="112" rx="14"/>
+    <rect class="node" x="666" y="48" width="190" height="112" rx="14"/>
+    <text class="big" x="76" y="91">Vorher</text>
+    <text class="label" x="76" y="120">Jeder Reiter anders</text>
+    <text class="big" x="386" y="91">Shell</text>
+    <text class="label" x="386" y="120">Eine Layout-Wahrheit</text>
+    <text class="big" x="696" y="91">Nachher</text>
+    <text class="label" x="696" y="120">Ruhig, untereinander</text>
+  </svg>
+</div></section>
+
+<section><div class="wrap">
+  <div class="eyebrow">Was es bedeutet</div>
+  <h2>Neue Module starten ab jetzt nicht mehr bei null.</h2>
+  <ul>
+    <li>Agent, Inbox, Wissen, Aufgaben, Konnektoren, Dateien und Artefakte nutzen denselben Header-Aufbau.</li>
+    <li>Die Artefakt-Suche ist schlank, die Konnektoren sind leiser, und die Eingaben sind nicht mehr so fett eingerahmt.</li>
+    <li>Der Theme-Schalter sitzt unten in der Rail und schaltet den Workspace sichtbar zwischen hell und dunkel.</li>
+    <li>Die Modul-Konvention ist dokumentiert, damit neue Reiter nicht wieder ausfransen.</li>
+  </ul>
+</div></section>
+</body>
+</html>

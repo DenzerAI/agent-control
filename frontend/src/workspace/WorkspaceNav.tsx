@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bot, BrainCircuit, CheckSquare2, FolderOpen, Inbox, Library, PlugZap } from 'lucide-react'
+import { Bot, Cable, CheckSquare2, FolderOpen, Inbox, LibraryBig, BookOpenText } from 'lucide-react'
 import type { WorkspaceMode } from './types'
 import { useWerkbankNavSignal } from './werkbankSignal'
 
@@ -11,11 +11,11 @@ const WORKSPACE_NAV: NavGroup[] = [
     label: '',
     items: [
       { id: 'inbox', label: 'Inbox', icon: Inbox },
-      { id: 'knowledge', label: 'Wissen', icon: BrainCircuit },
+      { id: 'knowledge', label: 'Wissen', icon: BookOpenText },
       { id: 'tasks', label: 'Aufgaben', icon: CheckSquare2 },
-      { id: 'connectors', label: 'Konnektoren', icon: PlugZap },
+      { id: 'connectors', label: 'Konnektoren', icon: Cable },
       { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
-      { id: 'artifacts', label: 'Artefakte', icon: Library },
+      { id: 'artifacts', label: 'Artefakte', icon: LibraryBig },
       { id: 'agent', label: 'Agent', icon: Bot },
     ],
   },
@@ -90,6 +90,15 @@ function useConnectionLost(): boolean {
   return lost
 }
 
+export function WorkspaceConnectionDot() {
+  const connectionLost = useConnectionLost()
+  return (
+    <div className="workspace-connection-dot" title={connectionLost ? 'Verbindung weg' : 'Verbindung steht'} aria-label={connectionLost ? 'Verbindung weg' : 'Verbindung steht'}>
+      <span className={connectionLost ? 'is-lost' : 'is-ok'} />
+    </div>
+  )
+}
+
 export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
   mode: WorkspaceMode
   collapsed?: boolean
@@ -97,7 +106,6 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
 }) {
   const activeId: WorkspaceMode = mode === 'document' || mode === 'preview' ? 'filesystem' : mode
   const notify = useNotifyModes(activeId)
-  const connectionLost = useConnectionLost()
   const werkbankSignal = useWerkbankNavSignal()
   return (
     <nav className={`workspace-nav${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace Navigation">
@@ -120,7 +128,7 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
                 ? werkbankSignal.active > 0 ? `Werkbank läuft · ${werkbankSignal.active}` : werkbankSignal.waiting > 0 ? `Werkbank wartet · ${werkbankSignal.waiting}` : werkbankSignal.attention > 0 ? `Werkbank braucht Blick · ${werkbankSignal.attention}` : undefined
                 : undefined}
             >
-              <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+              <item.icon className="workspace-nav-icon" strokeWidth={1.75} />
               <span>{item.label}</span>
               {item.id === 'tasks' && (werkbankSignal.active > 0 || werkbankSignal.waiting > 0) && !collapsed && (
                 <span className="workspace-nav-count" aria-label={werkbankSignal.active > 0 ? `${werkbankSignal.active} laufende Aufträge` : `${werkbankSignal.waiting} wartende Aufträge`}>{werkbankSignal.active || werkbankSignal.waiting}</span>
@@ -129,10 +137,6 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
           ))}
         </div>
       ))}
-      <div className="workspace-nav-status" title={connectionLost ? 'Verbindung weg' : 'Verbindung steht'}>
-        <span className={connectionLost ? 'is-lost' : 'is-ok'} />
-        {!collapsed && <em>{connectionLost ? 'Verbindung weg' : 'Verbunden'}</em>}
-      </div>
     </nav>
   )
 }

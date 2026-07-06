@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Brain, FileText, MessageSquare, Network, RefreshCw, ShieldCheck, Sparkles, type LucideIcon } from 'lucide-react'
 import type { CronJob } from '../components/info-pane/types'
 import { useMainAgentName } from '../agents'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type RecentFile = { name: string; path: string; modified: number }
 type RecentMessage = { author: string; content: string; ts: number; conversationId: string; title: string }
@@ -170,17 +171,17 @@ export function AgentWorkspace() {
   ].filter(item => item.path)), [viewData])
 
   return (
-    <div className="workspace-system agent-cq">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Agent</p>
-          <h2>{viewData.name || agentName}</h2>
-          <span>{viewData.role || 'Persönlicher Agent, Identität und Systemzustand als übersichtliches Dashboard.'}</span>
-        </div>
+    <WorkspaceShell
+      className="agent-cq"
+      eyebrow="Agent"
+      title={viewData.name || agentName}
+      subtitle={viewData.role || 'Persönlicher Agent, Identität und Systemzustand als übersichtliches Dashboard.'}
+      action={
         <button type="button" onClick={load} disabled={loading} title="Neu laden">
           <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
         </button>
-      </header>
+      }
+    >
 
       <div className="workspace-system-strip">
         <BigStat label="Nachrichten zusammen" value={fmtNum(viewData.stats?.total)} accent />
@@ -257,7 +258,7 @@ export function AgentWorkspace() {
           </>
         )}
       </main>
-    </div>
+    </WorkspaceShell>
   )
 }
 

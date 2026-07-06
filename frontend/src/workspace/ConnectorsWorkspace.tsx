@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Bot, BrainCircuit, CheckCircle2, Cloud, Cpu, KeyRound, Loader2,
-  MessageSquare, PlugZap, Save, Server, Sparkles, Volume2,
+  Bot, CheckCircle2, Cpu, KeyRound, Loader2, MessageSquare, PlugZap, Save,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { WorkspaceShell } from './WorkspaceShell'
 
 type ConnectorStatus = 'connected' | 'not_connected'
 
@@ -19,16 +19,25 @@ type ConnectorItem = {
 }
 
 const ICONS: Record<string, LucideIcon> = {
-  openai: Sparkles,
-  anthropic: BrainCircuit,
-  google_workspace: Cloud,
-  microsoft: Server,
-  slack: MessageSquare,
-  elevenlabs: Volume2,
   custom: PlugZap,
+  sms: MessageSquare,
+  custom_messenger: PlugZap,
   engine_claude: Bot,
   engine_codex_openai: KeyRound,
   engine_local_models: Cpu,
+}
+
+const LOGOS: Record<string, string> = {
+  openai: '/connectors/openai.svg',
+  anthropic: '/connectors/anthropic.svg',
+  google_workspace: '/connectors/google.svg',
+  microsoft: '/connectors/microsoft.svg',
+  slack: '/connectors/slack.svg',
+  elevenlabs: '/connectors/elevenlabs.svg',
+  telegram: '/connectors/telegram.svg',
+  sms: '/connectors/sms.svg',
+  whatsapp: '/connectors/whatsapp.svg',
+  custom_messenger: '/connectors/custom-messenger.svg',
 }
 
 const DEMO_CONNECTORS: ConnectorItem[] = [
@@ -38,7 +47,11 @@ const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'microsoft', kind: 'service', name: 'Microsoft', description: 'Outlook, Teams, OneDrive und Microsoft 365 später anbinden.', account_label: '', credential_hint: 'Tenant oder Key leer', status: 'not_connected', updated_at: 0 },
   { id: 'slack', kind: 'service', name: 'Slack', description: 'Channels, Threads und interne Freigaben für Team-Kommunikation.', account_label: '', credential_hint: 'Bot-Token leer', status: 'not_connected', updated_at: 0 },
   { id: 'elevenlabs', kind: 'service', name: 'ElevenLabs', description: 'Stimmen, TTS und Voice-Agent-Ausgabe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'telegram', kind: 'service', name: 'Telegram', description: 'Chats, Bots und Benachrichtigungen als späterer Messenger-Kanal.', account_label: '', credential_hint: 'Bot-Token leer', status: 'not_connected', updated_at: 0 },
+  { id: 'sms', kind: 'service', name: 'SMS', description: 'Kurznachrichten über einen Telefonie-Provider wie Twilio oder Sipgate.', account_label: '', credential_hint: 'Provider-Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'whatsapp', kind: 'service', name: 'WhatsApp', description: 'WhatsApp Business oder lokale Brücke für Kunden- und Teamchats.', account_label: '', credential_hint: 'Zugang leer', status: 'not_connected', updated_at: 0 },
   { id: 'custom', kind: 'service', name: 'Eigener Dienst', description: 'Freier Platz für Kunden-API, CRM, ERP oder interne Tools.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'custom_messenger', kind: 'service', name: 'Custom Messenger', description: 'Freier Messenger-Kanal für Kunden-App, Community oder internes System.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
 ]
 
 function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
@@ -48,6 +61,7 @@ function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
 
 function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item: ConnectorItem) => void }) {
   const Icon = ICONS[item.id] || PlugZap
+  const logo = LOGOS[item.id]
   const [credential, setCredential] = useState('')
   const [accountLabel, setAccountLabel] = useState(item.account_label || '')
   const [saving, setSaving] = useState(false)
@@ -83,7 +97,9 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
     <section className="workspace-system-panel">
       <div className="workspace-system-panel-head">
         <div>
-          <Icon className="h-4 w-4" />
+          <span className="connector-logo" aria-hidden="true">
+            {logo ? <img src={logo} alt="" /> : <Icon className="h-4 w-4" strokeWidth={1.75} />}
+          </span>
           <strong>{item.name}</strong>
         </div>
         <span>{item.kind === 'engine' ? 'Engine' : 'Dienst'}</span>
@@ -103,7 +119,7 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
             value={accountLabel}
             onChange={e => setAccountLabel(e.target.value)}
             placeholder="optional"
-            className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-sm text-[var(--t1)] outline-none transition-colors focus:border-[var(--cc-orange)]"
+            className="connector-input"
           />
         </label>
         <label className="grid gap-1 text-xs text-[var(--t2)]">
@@ -113,7 +129,7 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
             onChange={e => setCredential(e.target.value)}
             placeholder={connected ? item.credential_hint : 'Key eintragen'}
             type="password"
-            className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-sm text-[var(--t1)] outline-none transition-colors focus:border-[var(--cc-orange)]"
+            className="connector-input"
           />
         </label>
         {error && <p className="text-xs text-[var(--cc-orange)]">{error}</p>}
@@ -168,17 +184,16 @@ export function ConnectorsWorkspace() {
   }
 
   return (
-    <div className="workspace-system">
-      <header className="workspace-system-hero">
-        <div>
-          <p>Konnektoren</p>
-          <h2>Zugänge für Dienste und Engines</h2>
-          <span>Keys werden nur maskiert gespeichert und nie im Klartext an die Oberfläche zurückgegeben.</span>
-        </div>
+    <WorkspaceShell
+      eyebrow="Konnektoren"
+      title="Zugänge für Dienste und Engines"
+      subtitle="Keys werden nur maskiert gespeichert und nie im Klartext an die Oberfläche zurückgegeben."
+      action={
         <button type="button" title="Konnektoren aktualisieren" onClick={() => window.location.reload()}>
           <PlugZap className="h-4 w-4" />
         </button>
-      </header>
+      }
+    >
 
       {error && <div className="workspace-system-note">{error}</div>}
 
@@ -204,6 +219,6 @@ export function ConnectorsWorkspace() {
         {items.map(item => <ConnectorCard key={item.id} item={item} onSaved={handleSaved} />)}
         {loading && <section className="workspace-system-panel"><div className="workspace-system-list"><p>Lädt …</p></div></section>}
       </div>
-    </div>
+    </WorkspaceShell>
   )
 }
