@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bot, BrainCircuit, CheckSquare2, FolderOpen, Inbox, PlugZap } from 'lucide-react'
+import { Bot, BrainCircuit, CheckSquare2, FolderOpen, Inbox, Library, PlugZap } from 'lucide-react'
 import type { WorkspaceMode } from './types'
 import { useWerkbankNavSignal } from './werkbankSignal'
 
@@ -10,12 +10,13 @@ const WORKSPACE_NAV: NavGroup[] = [
   {
     label: '',
     items: [
-      { id: 'agent', label: 'Chat', icon: Bot },
       { id: 'inbox', label: 'Inbox', icon: Inbox },
       { id: 'knowledge', label: 'Wissen', icon: BrainCircuit },
       { id: 'tasks', label: 'Aufgaben', icon: CheckSquare2 },
       { id: 'connectors', label: 'Konnektoren', icon: PlugZap },
       { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
+      { id: 'artifacts', label: 'Artefakte', icon: Library },
+      { id: 'agent', label: 'Agent', icon: Bot },
     ],
   },
 ]

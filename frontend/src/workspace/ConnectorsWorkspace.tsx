@@ -31,6 +31,21 @@ const ICONS: Record<string, LucideIcon> = {
   engine_local_models: Cpu,
 }
 
+const DEMO_CONNECTORS: ConnectorItem[] = [
+  { id: 'openai', kind: 'service', name: 'OpenAI', description: 'API-Zugang für GPT, Bilder, Transkription und Agentenläufe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'anthropic', kind: 'engine', name: 'Claude', description: 'Claude Code und Anthropic-Modelle für Bau- und Analyseaufgaben.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'google_workspace', kind: 'service', name: 'Google / E-Mail', description: 'Gmail, Kalender, Drive und E-Mail-Kontext für den Workspace.', account_label: '', credential_hint: 'OAuth oder Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'microsoft', kind: 'service', name: 'Microsoft', description: 'Outlook, Teams, OneDrive und Microsoft 365 später anbinden.', account_label: '', credential_hint: 'Tenant oder Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'slack', kind: 'service', name: 'Slack', description: 'Channels, Threads und interne Freigaben für Team-Kommunikation.', account_label: '', credential_hint: 'Bot-Token leer', status: 'not_connected', updated_at: 0 },
+  { id: 'elevenlabs', kind: 'service', name: 'ElevenLabs', description: 'Stimmen, TTS und Voice-Agent-Ausgabe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'custom', kind: 'service', name: 'Eigener Dienst', description: 'Freier Platz für Kunden-API, CRM, ERP oder interne Tools.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
+]
+
+function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
+  const byId = new Map(items.map(item => [item.id, item]))
+  return DEMO_CONNECTORS.map(demo => ({ ...demo, ...(byId.get(demo.id) || {}) }))
+}
+
 function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item: ConnectorItem) => void }) {
   const Icon = ICONS[item.id] || PlugZap
   const [credential, setCredential] = useState('')
@@ -130,9 +145,10 @@ export function ConnectorsWorkspace() {
         const res = await fetch('/api/connectors', { cache: 'no-store' })
         const data = await res.json()
         if (!res.ok) throw new Error(data?.error || 'Konnektoren nicht erreichbar')
-        if (alive) setItems(Array.isArray(data.items) ? data.items : [])
+        if (alive) setItems(mergeDemoConnectors(Array.isArray(data.items) ? data.items : []))
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : 'Konnektoren nicht erreichbar')
+        if (alive) setItems(mergeDemoConnectors([]))
       } finally {
         if (alive) setLoading(false)
       }
@@ -184,7 +200,7 @@ export function ConnectorsWorkspace() {
         </section>
       </div>
 
-      <div className="workspace-system-main">
+      <div className="workspace-system-main workspace-system-stack">
         {items.map(item => <ConnectorCard key={item.id} item={item} onSaved={handleSaved} />)}
         {loading && <section className="workspace-system-panel"><div className="workspace-system-list"><p>Lädt …</p></div></section>}
       </div>

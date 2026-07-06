@@ -144,7 +144,7 @@ export function AgentWorkspace() {
             <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
           </button>
         </div>
-        <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <BigStat label="Nachrichten zusammen" value={fmtNum(data?.stats?.total)} accent />
           <BigStat label="Heute" value={fmtNum(data?.stats?.today)} />
           <BigStat label="Zuletzt aktiv" value={fmtAge(data?.stats?.lastActive)} />

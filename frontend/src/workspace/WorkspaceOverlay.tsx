@@ -9,6 +9,7 @@ import { HealthWorkspace } from './HealthWorkspace'
 import { LimitsWorkspace } from './LimitsWorkspace'
 import { SystemagentWorkspace } from './SystemagentWorkspace'
 import { ChatagentWorkspace } from './ChatagentWorkspace'
+import { AutomationWorkspace } from './AutomationWorkspace'
 import { LoopWorkspace } from './LoopWorkspace'
 import { PioniereWorkspace } from './PioniereWorkspace'
 import { YouTubeWorkspace } from './YouTubeWorkspace'
@@ -77,9 +78,9 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
 
       {open && (
         <div className="workspace-panel">
-          <div className="workspace-topbar">
-            <div className="workspace-title-group">
-              {returnMode && mode !== returnMode && onBack && (
+          {returnMode && mode !== returnMode && onBack && (
+            <div className="workspace-topbar workspace-topbar-backonly">
+              <div className="workspace-title-group">
                 <button
                   type="button"
                   className="workspace-back"
@@ -89,10 +90,9 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
                   <ArrowLeft className="h-4 w-4" />
                   <span>{workspaceModeLabel(returnMode || 'artifacts')}</span>
                 </button>
-              )}
-              <div className="workspace-title">{workspaceModeLabel(mode)}</div>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="workspace-body">
             {mode === 'preview' && <PreviewPane file={file?.kind === 'html' ? file : null} onRevealPath={onRevealPath} />}
@@ -100,7 +100,7 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
             {mode === 'filesystem' && <WorkspaceHome onOpenFile={onOpenFile} onClose={onClose} onRevealPath={onRevealPath} path={filesystemPath} filePath={file && file.kind !== 'html' ? file.path : null} />}
             {mode === 'agent' && <AgentWorkspace />}
             {mode === 'knowledge' && <CompanyMemoryWorkspace />}
-            {mode === 'tasks' && <LoopWorkspace initialView="werkbank" lockedView />}
+            {mode === 'tasks' && <AutomationWorkspace />}
             {mode === 'connectors' && <ConnectorsWorkspace />}
             {mode === 'health' && <HealthWorkspace />}
             {mode === 'limits' && <LimitsWorkspace />}

@@ -26,6 +26,12 @@ function writeCache(entries: ArtifactEntry[]) {
   try { localStorage.setItem(CACHE_KEY, JSON.stringify(entries)) } catch {}
 }
 
+const DEMO_ARTIFACTS: ArtifactEntry[] = [
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'report', name: 'demo-kundenbriefing.html', label: 'Kundenbriefing als HTML', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-kundenbriefing.html', ts: 0 },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'doc', name: 'demo-protokoll.md', label: 'Werkbank-Protokoll', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-protokoll.md', ts: 0 },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'asset:image', name: 'demo-visual.png', label: 'Kampagnenvisual', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-visual.png', ts: 0 },
+]
+
 // Immer mit Uhrzeit: heute nur die Zeit, sonst Tag plus Zeit. Das Datum allein
 // ist redundant, weil die Dateien ohnehin nach Datum heissen.
 function fmtWhen(ts?: number): string {
@@ -106,21 +112,26 @@ function ArtifactThumb({ entry }: { entry: ArtifactEntry }) {
 // Claude-Verlauf: alles gleich aufgebaut, scanbar, leise.
 function ArtifactLine({ entry }: { entry: ArtifactEntry }) {
   return (
-    <button
-      type="button"
-      onClick={() => openArtifact(entry.path)}
-      title={entry.path}
-      className="group flex w-full min-w-0 items-center gap-3 border-b border-[var(--border)] px-2 py-2.5 text-left transition-colors hover:bg-white/[0.03]"
-    >
-      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg)]">
-        <ArtifactThumb entry={entry} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-medium text-[var(--t1)]">{entry.label || entry.name}</span>
-        <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{categoryLabel(entry.category)} · {fmtWhen(entry.ts)}</span>
-      </span>
+    <article className="group flex w-full min-w-0 items-center gap-3 border-b border-[var(--border)] px-2 py-2.5 text-left transition-colors hover:bg-white/[0.03]">
+      <button type="button" onClick={() => openArtifact(entry.path)} title={entry.path} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg)]">
+          <ArtifactThumb entry={entry} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] font-medium text-[var(--t1)]">{entry.label || entry.name}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{categoryLabel(entry.category)} · {fmtWhen(entry.ts) || entry.relativeDate || 'Demo'}</span>
+        </span>
+      </button>
       <span className="shrink-0 rounded bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-[var(--t3)]">{ext(entry.path)}</span>
-    </button>
+      <a
+        href={`/api/fs/download?path=${encodeURIComponent(entry.path)}`}
+        className="shrink-0 rounded-md px-2 py-1 text-[11px] text-[var(--t3)] transition-colors hover:bg-white/[0.05] hover:text-[var(--t1)]"
+        title="Herunterladen"
+        onClick={e => e.stopPropagation()}
+      >
+        Download
+      </a>
+    </article>
   )
 }
 
@@ -154,7 +165,7 @@ export function ArtifactsWorkspace() {
     try {
       const res = await fetch('/api/recent-entries?limit=100', { cache: 'no-store' })
       const data = await res.json()
-      const next = Array.isArray(data.entries) ? data.entries as ArtifactEntry[] : []
+      const next = Array.isArray(data.entries) && data.entries.length ? data.entries as ArtifactEntry[] : DEMO_ARTIFACTS
       setEntries(next)
       writeCache(next)
     } catch (e) {
@@ -235,7 +246,7 @@ export function ArtifactsWorkspace() {
 
         <div className="mt-2">
           {visible.length === 0 ? (
-            <div className="rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Artefakte' : 'Keine Artefakte.'}</div>
+            <div className="px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Artefakte' : 'Keine Artefakte.'}</div>
           ) : (
             visible.map(entry => <ArtifactLine key={`${entry.path}:${entry.ts}`} entry={entry} />)
           )}

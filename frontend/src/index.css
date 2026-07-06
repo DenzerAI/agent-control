@@ -270,6 +270,10 @@
   background: var(--border);
 }
 
+.workspace-topbar-backonly::after {
+  display: none;
+}
+
 .workspace-title {
   font-size: 13px;
   font-weight: 600;
@@ -517,7 +521,7 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  padding: 18px;
+  padding: 0 18px 18px;
 }
 
 /* Kohärente Rundung: jede vollständig umrandete Fläche (Karte, Button, Eingabe)
@@ -531,9 +535,10 @@
    Artefakte, Settings, Agent-Ansichten) bekommen einen gerahmten, abgerundeten
    Panel-Look, damit der Hintergrund nicht eckig abgeschnitten wirkt. */
 .workspace-body > .bg-\[var\(--bg\)\] {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
 }
 
 /* Workspaces, die am Wurzelcontainer selbst scrollen (z. B. Social), behalten
@@ -3097,7 +3102,7 @@
 .workspace-health-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
   align-items: start;
   padding: clamp(18px, 2vw, 24px);
@@ -3421,7 +3426,7 @@
 .workspace-limits-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
   align-items: start;
   padding: clamp(18px, 2vw, 24px);
@@ -3756,7 +3761,7 @@
 .workspace-system-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: start;
   padding: clamp(18px, 2vw, 24px);
@@ -3817,7 +3822,7 @@
 
 .workspace-system-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -3859,8 +3864,12 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  grid-template-columns: 1fr;
   gap: 14px;
+}
+
+.workspace-system-stack {
+  grid-template-columns: 1fr;
 }
 
 .workspace-system-panel {
@@ -4257,7 +4266,7 @@
 }
 
 .workspace-span-1 .workspace-system-hero {
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   padding: 18px;
 }
@@ -4272,9 +4281,7 @@
   grid-template-columns: 1fr;
 }
 
-.workspace-span-2 .workspace-system-strip {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
+.workspace-span-2 .workspace-system-strip { grid-template-columns: 1fr; }
 
 .workspace-span-1 .workspace-system-strip section {
   min-height: 78px;
@@ -4365,6 +4372,22 @@ html, body, #root {
   pointer-events: none;
 }
 
+.chat-pane-titlebar::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  height: 1px;
+  background: var(--border);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.chat-pane-titlebar [id^="chat-pane-controls-"] {
+  pointer-events: auto;
+}
+
 .chat-pane-switcher {
   pointer-events: auto;
   position: absolute;
@@ -4387,6 +4410,16 @@ html, body, #root {
 .chat-pane-switcher:hover {
   background: color-mix(in srgb, var(--bg-3) 42%, transparent);
   color: var(--t1);
+}
+
+.workspace-files-root {
+  background: transparent;
+}
+
+.workspace-files-demo {
+  padding: 16px 0 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  margin-bottom: 8px;
 }
 
 .chat-pane-switcher span {

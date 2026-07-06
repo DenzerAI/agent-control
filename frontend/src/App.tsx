@@ -4,7 +4,7 @@ const Spotlight = lazy(() => import('./components/Spotlight').then(m => ({ defau
 import { LinkPreview } from './components/LinkPreview'
 import { WorkspaceOverlay, useWorkspaceController, type WorkspaceSpan } from './workspace'
 import { GlobalYouTubePlayer } from './components/GlobalYouTubePlayer'
-import { Square, MessageSquare, Presentation, Radio, Settings, Plus, X, Pencil, Archive, ArchiveRestore, Search, Wrench } from 'lucide-react'
+import { Square, MessageSquare, Presentation, Radio, Settings, Plus, X, Pencil, Archive, ArchiveRestore, Search, Wrench, Maximize2, Minimize2 } from 'lucide-react'
 import { getAgentNames, getDefaultEngine, useMainAgentName } from './agents'
 import { playUISound, preloadUISounds } from './uiSounds'
 import { fuzzyIncludes } from './fuzzy'
@@ -130,8 +130,8 @@ function chatAge(ts: number): string {
   return `${d.getDate()}. ${d.toLocaleString('de', { month: 'short' })}`
 }
 
-function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, onConvChange, onNewChat, onRenameChat, onArchiveChat, onRestoreChat, onLoadArchive }: {
-  pane: PaneConfig; paneIndex: number; conversations: ConvOption[]; archivedChats: ConvOption[]; busyConvs: Set<string>; onConvChange: (idx: number, convId: string, agent: string) => void; onNewChat: (idx: number, agent: string) => void; onRenameChat: (convId: string, title: string) => void; onArchiveChat: (convId: string) => void; onRestoreChat: (convId: string) => void; onLoadArchive: () => void
+function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, isMaximized, onToggleMaximize, onConvChange, onNewChat, onRenameChat, onArchiveChat, onRestoreChat, onLoadArchive }: {
+  pane: PaneConfig; paneIndex: number; conversations: ConvOption[]; archivedChats: ConvOption[]; busyConvs: Set<string>; isMaximized: boolean; onToggleMaximize: () => void; onConvChange: (idx: number, convId: string, agent: string) => void; onNewChat: (idx: number, agent: string) => void; onRenameChat: (convId: string, title: string) => void; onArchiveChat: (convId: string) => void; onRestoreChat: (convId: string) => void; onLoadArchive: () => void
 }) {
   const [open, setOpenState] = useState(false)
   const setOpen = (v: boolean) => {
@@ -249,6 +249,20 @@ function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, 
           title={tabTitle}
         >
           <span>{tabTitle}</span>
+        </div>
+        <div
+          id={`chat-pane-controls-${paneIndex}`}
+          className={`absolute right-0 top-0 flex h-[var(--header-row-h)] items-center gap-1 pl-1 pr-6 pt-[5px] pb-[3px] transition-opacity ${isMaximized ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        >
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onToggleMaximize() }}
+            className="inline-flex h-6 w-6 items-center justify-center text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            title={isMaximized ? 'Verkleinern' : 'Maximieren'}
+            aria-label={isMaximized ? 'Chat-Pane verkleinern' : 'Chat-Pane maximieren'}
+          >
+            {isMaximized ? <Minimize2 className="h-[14px] w-[14px]" strokeWidth={1.8} /> : <Maximize2 className="h-[14px] w-[14px]" strokeWidth={1.8} />}
+          </button>
         </div>
       </div>
       {open && paneRect && (
@@ -514,6 +528,7 @@ export default function App() {
   const workspace = useWorkspaceController()
   const [activeSpace, setActiveSpace] = useState('chat')
   const [deckFile, setDeckFile] = useState('')
+  const [focusedPaneIdx, setFocusedPaneIdx] = useState<number | null>(null)
   const [, setUnread] = useState<Set<string>>(new Set())
   const [busyConvs, setBusyConvs] = useState<Set<string>>(new Set())
   const contentFrameRef = useRef<HTMLDivElement | null>(null)
@@ -952,6 +967,17 @@ export default function App() {
     return () => window.removeEventListener('keydown', handler)
   }, [activeAgent, showInfo])
 
+  useEffect(() => {
+    if (focusedPaneIdx === null) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (search || spaceSwitcher) return
+      setFocusedPaneIdx(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [focusedPaneIdx, search, spaceSwitcher])
+
   // Workspace links, ein Chat rechts. Keine Layout-Slots, keine Pane-Pillen.
   const WS_RAIL_PX = 200
   const WS_RAIL_COLLAPSED_PX = 64
@@ -975,11 +1001,14 @@ export default function App() {
   }, [busyConvs.size])
 
   const renderedPanes = paneConfigs.map((pane, idx) => {
+    const isFocused = focusedPaneIdx === idx
     return (
     <div
       key={idx}
       data-pane-container
-      className="relative bg-[var(--bg)] min-h-0 overflow-hidden border-l border-[var(--border)] rounded-l-[14px] rounded-r-[14px]"
+      className={isFocused
+        ? 'fixed inset-0 z-40 bg-[var(--bg)] overflow-hidden'
+        : 'relative bg-[var(--bg)] min-h-0 overflow-hidden border-l border-[var(--border)] rounded-l-[14px] rounded-r-[14px]'}
     >
       {/* Pane header overlay — sitzt absolut oben auf dem Chat, damit Messages dahinter durchscrollen können */}
       <div className="absolute top-0 left-0 right-0 z-20">
@@ -1023,6 +1052,8 @@ export default function App() {
         }}
         onLoadArchive={loadArchivedChats}
         busyConvs={busyConvs}
+        isMaximized={isFocused}
+        onToggleMaximize={() => setFocusedPaneIdx(prev => prev === idx ? null : idx)}
       />
       </div>
       {/* Chat füllt die gesamte Pane — scrollt unter dem Header hindurch */}
