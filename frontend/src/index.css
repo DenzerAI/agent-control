@@ -96,6 +96,58 @@
   position: relative;
 }
 
+.main-layout-splitter {
+  position: relative;
+  z-index: 3;
+  min-width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.main-layout-splitter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--border-f) 50%, transparent);
+  transition-property: width, background-color, box-shadow;
+  transition-duration: 140ms;
+  transition-timing-function: ease;
+}
+
+.main-layout-splitter:hover::before,
+.main-layout-splitter:focus-visible::before,
+body.is-resizing-main-layout .main-layout-splitter::before {
+  width: 3px;
+  background: color-mix(in srgb, var(--cc-orange) 72%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cc-orange) 10%, transparent);
+}
+
+body.is-resizing-main-layout,
+body.is-resizing-main-layout * {
+  cursor: col-resize !important;
+  user-select: none;
+}
+
+.workspace-responsive-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  min-width: 0;
+  min-height: 0;
+  background: var(--info-tone);
+}
+
+.workspace-responsive-overlay .workspace-dock {
+  width: 100%;
+  height: 100%;
+}
+
 /* InfoPane: flächiger, leicht dunklerer Ton (--info-tone), KEINE eigene Box.
    Der Chat-Bereich läuft full height und ist nur durch eine einzige Border links
    (border-l + rounded-l am ersten Pane, s. App.tsx) abgesetzt, kein Rahmen rundum.

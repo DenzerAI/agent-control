@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flexibles Layout mit Splitter</title>
+  <style>
+    :root {
+      --bg: #1F1F1E;
+      --panel: #2C2C2B;
+      --panel-soft: #252523;
+      --text: #E6E6E3;
+      --muted: #A1A1A0;
+      --border: #3A3A38;
+      --coral: #D97757;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.55;
+    }
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0;
+    }
+    .kicker {
+      margin: 0 0 10px;
+      color: var(--coral);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.03;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+    .lead {
+      max-width: 720px;
+      margin: 18px 0 30px;
+      color: var(--muted);
+      font-size: 18px;
+      text-wrap: pretty;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .card {
+      min-height: 132px;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    .card span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .summary {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      background: var(--panel-soft);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+    .summary p { margin: 0; color: var(--muted); }
+    .summary p + p { margin-top: 12px; }
+    b { color: var(--text); }
+    @media (max-width: 720px) {
+      main { width: min(100% - 24px, 920px); padding: 28px 0; }
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 0; }
+      .lead { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="kicker">Agent Control Layout</p>
+    <h1>Chat und Workspace teilen sich den Platz jetzt flexibel.</h1>
+    <p class="lead">Zwischen Workspace und Chat sitzt eine schmale Ziehkante. Christian kann den Chat kleiner machen, wenn er mehr Arbeitsfläche braucht, und die App merkt sich diese Aufteilung.</p>
+
+    <section class="grid" aria-label="Kernaenderungen">
+      <article class="card">
+        <strong>Eine Ziehkante</strong>
+        <span>Ein einzelner Splitter steuert beide Seiten gleichzeitig. Kein Rätselraten, kein zweiter Griff.</span>
+      </article>
+      <article class="card">
+        <strong>Feste Mindestbreiten</strong>
+        <span>Der Chat bleibt nutzbar, der Workspace bleibt lesbar. Beide Seiten haben klare Grenzen.</span>
+      </article>
+      <article class="card">
+        <strong>Schmal sauber</strong>
+        <span>Wenn der Platz nicht reicht, klappt das Layout in eine eigene Workspace-Ansicht um.</span>
+      </article>
+    </section>
+
+    <section class="summary">
+      <p><b>Was das bedeutet:</b> Der Workspace ist nicht mehr der zu kleine Nebenraum, sondern kann aktiv größer gezogen werden.</p>
+      <p><b>Geprüft:</b> breit, mittel und schmal auf dem laufenden Vite-Server unter Port 4222. Drag, Mindestbreiten und gespeicherte Aufteilung funktionieren.</p>
+    </section>
+  </main>
+</body>
+</html>

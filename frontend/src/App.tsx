@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, useCallback, lazy, Suspense, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { ChatPane } from './components/ChatPane'
 const Spotlight = lazy(() => import('./components/Spotlight').then(m => ({ default: m.Spotlight })))
 import { LinkPreview } from './components/LinkPreview'
@@ -12,6 +12,13 @@ import { useConversationSearch } from './conversationSearch'
 import './index.css'
 
 const AGENT_CHANNEL_ID = ['kl', 'aus-channel'].join('')
+const LAYOUT_CHAT_FRACTION_KEY = 'control:layout:chatFraction'
+const CHAT_MIN_PX = 380
+const WORKSPACE_MIN_PX = 520
+const SPLITTER_PX = 10
+const DEFAULT_CHAT_FRACTION = 0.42
+
+const clampNumber = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
 // ── Space Switcher ──
 
@@ -532,10 +539,34 @@ export default function App() {
   const [, setUnread] = useState<Set<string>>(new Set())
   const [busyConvs, setBusyConvs] = useState<Set<string>>(new Set())
   const contentFrameRef = useRef<HTMLDivElement | null>(null)
+  const [contentFrameWidth, setContentFrameWidth] = useState(() => typeof window === 'undefined' ? 0 : window.innerWidth)
+  const [chatFraction, setChatFraction] = useState(() => {
+    const raw = typeof localStorage === 'undefined' ? null : localStorage.getItem(LAYOUT_CHAT_FRACTION_KEY)
+    const parsed = raw ? Number(raw) : DEFAULT_CHAT_FRACTION
+    return Number.isFinite(parsed) ? clampNumber(parsed, 0.24, 0.7) : DEFAULT_CHAT_FRACTION
+  })
   const [conversations, setConversations] = useState<ConvOption[]>([])
   const [archivedChats, setArchivedChats] = useState<ConvOption[]>([])
 
   useEffect(() => { preloadUISounds() }, [])
+
+  useEffect(() => {
+    const el = contentFrameRef.current
+    if (!el) return
+    const measure = () => setContentFrameWidth(el.getBoundingClientRect().width)
+    measure()
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure)
+      return () => window.removeEventListener('resize', measure)
+    }
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    try { localStorage.setItem(LAYOUT_CHAT_FRACTION_KEY, String(chatFraction)) } catch {}
+  }, [chatFraction])
 
   // archived chat support is used by PaneHeader
   const loadArchivedChats = useCallback(() => {
@@ -978,20 +1009,67 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [focusedPaneIdx, search, spaceSwitcher])
 
-  // Workspace links, ein Chat rechts. Keine Layout-Slots, keine Pane-Pillen.
+  // Workspace links, ein Chat rechts. Der Splitter teilt nur diese beiden Hauptflächen.
   const WS_RAIL_PX = 200
   const WS_RAIL_COLLAPSED_PX = 64
   const N = paneConfigs.length
   const effectiveWorkspaceSpan = 1 as WorkspaceSpan
+  const frameWidth = Math.max(contentFrameWidth, 0)
+  const minSplitWidth = WORKSPACE_MIN_PX + SPLITTER_PX + CHAT_MIN_PX
+  const canSplitWorkspace = workspace.open && frameWidth >= minSplitWidth
+  const shouldOverlayWorkspace = workspace.open && !canSplitWorkspace
+  const maxChatWidth = Math.max(CHAT_MIN_PX, frameWidth - WORKSPACE_MIN_PX - SPLITTER_PX)
+  const chatWidth = canSplitWorkspace
+    ? clampNumber(Math.round(frameWidth * chatFraction), CHAT_MIN_PX, maxChatWidth)
+    : 0
+  const workspaceWidth = canSplitWorkspace
+    ? Math.max(WORKSPACE_MIN_PX, frameWidth - chatWidth - SPLITTER_PX)
+    : 0
 
   const workspaceColTrack = workspace.open
-    ? 'minmax(520px, 1fr)'
+    ? canSplitWorkspace ? `${workspaceWidth}px` : 'minmax(0, 1fr)'
     : `${workspace.collapsed ? WS_RAIL_COLLAPSED_PX : WS_RAIL_PX}px`
   const horizontalGridStyle: CSSProperties = {
-    gridTemplateColumns: N > 0
-      ? `${workspaceColTrack} minmax(0, 1fr)`
-      : workspaceColTrack,
+    gridTemplateColumns: canSplitWorkspace
+      ? `${workspaceColTrack} ${SPLITTER_PX}px ${chatWidth}px`
+      : shouldOverlayWorkspace
+        ? 'minmax(0, 1fr)'
+        : N > 0
+          ? `${workspaceColTrack} minmax(0, 1fr)`
+          : workspaceColTrack,
   }
+
+  const updateSplitFromClientX = useCallback((clientX: number, rect: DOMRect) => {
+    const nextWorkspaceWidth = clampNumber(clientX - rect.left, WORKSPACE_MIN_PX, rect.width - SPLITTER_PX - CHAT_MIN_PX)
+    const nextChatWidth = rect.width - nextWorkspaceWidth - SPLITTER_PX
+    setChatFraction(clampNumber(nextChatWidth / rect.width, 0.24, 0.7))
+  }, [])
+
+  const startLayoutResize = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!canSplitWorkspace || !contentFrameRef.current) return
+    event.preventDefault()
+    const rect = contentFrameRef.current.getBoundingClientRect()
+    updateSplitFromClientX(event.clientX, rect)
+    document.body.classList.add('is-resizing-main-layout')
+    const onMove = (moveEvent: PointerEvent) => updateSplitFromClientX(moveEvent.clientX, rect)
+    const onEnd = () => {
+      document.body.classList.remove('is-resizing-main-layout')
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onEnd)
+      window.removeEventListener('pointercancel', onEnd)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onEnd)
+    window.addEventListener('pointercancel', onEnd)
+  }, [canSplitWorkspace, updateSplitFromClientX])
+
+  const nudgeLayoutSplit = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (!canSplitWorkspace) return
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+    event.preventDefault()
+    const direction = event.key === 'ArrowLeft' ? 1 : -1
+    setChatFraction(prev => clampNumber(prev + direction * 0.03, 0.24, 0.7))
+  }, [canSplitWorkspace])
 
   const [, setNowTick] = useState(0)
   useEffect(() => {
@@ -1118,8 +1196,36 @@ export default function App() {
           ...horizontalGridStyle,
         } as CSSProperties}
       >
-        {renderedWorkspace}
-        {renderedPanes}
+        {canSplitWorkspace ? (
+          <>
+            {renderedWorkspace}
+            <div
+              className="main-layout-splitter"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Chat und Workspace teilen"
+              aria-valuemin={CHAT_MIN_PX}
+              aria-valuemax={Math.round(maxChatWidth)}
+              aria-valuenow={Math.round(chatWidth)}
+              tabIndex={0}
+              onPointerDown={startLayoutResize}
+              onKeyDown={nudgeLayoutSplit}
+            />
+            {renderedPanes}
+          </>
+        ) : shouldOverlayWorkspace ? (
+          <>
+            {renderedPanes}
+            <div className="workspace-responsive-overlay">
+              {renderedWorkspace}
+            </div>
+          </>
+        ) : (
+          <>
+            {renderedWorkspace}
+            {renderedPanes}
+          </>
+        )}
       </div>
 
       <LinkPreview />
