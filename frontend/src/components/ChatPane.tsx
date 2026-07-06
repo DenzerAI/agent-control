@@ -1196,6 +1196,10 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
   const pendingVisualDoneRef = useRef<PendingVisualDone | null>(null)
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent('deck:connectionStatus', { detail: { disconnected } }))
+  }, [disconnected])
+
+  useEffect(() => {
     if (!werkbankTasks.some(t => t.status === 'running' || t.status === 'queued')) return
     const id = window.setInterval(() => setWerkbankTick(t => t + 1), 1000)
     return () => window.clearInterval(id)
@@ -3734,15 +3738,6 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
           onLoadArchive={onMobileLoadArchive}
         />
       )}
-      {disconnected && !mobile && (
-        <button
-          onClick={() => location.reload()}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--bg-3)] text-[var(--t2)] text-sm cursor-pointer active:bg-[var(--bg-2)] transition-colors"
-        >
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          Verbindung unterbrochen — verbinde neu…
-        </button>
-      )}
       <div className="flex-1 basis-0 min-h-0 overflow-hidden relative">
         <div className="h-full max-w-[720px] mx-auto px-6 max-md:px-0">
           {messages.length === 0 && !busy ? (
@@ -4032,15 +4027,6 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
           </button>
         )}
         {/* Status sitzt in beiden Modi IM Composer (siehe Composer.tsx). */}
-        {mobile && disconnected && (
-          <button
-            onClick={() => location.reload()}
-            className="w-full flex items-center justify-center gap-2 px-4 py-1.5 text-[var(--t3)] text-[14px] cursor-pointer active:text-[var(--t2)] transition-colors"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            Verbindung unterbrochen — verbinde neu…
-          </button>
-        )}
         {/* Queue UI */}
         {queue.length > 0 && (
           <div className={mobile ? "px-5 mb-1.5" : "px-4 max-md:px-3 mb-2"}>

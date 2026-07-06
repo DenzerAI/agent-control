@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Header-Logik vereinheitlicht</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   TOKENS.css — die EINE Wahrheit für die Agent-Control HTML-Artefakt-Palette.
+
+   Quelle gegen Drift (Strang 1): Jede neue Artefakt-HTML übernimmt diesen Block
+   1:1 INLINE in ihren <style> — nicht aus dem Kopf neu tippen, nicht abweichen.
+   So erreicht ein CI-Update (Farb-Tweak, neuer Token) alle künftigen Seiten über
+   eine Stelle, statt in jeder Datei eine eigene, langsam alternde Kopie zu pflegen.
+
+   Die fertige HTML bleibt self-contained: der Block wird inline eingesetzt, stammt
+   aber aus dieser einen Quelle. Helfer zum Ausgeben:
+     python3 scripts/artifact-check.py --emit-tokens
+   Konsistenz-Prüfung vor Übergabe:
+     python3 scripts/artifact-check.py <datei.html>
+
+   Default ist DUNKEL (Agent-Control-Darks). Der Light-Block ist Pflicht, weil der
+   Preview-Viewer per data-theme am <html> umschaltet. Beide Blöcke immer mitnehmen.
+   Hintergrund/Skala/Komponenten stehen in DESIGN.md + COMPONENTS.md.
+   ============================================================================ */
+
+:root {
+  --bg:          #1F1F1E;              /* Haupthintergrund (Agent-Control-Dark) */
+  --bg-1:        #2C2C2B;              /* Karten, raised surface */
+  --bg-2:        #353533;             /* tertiäre Flächen, Code-BG */
+  --border:      #3A3A38;             /* Card-Ränder, gut sichtbar auf bg-1 */
+  --border-soft: #2A2A29;             /* dezente Sektions-Trenner auf bg */
+  --t1:          #E6E6E3;             /* Primärtext */
+  --t2:          #A1A1A0;             /* Sekundärtext (Leads, Beschreibungen) */
+  --t3:          #8A8278;             /* Muted (Preise, Meta) */
+  --accent:      #D97757;             /* Terrakotta, einzige Signalfarbe */
+  --accent-soft: rgba(217,119,87,0.12);
+  --warm:        #D6C9A8;             /* warmer Highlight-Ton */
+  --max:         980px;               /* Layout-Breite (.wrap) */
+  /* Status-Grün (optional, nur wenn echt gebraucht — z. B. live-Pill) */
+  --ok:          #7FB069;
+  --ok-soft:     rgba(127,176,105,0.14);
+  /* Sticky-Top-Nav-Hintergrund (COMPONENTS §14) */
+  --nav-bg:      rgba(31,31,30,0.82);
+}
+
+:root[data-theme="light"] {
+  --bg:          #FAF9F5;             /* Original-Hellwerte aus DESIGN.md */
+  --bg-1:        #F5F3EC;
+  --bg-2:        #F0EEE6;
+  --border:      #E4E0D2;
+  --border-soft: #ECEAE0;
+  --t1:          #1F1F1E;
+  --t2:          #5C5B57;
+  --t3:          #8A8983;
+  --accent:      #E07A4F;             /* im Light kräftiger für Kontrast */
+  --accent-soft: rgba(224,122,79,0.10);
+  --warm:        #9A8C68;
+  --ok:          #5C8A3C;             /* Status-Grün im Light dunkler */
+  --ok-soft:     rgba(92,138,60,0.12);
+  --nav-bg:      rgba(250,249,245,0.85);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;color:var(--t1);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.italic{font-family:'Lora',Georgia,serif;font-style:italic;font-weight:400}
+.hero{padding:82px 0 70px}
+.eyebrow{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:20px}
+h1{font-size:clamp(42px,7vw,72px);font-weight:800;letter-spacing:-.02em;line-height:1.02;margin:0 0 18px}
+h2{font-size:32px;font-weight:700;letter-spacing:-.01em;margin:0 0 16px}
+p{margin:0;color:var(--t2)}
+.lead{font-size:20px;max-width:680px}
+section{padding:58px 0;border-top:1px solid var(--border-soft)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px}
+.card{border:1px solid var(--border);border-radius:14px;padding:24px;background:transparent}
+.card strong{display:block;color:var(--t1);font-size:20px;margin-bottom:8px}
+.card span{display:block;color:var(--t2);font-size:15px}
+.flow{width:100%;max-width:760px;margin:34px 0 0}
+.statline{display:grid;grid-template-columns:1fr;gap:14px;margin-top:28px}
+.stat{border-top:1px solid var(--border);padding-top:18px}
+.stat b{display:block;color:var(--accent);font-size:38px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{display:block;color:var(--t3);font-size:13px;margin-top:8px}
+ul{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px}
+li{position:relative;padding-left:20px;color:var(--t2)}
+li::before{content:"·";position:absolute;left:0;color:var(--accent);font-weight:800;font-size:18px}
+@media (min-width:760px){.statline{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Agent-Control Live</div>
+      <h1>Alle Reiter sprechen jetzt dieselbe <span class="italic">Kopfsprache</span>.</h1>
+      <p class="lead">Der Workspace wirkt nicht mehr wie zusammengewachsene Einzelteile. Inbox, Dateien, Artefakte und Agent folgen jetzt derselben oberen Hero-Logik wie Wissen, Aufgaben und Konnektoren.</p>
+      <svg class="flow" viewBox="0 0 760 180" role="img" aria-label="Vorher-nachher-Fluss der Header-Vereinheitlichung">
+        <rect x="1" y="1" width="758" height="178" rx="14" fill="transparent" stroke="var(--border)"/>
+        <path d="M86 90 H674" stroke="var(--border)" stroke-width="1.5"/>
+        <circle cx="130" cy="90" r="20" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <circle cx="380" cy="90" r="20" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <circle cx="630" cy="90" r="20" fill="var(--ok-soft)" stroke="var(--ok)"/>
+        <text x="130" y="58" text-anchor="middle" fill="var(--t2)" font-size="13">alte Köpfe</text>
+        <text x="380" y="58" text-anchor="middle" fill="var(--t2)" font-size="13">Hero-Logik</text>
+        <text x="630" y="58" text-anchor="middle" fill="var(--t2)" font-size="13">einheitlich</text>
+        <text x="130" y="96" text-anchor="middle" fill="var(--accent)" font-size="18" font-weight="800">1</text>
+        <text x="380" y="96" text-anchor="middle" fill="var(--accent)" font-size="18" font-weight="800">2</text>
+        <text x="630" y="96" text-anchor="middle" fill="var(--ok)" font-size="18" font-weight="800">3</text>
+      </svg>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Was fertig ist</div>
+      <h2>Der alte Workspace-Kasten ist raus.</h2>
+      <div class="grid">
+        <div class="card"><strong>Ein Kopf für alle</strong><span>Inbox, Wissen, Aufgaben, Konnektoren, Dateien, Artefakte und Agent haben denselben Hero-Bereich oben.</span></div>
+        <div class="card"><strong>Dateien beruhigt</strong><span>Der alte Fileviewer-Rahmen ist weg. Stattdessen steht ein klarer Demo-Ordnerbaum untereinander.</span></div>
+        <div class="card"><strong>Status nach unten</strong><span>Der störende Verbindungsbalken ist aus der Kopfzone raus und sitzt jetzt als dezenter Punkt unten in der Navigation.</span></div>
+        <div class="card"><strong>Demos schöner</strong><span>Artefakte und Agent wirken jetzt wie vorbereitete Produktflächen statt wie kaputte Platzhalter.</span></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Kontrolle</div>
+      <h2>Geprüft, nicht geraten.</h2>
+      <div class="statline">
+        <div class="stat"><b>7</b><span>Menüpunkte mit gleichem Hero</span></div>
+        <div class="stat"><b>14</b><span>Screenshots in Hell und Dunkel</span></div>
+        <div class="stat"><b>200</b><span>Vite auf Port 4222 erreichbar</span></div>
+      </div>
+      <ul>
+        <li>Frontend-Build läuft grün.</li>
+        <li>Playwright hat alle Kernreiter visuell geprüft.</li>
+        <li>Die echte Datenverbindung bleibt bewusst Folgearbeit.</li>
+      </ul>
+    </div>
+  </section>
+</body>
+</html>

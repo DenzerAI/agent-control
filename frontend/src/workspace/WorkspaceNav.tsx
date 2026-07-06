@@ -78,6 +78,18 @@ function useNotifyModes(activeId: WorkspaceMode): Set<WorkspaceMode> {
   return notify
 }
 
+function useConnectionLost(): boolean {
+  const [lost, setLost] = useState(false)
+  useEffect(() => {
+    const onStatus = (event: Event) => {
+      setLost(!!(event as CustomEvent<{ disconnected?: boolean }>).detail?.disconnected)
+    }
+    window.addEventListener('deck:connectionStatus', onStatus as EventListener)
+    return () => window.removeEventListener('deck:connectionStatus', onStatus as EventListener)
+  }, [])
+  return lost
+}
+
 export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
   mode: WorkspaceMode
   collapsed?: boolean
@@ -85,6 +97,7 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
 }) {
   const activeId: WorkspaceMode = mode === 'document' || mode === 'preview' ? 'filesystem' : mode
   const notify = useNotifyModes(activeId)
+  const connectionLost = useConnectionLost()
   const werkbankSignal = useWerkbankNavSignal()
   return (
     <nav className={`workspace-nav${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace Navigation">
@@ -116,6 +129,10 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
           ))}
         </div>
       ))}
+      <div className="workspace-nav-status" title={connectionLost ? 'Verbindung weg' : 'Verbindung steht'}>
+        <span className={connectionLost ? 'is-lost' : 'is-ok'} />
+        {!collapsed && <em>{connectionLost ? 'Verbindung weg' : 'Verbunden'}</em>}
+      </div>
     </nav>
   )
 }

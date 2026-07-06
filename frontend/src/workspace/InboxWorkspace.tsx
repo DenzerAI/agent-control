@@ -370,29 +370,28 @@ export function InboxWorkspace() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
-      <header className="shrink-0 border-b border-[var(--border)] px-4 py-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[11px] text-[var(--t3)]">Inbox · WhatsApp · Mail</div>
-            <h2 className="truncate text-base font-medium leading-6 text-[var(--t1)]">{attention > 0 ? `${attention} wartet` : 'Inbox ruhig'}</h2>
-            <div className="truncate text-xs text-[var(--t3)]">{unreadTotal > 0 ? `${unreadTotal} ungelesene WhatsApp-Nachrichten` : 'Keine ungelesenen WhatsApp-Hinweise'}</div>
-          </div>
-          <button type="button" onClick={() => { load(); loadArchived() }} disabled={loading} className="shrink-0 border border-[var(--border)] p-2 text-[var(--t2)] hover:bg-white/[0.05] disabled:opacity-60" title="Neu laden">
+    <div className="workspace-system">
+      <header className="workspace-system-hero">
+        <div>
+          <p>Inbox</p>
+          <h2>{attention > 0 ? `${attention} wartet` : 'Inbox ruhig'}</h2>
+          <span>{unreadTotal > 0 ? `${unreadTotal} ungelesene WhatsApp-Nachrichten` : 'WhatsApp, Mail und Kontakte liegen untereinander in einer ruhigen Arbeitsliste.'}</span>
+        </div>
+        <button type="button" onClick={() => { load(); loadArchived() }} disabled={loading} title="Neu laden">
             <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-          </button>
-        </div>
-        <div className="mt-3 grid grid-cols-4 gap-2">
-          <Stat label="Wartet" value={filtered.waiting.length} />
-          <Stat label="WhatsApp" value={filtered.dms.length} />
-          <Stat label="Gruppen" value={filtered.groups.length} />
-          <Stat label="Archiv" value={archivedCount} />
-        </div>
-        {error && <div className="mt-3 rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2 text-xs text-[var(--warm)]">{error}</div>}
+        </button>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-auto px-3 py-3">
-        <label className="mb-3 flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2">
+      <div className="workspace-system-strip">
+        <Stat label="Wartet" value={filtered.waiting.length} />
+        <Stat label="WhatsApp" value={filtered.dms.length} />
+        <Stat label="Gruppen" value={filtered.groups.length} />
+        <Stat label="Archiv" value={archivedCount} />
+      </div>
+      {error && <div className="workspace-system-note">{error}</div>}
+
+      <main className="workspace-system-main workspace-system-stack">
+        <label className="workspace-system-panel flex items-center gap-2 px-3 py-2">
           <Search className="h-4 w-4 shrink-0 text-[var(--t3)]" />
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Kontakt, Chat oder Mail suchen" className="min-w-0 flex-1 bg-transparent text-sm text-[var(--t1)] outline-none placeholder:text-[var(--t3)]" />
         </label>

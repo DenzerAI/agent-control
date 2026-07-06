@@ -24,6 +24,48 @@ type AgentData = {
 
 const CACHE_KEY = 'workspace:agent:profile'
 
+function demoAgentData(name: string): AgentData {
+  const now = Math.floor(Date.now() / 1000)
+  return {
+    agent: 'main',
+    name,
+    color: '#D97757',
+    model: 'lokal verbunden',
+    role: 'Persönlicher Agent, der Entscheidungen vorbereitet, Arbeit bündelt und private Daten lokal hält.',
+    brain: '',
+    identity: '',
+    soul: [
+      '## Identität',
+      'Realistischer Optimist. Warm, direkt und output-orientiert.',
+      '## Haltung',
+      'Ursache finden, nicht Symptome überpinseln. Einfach, robust, lokal zuerst.',
+      '## Stimme',
+      'Ergebnis zuerst. Menschlich, knapp und ohne Support-Theater.',
+      '## Grenzen',
+      'Private Daten bleiben privat. Outbound nur nach Freigabe.',
+      '## Arbeitsweise',
+      'Problem verstehen.',
+      'Einfachsten tragfähigen Weg wählen.',
+      'Aktiv verifizieren.',
+      'Ergebnis knapp melden.',
+    ].join('\n'),
+    stats: { total: 1248, today: 18, lastActive: now - 420 },
+    crons: [],
+    recentFiles: [],
+    recentMessages: [
+      { author: name, content: 'Header-Logik vereinheitlichen, alte Workspace-Köpfe rausnehmen und die Demo-Flächen beruhigen.', ts: now - 900, conversationId: 'demo-1', title: 'Workspace Feinschliff' },
+      { author: name, content: 'Artefakte, Dateien und Agent-Seite optisch vorbereiten, echte Verbindungen kommen danach.', ts: now - 3600, conversationId: 'demo-2', title: 'Demo-Daten' },
+    ],
+    workspace: '/workspace',
+    files: {
+      soul: '/workspace/soul/SOUL.md',
+      identity: '/workspace/AGENTS.md',
+      brain: '/workspace/brain/REPO-MAP.md',
+      agents: '/workspace/config/agents.json',
+    },
+  }
+}
+
 function readCache(): AgentData | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY)
@@ -81,10 +123,10 @@ function shortPath(path?: string): string {
 // warmen Akzent, die Nebenzahlen bleiben ruhig.
 function BigStat({ label, value, hint, accent }: { label: string; value: string | number; hint?: string; accent?: boolean }) {
   return (
-    <section className="agent-stat flex flex-col rounded-lg border border-[var(--border)] bg-[var(--bg-1)] px-4 py-3">
-      <span className={`agent-bignum whitespace-nowrap leading-none tabular-nums ${accent ? 'text-[var(--warm)]' : 'text-[var(--t1)]'}`}>{value}</span>
-      <span className="mt-2 text-[11px] uppercase tracking-[0.14em] text-[var(--t3)]">{label}</span>
-      {hint && <span className="mt-0.5 text-[11px] text-[var(--t3)]">{hint}</span>}
+    <section className={accent ? 'is-warning' : undefined}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {hint && <em>{hint}</em>}
     </section>
   )
 }
@@ -94,6 +136,7 @@ export function AgentWorkspace() {
   const [data, setData] = useState<AgentData | null>(() => readCache())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const viewData = data || demoAgentData(agentName)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -105,7 +148,7 @@ export function AgentWorkspace() {
       setData(next as AgentData)
       writeCache(next as AgentData)
     } catch (e) {
-      setError(`Agent-Daten gerade nicht erreichbar, letzter Stand bleibt: ${e instanceof Error ? e.message : 'unbekannt'}`)
+      setError('Echter Agent-Stand gerade nicht erreichbar, die Demo-Ansicht bleibt sichtbar.')
     } finally {
       setLoading(false)
     }
@@ -114,79 +157,79 @@ export function AgentWorkspace() {
   useEffect(() => { load() }, [load])
 
   const soulCards = useMemo(() => ([
-    { icon: Sparkles, label: 'Identität', text: section(data?.soul || '', 'Identität') || data?.role || 'des Nutzers persönlicher Agent.' },
-    { icon: Brain, label: 'Haltung', text: section(data?.soul || '', 'Haltung') || 'Handle, wenn der Weg klar ist. Frage nur, wenn es echte Folgen hat.' },
-    { icon: MessageSquare, label: 'Stimme', text: section(data?.soul || '', 'Stimme') || 'Warm, direkt, menschlich. Ergebnis zuerst.' },
-    { icon: ShieldCheck, label: 'Grenzen', text: section(data?.soul || '', 'Grenzen') || 'Private Daten bleiben privat. Outbound nur als Draft.' },
-  ]), [data])
+    { icon: Sparkles, label: 'Identität', text: section(viewData.soul || '', 'Identität') || viewData.role || 'des Nutzers persönlicher Agent.' },
+    { icon: Brain, label: 'Haltung', text: section(viewData.soul || '', 'Haltung') || 'Handle, wenn der Weg klar ist. Frage nur, wenn es echte Folgen hat.' },
+    { icon: MessageSquare, label: 'Stimme', text: section(viewData.soul || '', 'Stimme') || 'Warm, direkt, menschlich. Ergebnis zuerst.' },
+    { icon: ShieldCheck, label: 'Grenzen', text: section(viewData.soul || '', 'Grenzen') || 'Private Daten bleiben privat. Outbound nur als Draft.' },
+  ]), [viewData])
 
   const files = useMemo(() => ([
-    { label: 'SOUL.md', path: data?.files?.soul },
-    { label: 'AGENTS.md', path: data?.files?.identity },
-    { label: 'BRAIN.md', path: data?.files?.brain },
-  ].filter(item => item.path)), [data])
+    { label: 'SOUL.md', path: viewData.files?.soul },
+    { label: 'AGENTS.md', path: viewData.files?.identity },
+    { label: 'BRAIN.md', path: viewData.files?.brain },
+  ].filter(item => item.path)), [viewData])
 
   return (
-    <div className="agent-cq flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
-      <header className="shrink-0 border-b border-[var(--border)] px-5 py-4">
-        <div className="flex min-w-0 items-start gap-4">
-          <div className="agent-avatar flex shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-            <img src="/agent-control-logo.png" alt="" className="h-8 w-8 opacity-90" draggable={false} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--warm)]">Main Agent · Persona</div>
-            <h2 className="agent-title mt-1 truncate font-medium leading-none text-[var(--t1)]">{data?.name || agentName}</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--t2)]">
-              {data?.role || 'des Nutzers persönlicher Agent.'} Kein Modell-Showroom, sondern die sichtbare Identität hinter diesem Workspace.
-            </p>
-          </div>
-          <button type="button" onClick={load} disabled={loading} className="shrink-0 border border-[var(--border)] p-2 text-[var(--t2)] hover:bg-white/[0.05] disabled:opacity-60" title="Neu laden">
-            <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-          </button>
+    <div className="workspace-system agent-cq">
+      <header className="workspace-system-hero">
+        <div>
+          <p>Agent</p>
+          <h2>{viewData.name || agentName}</h2>
+          <span>{viewData.role || 'Persönlicher Agent, Identität und Systemzustand als übersichtliches Dashboard.'}</span>
         </div>
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <BigStat label="Nachrichten zusammen" value={fmtNum(data?.stats?.total)} accent />
-          <BigStat label="Heute" value={fmtNum(data?.stats?.today)} />
-          <BigStat label="Zuletzt aktiv" value={fmtAge(data?.stats?.lastActive)} />
-        </div>
-        {error && <div className="mt-3 flex gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2 text-xs leading-5 text-[var(--warm)]"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div>}
+        <button type="button" onClick={load} disabled={loading} title="Neu laden">
+          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+        </button>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-auto px-4 py-4">
-        {!data && loading && <div className="flex h-full min-h-[220px] items-center justify-center text-sm text-[var(--t3)]">Lade {agentName}</div>}
-        {data && (
-          <div className="agent-grid">
-            <section className="agent-soul">
+      <div className="workspace-system-strip">
+        <BigStat label="Nachrichten zusammen" value={fmtNum(viewData.stats?.total)} accent />
+        <BigStat label="Heute" value={fmtNum(viewData.stats?.today)} />
+        <BigStat label="Zuletzt aktiv" value={fmtAge(viewData.stats?.lastActive)} />
+      </div>
+      {error && <div className="workspace-system-note flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div>}
+
+      <main className="workspace-system-main workspace-system-stack">
+        {loading && !data && <div className="flex min-h-[42px] items-center text-sm text-[var(--t3)]">Lade echten Stand, Demo bleibt sichtbar.</div>}
+        {viewData && (
+          <>
+            <section className="workspace-system-panel">
+              <div className="workspace-system-panel-head">
+                <div><Sparkles className="h-4 w-4" /><strong>Persona</strong></div>
+                <span>SOUL</span>
+              </div>
+              <div className="agent-soul">
               {soulCards.map(card => <PersonaCard key={card.label} icon={card.icon} label={card.label} text={card.text} />)}
+              </div>
             </section>
 
-            <aside className="rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-              <PanelHead icon={Network} title="LM-Verdrahtung" meta={data.model || 'Engine'} />
+            <section className="workspace-system-panel">
+              <PanelHead icon={Network} title="LM-Verdrahtung" meta={viewData.model || 'Engine'} />
               <div className="space-y-3 p-3 text-sm leading-6 text-[var(--t2)]">
                 <p><strong className="text-[var(--t1)]">Engine ist Werkzeug.</strong> Agent bleibt die Identität, egal ob darunter Codex, Claude oder ein lokales Modell läuft.</p>
-                <p><strong className="text-[var(--t1)]">Profilpfad:</strong> {shortPath(data.files?.soul)}</p>
+                <p><strong className="text-[var(--t1)]">Profilpfad:</strong> {shortPath(viewData.files?.soul)}</p>
                 <p className="text-[var(--warm)]">Werkzeug rein, Agent raus. Keine Zaubershow, nur saubere Verdrahtung.</p>
-              </div>
-            </aside>
-
-            <section className="rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-              <PanelHead icon={FileText} title="Aus SOUL.md" meta="Kern" />
-              <div className="p-3 text-sm leading-6 text-[var(--t2)]">
-                {section(data.soul, 'Arbeitsweise') || 'Problem verstehen. Einfachsten tragfähigen Weg wählen. Aktiv verifizieren. Ergebnis knapp melden.'}
               </div>
             </section>
 
-            <section className="rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
+            <section className="workspace-system-panel">
+              <PanelHead icon={FileText} title="Aus SOUL.md" meta="Kern" />
+              <div className="p-3 text-sm leading-6 text-[var(--t2)]">
+                {section(viewData.soul, 'Arbeitsweise') || 'Problem verstehen. Einfachsten tragfähigen Weg wählen. Aktiv verifizieren. Ergebnis knapp melden.'}
+              </div>
+            </section>
+
+            <section className="workspace-system-panel">
               <PanelHead icon={ShieldCheck} title="Aus AGENTS.md" meta="Regel" />
               <div className="p-3 text-sm leading-6 text-[var(--t2)]">
                 Du bist Agent. Engines sind nur Werkzeuge. Deutsch ist Default. Backend-Änderungen brauchen einen sauberen Restart-Hinweis.
               </div>
             </section>
 
-            <section className="agent-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-              <PanelHead icon={MessageSquare} title={`Zuletzt von ${agentName}`} meta={`${data.recentMessages?.length || 0}`} />
+            <section className="workspace-system-panel">
+              <PanelHead icon={MessageSquare} title={`Zuletzt von ${agentName}`} meta={`${viewData.recentMessages?.length || 0}`} />
               <div className="divide-y divide-[var(--border)]">
-                {(data.recentMessages || []).map(message => (
+                {(viewData.recentMessages || []).map(message => (
                   <button key={`${message.conversationId}:${message.ts}`} type="button" onClick={() => openConversation(message)} className="flex w-full min-w-0 gap-3 px-3 py-3 text-left hover:bg-white/[0.04]" title={message.title}>
                     <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-[var(--t3)]" />
                     <span className="min-w-0 flex-1">
@@ -195,12 +238,12 @@ export function AgentWorkspace() {
                     </span>
                   </button>
                 ))}
-                {!data.recentMessages?.length && <div className="px-3 py-3 text-sm text-[var(--t3)]">Noch keine DB-Auszüge geladen.</div>}
+                {!viewData.recentMessages?.length && <div className="px-3 py-3 text-sm text-[var(--t3)]">Noch keine DB-Auszüge geladen.</div>}
               </div>
             </section>
 
-            <section className="agent-span-all rounded-md border border-[var(--border)] bg-[var(--bg-1)]">
-              <PanelHead icon={FileText} title="Identitätsdateien" meta={shortPath(data.workspace)} />
+            <section className="workspace-system-panel">
+              <PanelHead icon={FileText} title="Identitätsdateien" meta={shortPath(viewData.workspace)} />
               <div className="divide-y divide-[var(--border)]">
                 {files.map(file => (
                   <button key={file.label} type="button" onClick={() => openFile(file.path)} className="flex w-full min-w-0 items-center gap-2 px-3 py-2 text-left hover:bg-white/[0.04]" title={file.path}>
@@ -211,7 +254,7 @@ export function AgentWorkspace() {
                 ))}
               </div>
             </section>
-          </div>
+          </>
         )}
       </main>
     </div>
@@ -220,7 +263,7 @@ export function AgentWorkspace() {
 
 function PersonaCard({ icon: Icon, label, text }: { icon: LucideIcon; label: string; text: string }) {
   return (
-    <article className="min-h-[150px] rounded-md border border-[var(--border)] bg-[var(--bg-1)] p-4">
+    <article className="agent-persona-row">
       <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--warm)]">
         <Icon className="h-4 w-4" />
         <span>{label}</span>

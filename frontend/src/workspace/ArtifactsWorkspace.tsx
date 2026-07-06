@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Database, FileText, RefreshCw, Search } from 'lucide-react'
+import { AlertTriangle, BarChart3, Database, Download, FileText, Image, Presentation, RefreshCw, Search, X } from 'lucide-react'
 
 type ArtifactEntry = {
   agent: string
@@ -11,6 +11,7 @@ type ArtifactEntry = {
   relativeDate?: string
   path: string
   ts: number
+  demoText?: string
 }
 
 const CACHE_KEY = 'workspace:artifacts:entries'
@@ -27,9 +28,10 @@ function writeCache(entries: ArtifactEntry[]) {
 }
 
 const DEMO_ARTIFACTS: ArtifactEntry[] = [
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'report', name: 'demo-kundenbriefing.html', label: 'Kundenbriefing als HTML', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-kundenbriefing.html', ts: 0 },
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'doc', name: 'demo-protokoll.md', label: 'Werkbank-Protokoll', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-protokoll.md', ts: 0 },
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'asset:image', name: 'demo-visual.png', label: 'Kampagnenvisual', relativeDate: 'Demo', path: '/workspace/work/artifacts/demo-visual.png', ts: 0 },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'report', name: 'kundenlage-report.html', label: 'Kundenlage Report', relativeDate: 'Demo', path: '/workspace/work/artifacts/kundenlage-report.html', ts: 0, demoText: 'Ein klarer Überblick über Lage, Hebel und nächste Entscheidung.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'chart', name: 'pipeline-chart.svg', label: 'Pipeline Chart', relativeDate: 'Demo', path: '/workspace/work/artifacts/pipeline-chart.svg', ts: 0, demoText: 'Verdichtete Kennzahlen als ruhige Chart-Ansicht.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'presentation', name: 'strategie-deck.pdf', label: 'Strategie Präsentation', relativeDate: 'Demo', path: '/workspace/work/artifacts/strategie-deck.pdf', ts: 0, demoText: 'Drei Slides, die ein Angebot schnell erklärbar machen.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'asset:image', name: 'kampagnenmotiv.png', label: 'Kampagnenmotiv', relativeDate: 'Demo', path: '/workspace/work/artifacts/kampagnenmotiv.png', ts: 0, demoText: 'Ein visuelles Motiv für Landingpage oder Kundenmail.' },
 ]
 
 // Immer mit Uhrzeit: heute nur die Zeit, sonst Tag plus Zeit. Das Datum allein
@@ -81,7 +83,24 @@ function openArtifact(path: string) {
 // Das kleine Vorschau-Quadrat links in jeder Zeile: Bild als echtes Thumbnail,
 // HTML als verkleinerte Live-Seite (gibt zumindest die CI-Farbe), sonst ein
 // ruhiges Datei-Glyph. Eine feste Groesse haelt die Liste sauber ausgerichtet.
+function iconFor(entry: ArtifactEntry) {
+  if (entry.category === 'chart') return BarChart3
+  if (entry.category === 'presentation') return Presentation
+  if (isImage(entry.path)) return Image
+  if (isMarkdown(entry.path)) return FileText
+  if (isHtml(entry.path)) return FileText
+  return Database
+}
+
 function ArtifactThumb({ entry }: { entry: ArtifactEntry }) {
+  const DemoIcon = iconFor(entry)
+  if (entry.demoText) {
+    return (
+      <div className="workspace-artifact-demo-thumb">
+        <DemoIcon className="h-5 w-5" />
+      </div>
+    )
+  }
   const url = downloadUrl(entry.path)
   if (isImage(entry.path)) {
     return <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" draggable={false} />
@@ -110,26 +129,27 @@ function ArtifactThumb({ entry }: { entry: ArtifactEntry }) {
 // Eine ruhige Zeile fuer jedes Artefakt: Thumbnail, Titel, darunter Kategorie
 // und Zeit. Kein Kasten, nur eine Haarlinie als Trenner. Apple-Liste trifft
 // Claude-Verlauf: alles gleich aufgebaut, scanbar, leise.
-function ArtifactLine({ entry }: { entry: ArtifactEntry }) {
+function ArtifactLine({ entry, onOpen }: { entry: ArtifactEntry; onOpen: (entry: ArtifactEntry) => void }) {
   return (
-    <article className="group flex w-full min-w-0 items-center gap-3 border-b border-[var(--border)] px-2 py-2.5 text-left transition-colors hover:bg-white/[0.03]">
-      <button type="button" onClick={() => openArtifact(entry.path)} title={entry.path} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+    <article className="workspace-artifact-line group">
+      <button type="button" onClick={() => entry.demoText ? onOpen(entry) : openArtifact(entry.path)} title={entry.path} className="flex min-w-0 flex-1 items-center gap-3 text-left">
         <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg)]">
           <ArtifactThumb entry={entry} />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium text-[var(--t1)]">{entry.label || entry.name}</span>
-          <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{categoryLabel(entry.category)} · {fmtWhen(entry.ts) || entry.relativeDate || 'Demo'}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{entry.demoText || `${categoryLabel(entry.category)} · ${fmtWhen(entry.ts) || entry.relativeDate || 'Demo'}`}</span>
         </span>
       </button>
       <span className="shrink-0 rounded bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-[var(--t3)]">{ext(entry.path)}</span>
       <a
-        href={`/api/fs/download?path=${encodeURIComponent(entry.path)}`}
-        className="shrink-0 rounded-md px-2 py-1 text-[11px] text-[var(--t3)] transition-colors hover:bg-white/[0.05] hover:text-[var(--t1)]"
+        href={entry.demoText ? `data:text/plain;charset=utf-8,${encodeURIComponent(`${entry.label}\n\n${entry.demoText}`)}` : `/api/fs/download?path=${encodeURIComponent(entry.path)}`}
+        download={entry.name}
+        className="workspace-artifact-download"
         title="Herunterladen"
         onClick={e => e.stopPropagation()}
       >
-        Download
+        <Download className="h-4 w-4" />
       </a>
     </article>
   )
@@ -156,6 +176,7 @@ export function ArtifactsWorkspace() {
   const [entries, setEntries] = useState<ArtifactEntry[]>(() => readCache())
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
+  const [openDemo, setOpenDemo] = useState<ArtifactEntry | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -204,22 +225,20 @@ export function ArtifactsWorkspace() {
   const filters: Filter[] = ['all', 'html', 'image', 'doc', 'data']
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
-      <header className="shrink-0 border-b border-[var(--border)] px-4 py-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[11px] text-[var(--t3)]">Artefakte</div>
-            <h2 className="truncate text-base font-medium leading-6 text-[var(--t1)]">Was Agent gebaut hat</h2>
-            <div className="truncate text-xs text-[var(--t3)]">Reports, Visualisierungen und Dateien aus Chats und Jobs</div>
-          </div>
-          <button type="button" onClick={load} disabled={loading} className="shrink-0 rounded-md border border-[var(--border)] p-2 text-[var(--t2)] hover:bg-white/[0.05] disabled:opacity-60" title="Neu laden">
-            <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-          </button>
+    <div className="workspace-system">
+      <header className="workspace-system-hero">
+        <div>
+          <p>Artefakte</p>
+          <h2>Was der Agent gebaut hat</h2>
+          <span>Reports, Charts, Präsentationen und Bilder als saubere Liste. Demo-Artefakte öffnen direkt als Vollbild-Vorschau.</span>
         </div>
+        <button type="button" onClick={load} disabled={loading} title="Neu laden">
+            <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+        </button>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-auto px-3 py-3">
-        <label className="mb-3 flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2">
+      <main className="workspace-system-main workspace-system-stack">
+        <label className="workspace-system-panel flex items-center gap-2 px-3 py-2">
           <Search className="h-4 w-4 shrink-0 text-[var(--t3)]" />
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Name, Kategorie oder Pfad suchen" className="min-w-0 flex-1 bg-transparent text-sm text-[var(--t1)] outline-none placeholder:text-[var(--t3)]" />
         </label>
@@ -242,16 +261,40 @@ export function ArtifactsWorkspace() {
           })}
         </div>
 
-        {error && <div className="mt-3 flex gap-2 rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2 text-xs leading-5 text-[var(--warm)]"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div>}
+        {error && <div className="workspace-system-note flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div>}
 
-        <div className="mt-2">
+        <section className="workspace-system-panel">
           {visible.length === 0 ? (
             <div className="px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Artefakte' : 'Keine Artefakte.'}</div>
           ) : (
-            visible.map(entry => <ArtifactLine key={`${entry.path}:${entry.ts}`} entry={entry} />)
+            visible.map(entry => <ArtifactLine key={`${entry.path}:${entry.ts}`} entry={entry} onOpen={setOpenDemo} />)
           )}
-        </div>
+        </section>
       </main>
+      {openDemo && <ArtifactDemoLightbox entry={openDemo} onClose={() => setOpenDemo(null)} />}
+    </div>
+  )
+}
+
+function ArtifactDemoLightbox({ entry, onClose }: { entry: ArtifactEntry; onClose: () => void }) {
+  const Icon = iconFor(entry)
+  return (
+    <div className="workspace-artifact-lightbox" role="dialog" aria-modal="true">
+      <div className="workspace-artifact-lightbox-panel">
+        <button type="button" className="workspace-artifact-lightbox-close" onClick={onClose} title="Schließen">
+          <X className="h-4 w-4" />
+        </button>
+        <div className="workspace-artifact-lightbox-visual">
+          <Icon className="h-12 w-12" />
+          <span>{categoryLabel(entry.category)}</span>
+        </div>
+        <h3>{entry.label || entry.name}</h3>
+        <p>{entry.demoText}</p>
+        <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(`${entry.label}\n\n${entry.demoText}`)}`} download={entry.name}>
+          <Download className="h-4 w-4" />
+          Download
+        </a>
+      </div>
     </div>
   )
 }

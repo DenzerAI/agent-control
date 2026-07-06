@@ -1,0 +1,100 @@
+[
+  {
+    "theme": "dark",
+    "label": "Inbox",
+    "hero": "INBOX Inbox ruhig WhatsApp, Mail und Kontakte liegen untereinander in einer ruhigen Arbeitsliste.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-inbox.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Wissen",
+    "hero": "WISSEN Zentrale Wissensbasis Demo-Einträge untereinander, später mit echten Kundenakten, Regeln und Vorlagen befüllbar.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-wissen.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Aufgaben",
+    "hero": "AUFGABEN Demo-Abläufe vorbereitet Kurze Platzhalter, damit der Reiter sofort lesbar ist und später echte Routinen aufnehmen kann.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-aufgaben.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Konnektoren",
+    "hero": "KONNEKTOREN Zugänge für Dienste und Engines Keys werden nur maskiert gespeichert und nie im Klartext an die Oberfläche zurückgegeben.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-konnektoren.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Dateien",
+    "hero": "DATEIEN Lokaler Arbeitsbaum Optische Demo der festen Struktur. Die echte Dateiverbindung kommt später wieder dazu, ohne den alten Workspace-Kasten.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-dateien.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Artefakte",
+    "hero": "ARTEFAKTE Was der Agent gebaut hat Reports, Charts, Präsentationen und Bilder als saubere Liste. Demo-Artefakte öffnen direkt als Vollbild-Vorschau.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-artefakte.png"
+  },
+  {
+    "theme": "dark",
+    "label": "Agent",
+    "hero": "AGENT Agent Persönlicher Agent, der Entscheidungen vorbereitet, Arbeit bündelt und private Daten lokal hält.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/dark-agent.png"
+  },
+  {
+    "theme": "light",
+    "label": "Inbox",
+    "hero": "INBOX Inbox ruhig WhatsApp, Mail und Kontakte liegen untereinander in einer ruhigen Arbeitsliste.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-inbox.png"
+  },
+  {
+    "theme": "light",
+    "label": "Wissen",
+    "hero": "WISSEN Zentrale Wissensbasis Demo-Einträge untereinander, später mit echten Kundenakten, Regeln und Vorlagen befüllbar.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-wissen.png"
+  },
+  {
+    "theme": "light",
+    "label": "Aufgaben",
+    "hero": "AUFGABEN Demo-Abläufe vorbereitet Kurze Platzhalter, damit der Reiter sofort lesbar ist und später echte Routinen aufnehmen kann.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-aufgaben.png"
+  },
+  {
+    "theme": "light",
+    "label": "Konnektoren",
+    "hero": "KONNEKTOREN Zugänge für Dienste und Engines Keys werden nur maskiert gespeichert und nie im Klartext an die Oberfläche zurückgegeben.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-konnektoren.png"
+  },
+  {
+    "theme": "light",
+    "label": "Dateien",
+    "hero": "DATEIEN Lokaler Arbeitsbaum Optische Demo der festen Struktur. Die echte Dateiverbindung kommt später wieder dazu, ohne den alten Workspace-Kasten.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-dateien.png"
+  },
+  {
+    "theme": "light",
+    "label": "Artefakte",
+    "hero": "ARTEFAKTE Was der Agent gebaut hat Reports, Charts, Präsentationen und Bilder als saubere Liste. Demo-Artefakte öffnen direkt als Vollbild-Vorschau.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-artefakte.png"
+  },
+  {
+    "theme": "light",
+    "label": "Agent",
+    "hero": "AGENT Agent Persönlicher Agent, der Entscheidungen vorbereitet, Arbeit bündelt und private Daten lokal hält.",
+    "oldWorkspaceHeader": false,
+    "screenshot": "/Users/klaus/agent-control-live/work/artifacts/screenshots-header-check/light-agent.png"
+  }
+]

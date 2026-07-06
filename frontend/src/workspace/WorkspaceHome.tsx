@@ -1,34 +1,30 @@
-import { useCallback, useEffect, useState } from 'react'
-import { WorkspaceTree } from '../components/info-pane/sections/WorkspaceTree'
-import { FsBusProvider } from '../components/info-pane/utils/fsBus'
-import { workspaceFileKind } from './fileRouting'
-import { WorkspaceFilePane } from './WorkspaceFilePane'
+import { BrainCircuit, Code2, FileText, FolderOpen, Hammer, Settings, Sparkles, Workflow } from 'lucide-react'
 
-const CLASSIC_TREE = [
-  ['soul/', 'Identität, Stimme und Grundregeln des Agenten'],
-  ['config/', 'Agenten, Profile und lokale Konfiguration'],
-  ['brain/', 'Gedächtnis, Repo-Karte, Infra und Learnings'],
-  ['work/', 'Artefakte, Werkbank-Läufe und laufende Arbeitsstände'],
-  ['skills/', 'Wiederverwendbare Fähigkeiten und Spezial-Workflows'],
-  ['backend/', 'FastAPI, Streaming, Kontext und lokale Dienste'],
-  ['frontend/', 'Vite-App, Chat, Workspace und mobile Oberfläche'],
-  ['scripts/', 'Start, Setup, Wartung und lokale Hilfswerkzeuge'],
+const DEMO_TREE = [
+  { name: 'soul/', text: 'Identität, Stimme und Grundregeln des Agenten', icon: Sparkles, children: ['SOUL.md', 'ROLLEN.md'] },
+  { name: 'brain/', text: 'Gedächtnis, Repo-Karte, Infra und Learnings', icon: BrainCircuit, children: ['REPO-MAP.md', 'INFRA.md', 'learnings/'] },
+  { name: 'work/', text: 'Artefakte, Werkbank-Läufe und laufende Arbeitsstände', icon: Hammer, children: ['artifacts/', 'werkbank/', 'reports/'] },
+  { name: 'skills/', text: 'Wiederverwendbare Fähigkeiten und Spezial-Workflows', icon: Workflow, children: ['html-artifact/', 'imagegen/', 'custom/'] },
+  { name: 'config/', text: 'Agenten, Profile und lokale Konfiguration', icon: Settings, children: ['agents.json', 'secrets.local.example'] },
+  { name: 'backend/', text: 'FastAPI, Streaming, Kontext und lokale Dienste', icon: Code2, children: ['server.py', 'streaming.py', 'modules/'] },
+  { name: 'frontend/', text: 'Vite-App, Chat, Workspace und mobile Oberfläche', icon: FileText, children: ['src/', 'public/', 'index.html'] },
 ]
 
-function ClassicFolderTree() {
+function DemoFolderTree() {
   return (
-    <section className="workspace-files-demo">
+    <section className="workspace-system-panel">
       <div className="workspace-system-panel-head">
-        <div><strong>Klassischer Ordnerbaum</strong></div>
-        <span>Setup-Struktur</span>
+        <div><FolderOpen className="h-4 w-4" /><strong>Ordnerbaum</strong></div>
+        <span>Demo</span>
       </div>
       <div className="workspace-system-list">
-        {CLASSIC_TREE.map(([name, text]) => (
-          <article key={name} className="workspace-system-row is-neutral">
+        {DEMO_TREE.map(({ name, text, icon: Icon, children }) => (
+          <article key={name} className="workspace-system-row is-neutral workspace-files-row">
             <span />
             <div>
-              <strong>{name}</strong>
+              <strong className="flex items-center gap-2"><Icon className="h-4 w-4 text-[var(--warm)]" />{name}</strong>
               <em>{text}</em>
+              <small>{children.join(' · ')}</small>
             </div>
           </article>
         ))}
@@ -44,29 +40,18 @@ export function WorkspaceHome({ onOpenFile, onClose, onRevealPath, path, filePat
   path?: string | null
   filePath?: string | null
 }) {
-  const [fallbackFile, setFallbackFile] = useState('')
-
-  useEffect(() => {
-    if (filePath) setFallbackFile(filePath)
-  }, [filePath])
-
-  const openFile = useCallback((path: string) => {
-    if (workspaceFileKind(path) === 'html' && onOpenFile(path)) return
-    setFallbackFile(path)
-  }, [onOpenFile])
-
-  if (fallbackFile) {
-    return (
-      <WorkspaceFilePane path={fallbackFile} onBack={() => setFallbackFile('')} onRevealPath={onRevealPath} />
-    )
-  }
+  void onOpenFile; void onClose; void onRevealPath; void path; void filePath
 
   return (
-    <div className="workspace-files-root h-full min-h-0 overflow-auto text-[var(--t1)]">
-      <ClassicFolderTree />
-      <FsBusProvider>
-        <WorkspaceTree onOpenFile={openFile} fullMode onToggleFull={onClose} initialPath={path} />
-      </FsBusProvider>
+    <div className="workspace-system workspace-files-root">
+      <header className="workspace-system-hero">
+        <div>
+          <p>Dateien</p>
+          <h2>Lokaler Arbeitsbaum</h2>
+          <span>Optische Demo der festen Struktur. Die echte Dateiverbindung kommt später wieder dazu, ohne den alten Workspace-Kasten.</span>
+        </div>
+      </header>
+      <DemoFolderTree />
     </div>
   )
 }
