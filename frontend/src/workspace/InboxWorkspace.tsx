@@ -117,15 +117,6 @@ function attentionScore(chat: WaChat): number {
   return 0
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <section className="rounded-md border border-[var(--border)] bg-[var(--bg-1)] px-3 py-2">
-      <div className="truncate text-[11px] text-[var(--t3)]">{label}</div>
-      <div className="truncate text-sm font-medium tabular-nums text-[var(--t1)]">{value}</div>
-    </section>
-  )
-}
-
 function Panel({ title, count, children, defaultOpen = true }: { title: string; count: number; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -145,6 +136,8 @@ function Panel({ title, count, children, defaultOpen = true }: { title: string; 
   )
 }
 
+type InboxTab = 'waiting' | 'whatsapp' | 'mail' | 'groups' | 'archive'
+
 export function InboxWorkspace() {
   const [waChats, setWaChats] = useState<WaChat[]>([])
   const [waArchived, setWaArchived] = useState<WaChat[]>([])
@@ -156,6 +149,7 @@ export function InboxWorkspace() {
   const [query, setQuery] = useState('')
   const [contactResults, setContactResults] = useState<ContactResult[]>([])
   const [openThread, setOpenThread] = useState<OpenThread | null>(null)
+  const [activeTab, setActiveTab] = useState<InboxTab>('waiting')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -297,6 +291,13 @@ export function InboxWorkspace() {
 
   const unreadTotal = waChats.reduce((sum, c) => sum + (c.unread || 0), 0)
   const attention = filtered.waiting.length
+  const tabs = useMemo<Array<{ key: InboxTab; label: string; count: number }>>(() => [
+    { key: 'waiting', label: 'Wartet', count: filtered.waiting.length },
+    { key: 'whatsapp', label: 'WhatsApp', count: filtered.dms.length },
+    { key: 'mail', label: 'E-Mail', count: filtered.mailRest.length },
+    { key: 'groups', label: 'Gruppen', count: filtered.groups.length },
+    { key: 'archive', label: 'Archiv', count: filtered.archived.length || archivedCount },
+  ], [archivedCount, filtered.archived.length, filtered.dms.length, filtered.groups.length, filtered.mailRest.length, filtered.waiting.length])
 
   const renderChat = (chat: WaChat) => {
     const hot = attentionScore(chat) > 1
@@ -381,13 +382,6 @@ export function InboxWorkspace() {
         </button>
       }
     >
-
-      <div className="workspace-system-strip">
-        <Stat label="Wartet" value={filtered.waiting.length} />
-        <Stat label="WhatsApp" value={filtered.dms.length} />
-        <Stat label="Gruppen" value={filtered.groups.length} />
-        <Stat label="Archiv" value={archivedCount} />
-      </div>
       {error && <div className="workspace-system-note">{error}</div>}
 
       <main className="workspace-system-main workspace-system-stack">
@@ -409,28 +403,47 @@ export function InboxWorkspace() {
           </Panel>
         )}
 
-        <div className="workspace-inbox-grid grid gap-3">
-          <Panel title="Wartet" count={filtered.waiting.length}>
-            {filtered.waiting.map(item => item.kind === 'wa' ? renderChat(item.chat) : renderMail(item.mail))}
-            {filtered.waiting.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Inbox' : 'Nichts wartet.'}</div>}
-          </Panel>
-          <Panel title="WhatsApp" count={filtered.dms.length}>
-            {filtered.dms.map(renderChat)}
-            {filtered.dms.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine Chats.</div>}
-          </Panel>
-          <Panel title="Gruppen" count={filtered.groups.length}>
-            {filtered.groups.map(renderChat)}
-            {filtered.groups.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine Gruppen.</div>}
-          </Panel>
-          <Panel title="E-Mails" count={filtered.mailRest.length}>
-            {filtered.mailRest.map(mail => renderMail(mail, false))}
-            {filtered.mailRest.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine erledigten Mails.</div>}
-          </Panel>
-          <Panel title="Archiviert" count={filtered.archived.length} defaultOpen={false}>
-            {filtered.archived.map(renderChat)}
-            {filtered.archived.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Kein Archiv geladen.</div>}
-          </Panel>
+        <div className="workspace-inbox-tabs" role="tablist" aria-label="Inbox-Kategorien">
+          {tabs.map(tab => (
+            <button key={tab.key} type="button" role="tab" aria-selected={activeTab === tab.key} onClick={() => setActiveTab(tab.key)} className={activeTab === tab.key ? 'is-active' : ''}>
+              <span>{tab.label}</span>
+              <strong>{tab.count}</strong>
+            </button>
+          ))}
         </div>
+
+        <section className="workspace-inbox-list workspace-system-panel">
+          {activeTab === 'waiting' && (
+            <>
+              {filtered.waiting.map(item => item.kind === 'wa' ? renderChat(item.chat) : renderMail(item.mail))}
+              {filtered.waiting.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Inbox' : 'Nichts wartet.'}</div>}
+            </>
+          )}
+          {activeTab === 'whatsapp' && (
+            <>
+              {filtered.dms.map(renderChat)}
+              {filtered.dms.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine Chats.</div>}
+            </>
+          )}
+          {activeTab === 'mail' && (
+            <>
+              {filtered.mailRest.map(mail => renderMail(mail, false))}
+              {filtered.mailRest.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine erledigten Mails.</div>}
+            </>
+          )}
+          {activeTab === 'groups' && (
+            <>
+              {filtered.groups.map(renderChat)}
+              {filtered.groups.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Keine Gruppen.</div>}
+            </>
+          )}
+          {activeTab === 'archive' && (
+            <>
+              {filtered.archived.map(renderChat)}
+              {filtered.archived.length === 0 && <div className="px-3 py-4 text-sm text-[var(--t3)]">Kein Archiv geladen.</div>}
+            </>
+          )}
+        </section>
       </main>
     </WorkspaceShell>
   )

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AlertTriangle, BarChart3, Database, Download, FileText, Image, Presentation, RefreshCw, Search, X } from 'lucide-react'
 import { WorkspaceShell } from './WorkspaceShell'
 
@@ -10,6 +11,7 @@ type ArtifactEntry = {
   name: string
   label?: string
   relativeDate?: string
+  size?: string
   path: string
   ts: number
   demoText?: string
@@ -29,10 +31,11 @@ function writeCache(entries: ArtifactEntry[]) {
 }
 
 const DEMO_ARTIFACTS: ArtifactEntry[] = [
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'report', name: 'kundenlage-report.html', label: 'Kundenlage Report', relativeDate: 'Demo', path: '/workspace/work/artifacts/kundenlage-report.html', ts: 0, demoText: 'Ein klarer Überblick über Lage, Hebel und nächste Entscheidung.' },
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'chart', name: 'pipeline-chart.svg', label: 'Pipeline Chart', relativeDate: 'Demo', path: '/workspace/work/artifacts/pipeline-chart.svg', ts: 0, demoText: 'Verdichtete Kennzahlen als ruhige Chart-Ansicht.' },
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'presentation', name: 'strategie-deck.pdf', label: 'Strategie Präsentation', relativeDate: 'Demo', path: '/workspace/work/artifacts/strategie-deck.pdf', ts: 0, demoText: 'Drei Slides, die ein Angebot schnell erklärbar machen.' },
-  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'asset:image', name: 'kampagnenmotiv.png', label: 'Kampagnenmotiv', relativeDate: 'Demo', path: '/workspace/work/artifacts/kampagnenmotiv.png', ts: 0, demoText: 'Ein visuelles Motiv für Landingpage oder Kundenmail.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'report', name: 'Quartalsbericht Q2.pdf', label: 'Quartalsbericht Q2.pdf', relativeDate: 'heute 09:42', size: '2,4 MB', path: '/workspace/work/artifacts/quartalsbericht-q2.pdf', ts: 0, demoText: 'Umsatz, Pipeline und offene Entscheidungen als kompakter Management-Bericht.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'html', name: 'Angebot Muster GmbH.html', label: 'Angebot Muster GmbH.html', relativeDate: 'gestern 16:20', size: '418 KB', path: '/workspace/work/artifacts/angebot-muster-gmbh.html', ts: 0, demoText: 'Ein fertiges Angebotsartefakt mit Nutzen, Umfang und nächstem Schritt.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'presentation', name: 'KI-Strategie Präsentation', label: 'KI-Strategie Präsentation', relativeDate: 'Mo 11:08', size: '6,1 MB', path: '/workspace/work/artifacts/ki-strategie-praesentation.pdf', ts: 0, demoText: 'Eine kurze Präsentation, die den Weg von Idee zu Pilotprojekt erklärt.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'asset:image', name: 'Produkt-Mockup.png', label: 'Produkt-Mockup.png', relativeDate: 'Fr 14:33', size: '1,8 MB', path: '/workspace/work/artifacts/produkt-mockup.png', ts: 0, demoText: 'Ein visuelles Mockup für Produktseite, Pitch oder Kundenfreigabe.' },
+  { agent: 'main', agentName: 'Agent', color: '#D97757', category: 'doc', name: 'Onboarding-Leitfaden.md', label: 'Onboarding-Leitfaden.md', relativeDate: 'Do 08:15', size: '32 KB', path: '/workspace/work/artifacts/onboarding-leitfaden.md', ts: 0, demoText: 'Ein klarer Leitfaden für neue Kunden, Übergaben und wiederkehrende Abläufe.' },
 ]
 
 // Immer mit Uhrzeit: heute nur die Zeit, sonst Tag plus Zeit. Das Datum allein
@@ -71,6 +74,11 @@ function isImage(path: string): boolean {
 
 function isMarkdown(path: string): boolean {
   return /\.(md|markdown|txt)$/i.test(path)
+}
+
+function artifactMeta(entry: ArtifactEntry): string {
+  const when = fmtWhen(entry.ts) || entry.relativeDate || 'Demo'
+  return [categoryLabel(entry.category), when, entry.size].filter(Boolean).join(' · ')
 }
 
 function downloadUrl(path: string): string {
@@ -139,7 +147,8 @@ function ArtifactLine({ entry, onOpen }: { entry: ArtifactEntry; onOpen: (entry:
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium text-[var(--t1)]">{entry.label || entry.name}</span>
-          <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{entry.demoText || `${categoryLabel(entry.category)} · ${fmtWhen(entry.ts) || entry.relativeDate || 'Demo'}`}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-[var(--t3)]">{artifactMeta(entry)}</span>
+          {entry.demoText && <span className="mt-0.5 block truncate text-[11px] text-[var(--t2)]">{entry.demoText}</span>}
         </span>
       </button>
       <span className="shrink-0 rounded bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-[var(--t3)]">{ext(entry.path)}</span>
@@ -187,7 +196,10 @@ export function ArtifactsWorkspace() {
     try {
       const res = await fetch('/api/recent-entries?limit=100', { cache: 'no-store' })
       const data = await res.json()
-      const next = Array.isArray(data.entries) && data.entries.length ? data.entries as ArtifactEntry[] : DEMO_ARTIFACTS
+      const liveEntries = Array.isArray(data.entries) ? data.entries as ArtifactEntry[] : []
+      const seen = new Set(liveEntries.map(entry => entry.path))
+      const demoEntries = DEMO_ARTIFACTS.filter(entry => !seen.has(entry.path))
+      const next = liveEntries.length ? [...liveEntries, ...demoEntries] : DEMO_ARTIFACTS
       setEntries(next)
       writeCache(next)
     } catch (e) {
@@ -263,7 +275,7 @@ export function ArtifactsWorkspace() {
 
         {error && <div className="workspace-system-note flex gap-2"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><span>{error}</span></div>}
 
-        <section className="workspace-system-panel">
+        <section className="workspace-system-panel workspace-artifact-list">
           {visible.length === 0 ? (
             <div className="px-3 py-4 text-sm text-[var(--t3)]">{loading ? 'Lade Artefakte' : 'Keine Artefakte.'}</div>
           ) : (
@@ -278,15 +290,15 @@ export function ArtifactsWorkspace() {
 
 function ArtifactDemoLightbox({ entry, onClose }: { entry: ArtifactEntry; onClose: () => void }) {
   const Icon = iconFor(entry)
-  return (
+  return createPortal((
     <div className="workspace-artifact-lightbox" role="dialog" aria-modal="true">
+      <button type="button" className="workspace-artifact-lightbox-close" onClick={onClose} title="Schließen" aria-label="Vorschau schließen">
+        <X className="h-4 w-4" />
+      </button>
       <div className="workspace-artifact-lightbox-panel">
-        <button type="button" className="workspace-artifact-lightbox-close" onClick={onClose} title="Schließen">
-          <X className="h-4 w-4" />
-        </button>
         <div className="workspace-artifact-lightbox-visual">
           <Icon className="h-12 w-12" />
-          <span>{categoryLabel(entry.category)}</span>
+          <span>{artifactMeta(entry)}</span>
         </div>
         <h3>{entry.label || entry.name}</h3>
         <p>{entry.demoText}</p>
@@ -296,5 +308,5 @@ function ArtifactDemoLightbox({ entry, onClose }: { entry: ArtifactEntry; onClos
         </a>
       </div>
     </div>
-  )
+  ), document.body)
 }
