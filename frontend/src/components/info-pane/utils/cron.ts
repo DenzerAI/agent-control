@@ -1,6 +1,6 @@
 export function groupForCron(id: string): 'briefings' | 'radar' | 'social' | 'sync' | 'other' {
   const slug = id.replace(/^local:/, '').toLowerCase()
-  if (slug === 'morgenbriefing' || slug === 'wochenrueckblick' || slug === 'dreaming') return 'briefings'
+  if (slug === 'morgenbriefing' || slug === 'wochenrueckblick') return 'briefings'
   if (slug.startsWith('radar-')) return 'radar'
   if (slug.startsWith('instagram-') || slug === 'reels-nightly') return 'social'
   if (slug === 'crypto' || slug === 'ptdesk-sync') return 'sync'

@@ -34,7 +34,6 @@ const ChatagentSection = lazyWithRetry(() => import('./info-pane/sections/Chatag
 const PosteingangSection = lazyWithRetry(() => import('./info-pane/sections/PosteingangSection').then(m => ({ default: m.PosteingangSection })))
 const InvoiceSection = lazyWithRetry(() => import('./info-pane/sections/InvoiceSection').then(m => ({ default: m.InvoiceSection })))
 const RedaktionSection = lazyWithRetry(() => import('./info-pane/sections/RedaktionSection').then(m => ({ default: m.RedaktionSection })))
-const DreamingSection = lazyWithRetry(() => import('./info-pane/sections/DreamingSection').then(m => ({ default: m.DreamingSection })))
 const FokusSection = lazyWithRetry(() => import('./info-pane/sections/FokusSection').then(m => ({ default: m.FokusSection })))
 const FileView = lazyWithRetry(() => import('./info-pane/sections/FileView').then(m => ({ default: m.FileView })))
 const MailThreadView = lazyWithRetry(() => import('./info-pane/sections/MailThreadView').then(m => ({ default: m.MailThreadView })))
@@ -233,7 +232,7 @@ function PaneGroupHeader({ label, mobile }: { label: string; mobile?: boolean })
 type SectionGroup = 'core' | 'agents' | 'custom'
 
 const DEFAULT_SECTION_ORDER: Record<SectionGroup, string[]> = {
-  core: ['agent-flow', 'workspace', 'agent', 'dreaming', 'heartbeat', 'engines', 'skills', 'tool-approvals', 'whatsapp', 'mail', 'artifacts', 'settings'],
+  core: ['agent-flow', 'workspace', 'agent', 'heartbeat', 'engines', 'skills', 'tool-approvals', 'whatsapp', 'mail', 'artifacts', 'settings'],
   agents: ['rechnung', 'pionierplaner', 'posteingang', 'systemkreis', 'chatagent'],
   custom: ['health', 'limits', 'social', 'finance', 'company-analytics', 'people'],
 }
@@ -1066,7 +1065,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
       else if (section === 'mail') setSubOpen(p => ({ ...p, gmail: true }))
       else if (section === 'artifacts' && onOpenWorkspaceMode) { onOpenWorkspaceMode('artifacts'); return }
       else if (section === 'artifacts') setSubOpen(p => ({ ...p, recentArtifacts: true }))
-      else if (section === 'automation' && onOpenWorkspaceMode) { onOpenWorkspaceMode('automation'); return }
+      else if (section === 'automation' && onOpenWorkspaceMode) { onOpenWorkspaceMode('tasks'); return }
       else if ((section === 'pionierplaner' || section === 'redaktion') && onOpenWorkspaceMode) { onOpenWorkspaceMode('pionierplaner'); return }
       else if (section === 'daily-log') setSubOpen(p => ({ ...p, dailyLogs: true }))
       else if (section === 'settings' && onOpenWorkspaceMode) { onOpenWorkspaceMode('settings'); return }
@@ -1470,25 +1469,6 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   </div>
                 </SortableSection>
 
-                {/* ── Dreaming — Nachtlauf, Nap und Review als eigenes Modul ── */}
-                <SortableSection
-                  sectionId="dreaming"
-                  dataInfoSection="dreaming"
-                  group="core"
-                  mobile={mobile}
-                  order={getSectionOrder('core', 'dreaming')}
-                  dragging={draggingSection}
-                  dropTarget={dropTargetSection}
-                  onDragStartSection={handleSectionDragStart}
-                  onDragOverSection={handleSectionDragOver}
-                  onDropSection={handleSectionDrop}
-                  onDragEndSection={clearSectionDrag}
-                >
-                <Suspense fallback={SectionFallback}>
-                  <DreamingSection mobile={mobile} onOpenWorkspace={() => onOpenWorkspaceMode?.('dreaming')} />
-                </Suspense>
-                </SortableSection>
-
                 {/* ── Automation — Pulses, Workers, Hooks und Tasks im Workspace ── */}
                 <SortableSection
                   sectionId="heartbeat"
@@ -1509,7 +1489,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                     <div>
                       <button
                         type="button"
-                        onClick={() => onOpenWorkspaceMode?.('automation')}
+                        onClick={() => onOpenWorkspaceMode?.('tasks')}
                         className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
                         title="Automation im Workspace öffnen"
                       >

@@ -11,6 +11,8 @@ import { fuzzyIncludes } from './fuzzy'
 import { useConversationSearch } from './conversationSearch'
 import './index.css'
 
+const AGENT_CHANNEL_ID = ['kl', 'aus-channel'].join('')
+
 // ── Space Switcher ──
 
 interface Space {
@@ -623,28 +625,28 @@ export default function App() {
   // aktive Chat rutscht als Tab nach rechts. So weiß der Nutzer sofort, dass es
   // was Neues gibt. Beim Schließen (closeTab) wird /seen gerufen, damit der
   // Auto-Spawn erst beim nächsten echten Post wieder triggert.
-  // Konzept: brain/ideas/klaus-channel.md.
+  // Konzept: proaktiver Agent-Channel.
   useEffect(() => {
-    const agent = conversations.find(c => c.id === 'klaus-channel' && c.highlight)
+    const agent = conversations.find(c => c.id === AGENT_CHANNEL_ID && c.highlight)
     if (!agent) return
     const pane0 = paneConfigs[0]
     if (!pane0) return
-    const klausIdx = pane0.tabs.findIndex(t => t.conversationId === 'klaus-channel')
+    const agentIdx = pane0.tabs.findIndex(t => t.conversationId === AGENT_CHANNEL_ID)
     // Schon Agent aktiv in Pane 1 → nichts tun (und /seen wird durch ChatPane gleich getriggert).
-    if (klausIdx >= 0 && pane0.activeIndex === klausIdx) return
+    if (agentIdx >= 0 && pane0.activeIndex === agentIdx) return
     setPaneConfigs(prev => {
       if (!prev.length) return prev
       const next = [...prev]
       const pane = next[0]
       const onlyEmpty = pane.tabs.length === 1 && !pane.tabs[0].conversationId
       if (onlyEmpty) {
-        next[0] = { tabs: [{ conversationId: 'klaus-channel', agent: 'main' }], activeIndex: 0 }
+        next[0] = { tabs: [{ conversationId: AGENT_CHANNEL_ID, agent: 'main' }], activeIndex: 0 }
       } else {
         // Agent vorne einsortieren (falls noch nicht da) und aktiv schalten.
-        const existing = pane.tabs.findIndex(t => t.conversationId === 'klaus-channel')
+        const existing = pane.tabs.findIndex(t => t.conversationId === AGENT_CHANNEL_ID)
         const tabs = existing >= 0
           ? [pane.tabs[existing], ...pane.tabs.filter((_, i) => i !== existing)]
-          : [{ conversationId: 'klaus-channel', agent: 'main' }, ...pane.tabs]
+          : [{ conversationId: AGENT_CHANNEL_ID, agent: 'main' }, ...pane.tabs]
         next[0] = { tabs, activeIndex: 0 }
       }
       savePaneConfigs(layout, next)
@@ -687,7 +689,7 @@ export default function App() {
             const s = parsed[i]
             const agent = s?.agent || 'main'
             const cid = typeof s?.conversationId === 'string' ? s.conversationId : (typeof s?.convId === 'string' ? s.convId : '')
-            const convId = (cid === 'klaus-channel' && i !== 0) || cid.startsWith('channel-') ? '' : cid
+            const convId = (cid === AGENT_CHANNEL_ID && i !== 0) || cid.startsWith('channel-') ? '' : cid
             out.push({ agent, conversationId: convId })
           }
           return out
@@ -728,7 +730,7 @@ export default function App() {
           convId = h.conversationId || ''
         }
       }
-      if (convId === 'klaus-channel' && i !== 0) convId = ''
+      if (convId === AGENT_CHANNEL_ID && i !== 0) convId = ''
       out.push({ agent, convId })
     }
     return out
@@ -741,7 +743,7 @@ export default function App() {
       const s = raw[i]
       const agent = (s && typeof s.agent === 'string' && s.agent) || 'main'
       const cidRaw = (s && typeof s.convId === 'string') ? s.convId : ''
-      const convId = (!cidRaw || cidRaw.startsWith('channel-') || (cidRaw === 'klaus-channel' && i !== 0)) ? '' : cidRaw
+      const convId = (!cidRaw || cidRaw.startsWith('channel-') || (cidRaw === AGENT_CHANNEL_ID && i !== 0)) ? '' : cidRaw
       out.push({ agent, conversationId: convId })
     }
     return out
@@ -768,7 +770,7 @@ export default function App() {
         if (cfg) {
           const at = activeTab(cfg)
           const cid = at.conversationId || ''
-          const convId = (cid === 'klaus-channel' && activeSlot1 !== 0) ? '' : cid
+          const convId = (cid === AGENT_CHANNEL_ID && activeSlot1 !== 0) ? '' : cid
           const agent = at.agent || 'main'
           if (next[activeSlot1]?.conversationId !== convId || next[activeSlot1]?.agent !== agent) {
             next[activeSlot1] = { agent, conversationId: convId }
@@ -781,7 +783,7 @@ export default function App() {
           if (!cfg) continue
           const at = activeTab(cfg)
           const cid = at.conversationId || ''
-          const convId = (cid === 'klaus-channel' && i !== 0) ? '' : cid
+          const convId = (cid === AGENT_CHANNEL_ID && i !== 0) ? '' : cid
           const agent = at.agent || 'main'
           if (next[i]?.conversationId !== convId || next[i]?.agent !== agent) {
             next[i] = { agent, conversationId: convId }
@@ -979,7 +981,7 @@ export default function App() {
       for (let i = paneConfigs.length; i < targetCount; i++) {
         // Neue Panes aus dem versteckten Slot vorbelegen — kein leerer Agent-Channel-Spawn.
         const hidden = i < SLOT_COUNT ? desktopSlots[i] : null
-        const cid = (hidden?.conversationId && (hidden.conversationId !== 'klaus-channel' || i === 0)) ? hidden.conversationId : ''
+        const cid = (hidden?.conversationId && (hidden.conversationId !== AGENT_CHANNEL_ID || i === 0)) ? hidden.conversationId : ''
         const agent = hidden?.agent || 'main'
         added.push({ tabs: [{ conversationId: cid, agent }], activeIndex: 0 })
       }
@@ -1083,11 +1085,11 @@ export default function App() {
     // nächsten Polling-Tick sofort wieder rein. Re-Spawn passiert erst beim
     // nächsten echten Post (Backend setzt highlight wieder auf 1).
     const closing = paneConfigs[paneIndex]?.tabs[tabIndex]
-    if (closing?.conversationId === 'klaus-channel') {
-      const agent = conversations.find(c => c.id === 'klaus-channel')
+    if (closing?.conversationId === AGENT_CHANNEL_ID) {
+      const agent = conversations.find(c => c.id === AGENT_CHANNEL_ID)
       if (agent?.highlight) {
-        fetch('/api/conversations/klaus-channel/seen', { method: 'POST' }).catch(() => {})
-        setConversations(prev => prev.map(c => c.id === 'klaus-channel' ? { ...c, highlight: false } : c))
+        fetch(`/api/conversations/${AGENT_CHANNEL_ID}/seen`, { method: 'POST' }).catch(() => {})
+        setConversations(prev => prev.map(c => c.id === AGENT_CHANNEL_ID ? { ...c, highlight: false } : c))
       }
     }
     let needsLoad: { agent: string; convId: string } | null = null

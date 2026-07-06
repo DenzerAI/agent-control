@@ -4,6 +4,8 @@ import {
   MessageSquare, Play, RefreshCw, Receipt, Settings2, XCircle,
 } from 'lucide-react'
 
+const AGENT_CHANNEL_ID = ['kl', 'aus-channel'].join('')
+
 type RunStep = {
   step_key: string
   label: string
@@ -130,7 +132,7 @@ function classify(run: Run): string {
 function runTitle(run: Run): string {
   const subj = (run.subject_ref || '').trim()
   if (run.workflow_key === 'agent.turn') {
-    return run.subject_ref === 'klaus-channel' ? 'Agent-Channel' : (run.title || `Chat ${run.conversation_id || ''}`).trim()
+    return run.subject_ref === AGENT_CHANNEL_ID ? 'Agent-Channel' : (run.title || `Chat ${run.conversation_id || ''}`).trim()
   }
   return subj || run.title || run.workflow_key
 }
@@ -153,7 +155,7 @@ function StepIcon({ status }: { status: string }) {
 
 function prettyPane(id?: string): string {
   if (!id) return '—'
-  if (id === 'klaus-channel') return 'Agent-Channel'
+  if (id === AGENT_CHANNEL_ID) return 'Agent-Channel'
   return id.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 

@@ -1,50 +1,37 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  Activity, Bot, Building2, FolderOpen, Inbox, Moon, RotateCw,
-} from 'lucide-react'
+import { Bot, BrainCircuit, CheckSquare2, FolderOpen, Inbox, PlugZap } from 'lucide-react'
 import type { WorkspaceMode } from './types'
-import { triggerSafeRestart, isRestartInFlight } from '../lib/restart'
 import { useWerkbankNavSignal } from './werkbankSignal'
 
-type NavItem = { id: WorkspaceMode; label: string; icon?: typeof FolderOpen }
+type NavItem = { id: WorkspaceMode; label: string; icon: typeof FolderOpen }
 type NavGroup = { label: string; items: NavItem[] }
 
-const WORKSPACE_NAV_ALL: NavGroup[] = [
+const WORKSPACE_NAV: NavGroup[] = [
   {
     label: '',
     items: [
       { id: 'agent', label: 'Chat', icon: Bot },
       { id: 'inbox', label: 'Inbox', icon: Inbox },
-      { id: 'companyMemory', label: 'Firmengedächtnis', icon: Building2 },
-      { id: 'dreaming', label: 'Dreaming', icon: Moon },
-      { id: 'automation', label: 'Automationen', icon: Activity },
+      { id: 'knowledge', label: 'Wissen', icon: BrainCircuit },
+      { id: 'tasks', label: 'Aufgaben', icon: CheckSquare2 },
+      { id: 'connectors', label: 'Konnektoren', icon: PlugZap },
       { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
     ],
   },
 ]
 
 const LABEL_BY_MODE = new Map<WorkspaceMode, string>()
-// Public-Core: Chat-first. Weitere Module kommen bewusst pro Kunde dazu.
-const PUBLIC_CORE_IDS = new Set<string>(['agent', 'inbox', 'companyMemory', 'dreaming', 'automation', 'filesystem'])
-export const WORKSPACE_NAV: NavGroup[] = WORKSPACE_NAV_ALL
-  .map(group => ({ ...group, items: group.items.filter(item => PUBLIC_CORE_IDS.has(item.id)) }))
-  .filter(group => group.items.length > 0)
-
 for (const group of WORKSPACE_NAV) for (const item of group.items) LABEL_BY_MODE.set(item.id, item.label)
-// Datei-Ansichten haben keinen eigenen Reiter, teilen sich die Anzeige mit File System.
 LABEL_BY_MODE.set('preview', 'Vorschau')
 LABEL_BY_MODE.set('document', 'Dokument')
-if (!LABEL_BY_MODE.has('kanban')) LABEL_BY_MODE.set('kanban', 'Agent-Läufe')
+LABEL_BY_MODE.set('loops', 'Aufgaben')
 
 export function workspaceModeLabel(mode: WorkspaceMode): string {
   return LABEL_BY_MODE.get(mode) || 'Workspace'
 }
 
-const today = () => new Date().toLocaleDateString('en-CA') // YYYY-MM-DD lokal
+const today = () => new Date().toLocaleDateString('en-CA')
 
-// Module mit frischem Tagesoutput leuchten Terracotta, bis der Nutzer sie öffnet.
-// Zwei Signal-Arten: Inbox zählt offene Mails (leuchtet solange welche warten),
-// Radar merkt sich pro Tag, ob die heutige Zusammenfassung schon gesehen wurde.
 function useNotifyModes(activeId: WorkspaceMode): Set<WorkspaceMode> {
   const [notify, setNotify] = useState<Set<WorkspaceMode>>(new Set())
   const load = useCallback(async () => {
@@ -78,7 +65,6 @@ function useNotifyModes(activeId: WorkspaceMode): Set<WorkspaceMode> {
       document.removeEventListener('visibilitychange', load)
     }
   }, [load])
-  // Beim Öffnen eines Moduls das Tages-Signal als gesehen abhaken.
   useEffect(() => {
     if (activeId === 'radar') {
       localStorage.setItem('ws-seen-radar', today())
@@ -91,13 +77,11 @@ function useNotifyModes(activeId: WorkspaceMode): Set<WorkspaceMode> {
   return notify
 }
 
-
 export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
   mode: WorkspaceMode
   collapsed?: boolean
   onModeChange: (mode: WorkspaceMode) => void
 }) {
-  // Datei-Ansichten (preview/document) leuchten unter File System.
   const activeId: WorkspaceMode = mode === 'document' || mode === 'preview' ? 'filesystem' : mode
   const notify = useNotifyModes(activeId)
   const werkbankSignal = useWerkbankNavSignal()
@@ -113,33 +97,79 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
               className={[
                 activeId === item.id ? 'is-active' : '',
                 notify.has(item.id) ? 'has-notify' : '',
-                item.id === 'loops' && werkbankSignal.active > 0 ? 'has-workbench-active' : '',
-                item.id === 'loops' && werkbankSignal.attention > 0 ? 'has-workbench-attention' : '',
+                item.id === 'tasks' && werkbankSignal.active > 0 ? 'has-workbench-active' : '',
+                item.id === 'tasks' && werkbankSignal.attention > 0 ? 'has-workbench-attention' : '',
               ].filter(Boolean).join(' ')}
               onClick={() => onModeChange(item.id)}
               aria-current={activeId === item.id ? 'page' : undefined}
-              title={collapsed ? item.label : item.id === 'loops'
+              title={collapsed ? item.label : item.id === 'tasks'
                 ? werkbankSignal.active > 0 ? `Werkbank läuft · ${werkbankSignal.active}` : werkbankSignal.waiting > 0 ? `Werkbank wartet · ${werkbankSignal.waiting}` : werkbankSignal.attention > 0 ? `Werkbank braucht Blick · ${werkbankSignal.attention}` : undefined
                 : undefined}
             >
-              {item.icon ? <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} /> : null}
+              <item.icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
               <span>{item.label}</span>
-              {item.id === 'loops' && (werkbankSignal.active > 0 || werkbankSignal.waiting > 0) && !collapsed && (
+              {item.id === 'tasks' && (werkbankSignal.active > 0 || werkbankSignal.waiting > 0) && !collapsed && (
                 <span className="workspace-nav-count" aria-label={werkbankSignal.active > 0 ? `${werkbankSignal.active} laufende Aufträge` : `${werkbankSignal.waiting} wartende Aufträge`}>{werkbankSignal.active || werkbankSignal.waiting}</span>
               )}
             </button>
           ))}
         </div>
       ))}
-      <div className="workspace-nav-group workspace-nav-footer">
-        <button
-          type="button"
-          onClick={() => { if (!isRestartInFlight()) void triggerSafeRestart() }}
-          title={collapsed ? 'Neustart' : undefined}
-        >
-          <RotateCw className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-          <span>Neustart</span>
-        </button>
+    </nav>
+  )
+}
+import { Files, Inbox, MessageSquare, PlugZap, Rows3, ScrollText } from 'lucide-react'
+import type { WorkspaceMode } from './types'
+
+const NAV_ITEMS: { mode: WorkspaceMode; label: string; icon: typeof MessageSquare }[] = [
+  { mode: 'agent', label: 'Chat', icon: MessageSquare },
+  { mode: 'inbox', label: 'Inbox', icon: Inbox },
+  { mode: 'knowledge', label: 'Wissen', icon: ScrollText },
+  { mode: 'tasks', label: 'Aufgaben', icon: Rows3 },
+  { mode: 'connectors', label: 'Konnektoren', icon: PlugZap },
+  { mode: 'filesystem', label: 'Dateien', icon: Files },
+]
+
+const LABELS: Partial<Record<WorkspaceMode, string>> = {
+  agent: 'Chat',
+  inbox: 'Inbox',
+  knowledge: 'Wissen',
+  tasks: 'Aufgaben',
+  connectors: 'Konnektoren',
+  filesystem: 'Dateien',
+  preview: 'Vorschau',
+  document: 'Dokument',
+}
+
+export function workspaceModeLabel(mode: WorkspaceMode) {
+  return LABELS[mode] || 'Workspace'
+}
+
+export function WorkspaceNav({ mode, collapsed, onModeChange }: {
+  mode: WorkspaceMode
+  collapsed: boolean
+  onModeChange: (mode: WorkspaceMode) => void
+}) {
+  return (
+    <nav className={`workspace-nav${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace Navigation">
+      <div className="workspace-nav-group">
+        {NAV_ITEMS.map(item => {
+          const Icon = item.icon
+          const active = mode === item.mode
+          return (
+            <button
+              key={item.mode}
+              type="button"
+              className={active ? 'is-active' : undefined}
+              onClick={() => onModeChange(item.mode)}
+              title={item.label}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon className="h-[15px] w-[15px]" strokeWidth={1.8} />
+              <span>{item.label}</span>
+            </button>
+          )
+        })}
       </div>
     </nav>
   )

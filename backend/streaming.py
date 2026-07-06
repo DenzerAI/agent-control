@@ -17,7 +17,7 @@ from db import (get_db, save_msg, insert_partial, update_partial, get_msg_conten
                 get_codex_session_id, set_codex_session_id,
                 get_conversation_engine, auto_title, auto_project,
                 create_conversation, get_conversation, get_msgs)
-from stream_helpers import transcribe_audio, build_attachment_context, linkify_file_paths, update_letzter_stand, build_time_context, build_whatsapp_project_context, build_focus_snapshot, build_context_router_context, build_dreaming_context, build_focus_item_context, build_focus_quick_add_context, build_session_context, build_person_context, UPLOADS_DIR
+from stream_helpers import transcribe_audio, build_attachment_context, linkify_file_paths, update_letzter_stand, build_time_context, build_whatsapp_project_context, build_focus_snapshot, build_context_router_context, build_focus_item_context, build_focus_quick_add_context, build_session_context, build_person_context, UPLOADS_DIR
 from auth import client_ip_trusted, current_token, token_matches, monitor_token_valid
 from llm_log import log_call as _log_call
 from identity import build_identity_context, get_agent_display, normalize_agent_id, get_owner
@@ -2561,11 +2561,10 @@ def setup_streaming(app_config: dict):
         session_ctx = build_session_context(conv_id)
         person_ctx = build_person_context(message, conv_id)
         router_ctx = build_context_router_context(message, conv_id)
-        dreaming_ctx = build_dreaming_context()
         broker_ctx = broker_tool_context(conv_id, project)
 
         def _compose_stdin(rc: str) -> str:
-            return identity_ctx + time_ctx + session_ctx + (rc or "") + focus_ctx + router_ctx + dreaming_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
+            return identity_ctx + time_ctx + session_ctx + (rc or "") + focus_ctx + router_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
 
         async def _consume_codex(proc) -> str:
             """Liest einen Codex-Lauf bis zum Ende. Gibt 'overflow' zurück, wenn das
@@ -3248,9 +3247,8 @@ def setup_streaming(app_config: dict):
             session_ctx = build_session_context(conv_id)
             person_ctx = build_person_context(message, conv_id)
             router_ctx = build_context_router_context(message, conv_id)
-            dreaming_ctx = build_dreaming_context()
             broker_ctx = broker_tool_context(conv_id, project)
-            stdin_text = identity_ctx + time_ctx + session_ctx + (recent_context if recent_context else "") + focus_ctx + router_ctx + dreaming_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
+            stdin_text = identity_ctx + time_ctx + session_ctx + (recent_context if recent_context else "") + focus_ctx + router_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
             proc.stdin.write(stdin_text.encode())
             proc.stdin.close()
 
@@ -3295,9 +3293,8 @@ def setup_streaming(app_config: dict):
                     session_ctx = build_session_context(conv_id)
                     person_ctx = build_person_context(message, conv_id)
                     router_ctx = build_context_router_context(message, conv_id)
-                    dreaming_ctx = build_dreaming_context()
                     broker_ctx = broker_tool_context(conv_id, project)
-                    stdin_text = identity_ctx + time_ctx + session_ctx + (recent_context if recent_context else "") + focus_ctx + router_ctx + dreaming_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
+                    stdin_text = identity_ctx + time_ctx + session_ctx + (recent_context if recent_context else "") + focus_ctx + router_ctx + broker_ctx + item_ctx + quick_ctx + wa_ctx + person_ctx + message
                     proc.stdin.write(stdin_text.encode())
                     proc.stdin.close()
                     await _safe_send({

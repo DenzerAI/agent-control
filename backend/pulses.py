@@ -1162,52 +1162,6 @@ def _pulse_radar_intraday() -> dict:
     }
 
 
-def _pulse_dreaming_pattern() -> dict:
-    """Bringt das einzelne staerkste, noch nicht gezeigte Dreaming-Muster als
-    leisen Muster-Ping in den Klaus-Channel. Hoechstens einmal pro Tag, jedes
-    Muster nur einmal. Feuert fruehestens 14:00, damit es ruhig im Nachmittag
-    liegt, getrennt vom Morgenbriefing.
-    """
-    from datetime import datetime
-    import dreaming_module as _dream
-
-    now = datetime.now()
-    if now.hour < 14:
-        return {"status": "ok", "message": "vor 14:00", "payload": {}}
-
-    state = _get_pulse_state("dreaming-pattern")
-    today_key = now.strftime("%Y-%m-%d")
-    if state.get("last_post_day") == today_key:
-        return {"status": "ok", "message": "schon gepostet heute", "payload": state}
-
-    shown = set(state.get("shown_ids") or [])
-    hit = _dream.strongest_unshown_pattern(shown)
-    if not hit:
-        # Kein neues gefestigtes Muster: Tag nicht verbrauchen, State halten.
-        return {"status": "ok", "message": "kein neues Muster", "payload": state}
-
-    body = str(hit.get("body") or "").strip()
-    # Keine Gedankenstriche im sichtbaren Output: Em-/En-Dash zu Komma glaetten.
-    for _dash in ("\u2014", "\u2013"):
-        body = body.replace(f" {_dash} ", ", ").replace(_dash, ", ")
-    body = re.sub(r"\s+", " ", body).strip().rstrip(",").strip()
-
-    cid = str(hit.get("id") or "")
-    _post_to_klaus_channel(
-        source="dreaming-pattern",
-        text=body,
-        dedupe_key=f"dreaming-{cid}",
-        cooldown_sec=20 * 3600,
-    )
-    shown.add(cid)
-    shown_list = list(shown)[-200:]  # State gedeckelt halten
-    return {
-        "status": "found",
-        "message": f"Muster-Ping: {body[:60]}",
-        "payload": {"last_post_day": today_key, "shown_ids": shown_list},
-    }
-
-
 def _pulse_local_llm() -> dict:
     """Prüft, ob LM Studio antwortet, und meldet, wie oft das lokale Modell
     heute schon dran war. Rein lesend — selbst kein LLM-Call.
@@ -1366,6 +1320,5 @@ def register_defaults() -> None:
     register("health-sleep-watcher",  900, _pulse_health_sleep_watcher, timeout_sec=10.0)
     register("youtube-digest",       1800, _pulse_youtube_digest, timeout_sec=40.0)
     register("radar-intraday",       3600, _pulse_radar_intraday)
-    register("dreaming-pattern",     3600, _pulse_dreaming_pattern)
     register("problem-radar",        3600, _pulse_problem_radar, timeout_sec=180.0)
     # Radar darf bei konkreter Nachbauchance einmal täglich durchkommen.

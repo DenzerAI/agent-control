@@ -226,15 +226,8 @@ function initTTS(){
 }
 function startTTS(conv, text, voiceId){
   if (!ttsAudio || !text) return;
-  ttsConv = conv;
-  pushAudioState('playing', 0, 0, conv);   // optimistisch: Handy zeigt sofort die Leiste, Dauer folgt
-  fetch('/api/tts', { method:'POST', credentials:'same-origin',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ conversationId:conv, text:text, voiceId: voiceId||'' }) })
-    .then(function(r){ return r.json(); })
-    .then(function(d){ if (!d || !d.url){ stopTTS(); return; }
-      ttsAudio.src = d.url; var p = ttsAudio.play(); if (p && p.catch) p.catch(function(){ stopTTS(); }); })
-    .catch(function(){ stopTTS(); });
+  void conv; void voiceId;
+  stopTTS();
 }
 function stopTTS(){
   if (ttsAudio){ try { ttsAudio.pause(); ttsAudio.removeAttribute('src'); ttsAudio.load(); } catch(e){} }
@@ -685,13 +678,12 @@ async def deck_scroll_pull():
     return JSONResponse({"pane": pane, "dy": dy})
 
 
-# ── Klaus Deck — Vorlesen über den TV (Handy steuert, Monitor spielt) ──────────
+# ── Deck — alter Vorlesen-Status (TTS ist im Public-Core deaktiviert) ──────────
 # Gleiche Poll-Logik wie der Scroll: zwei Kanäle, kein WS (alte TV-Engine).
-#   Befehl  (Handy → TV):  _deck_speak  — play/pause/resume/stop/seek, mit Text+Voice.
+#   Befehl  (Handy → TV):  _deck_speak  — legacy play/pause/resume/stop/seek.
 #   Status  (TV → Handy):  _deck_audio  — idle/playing/paused + Position/Dauer.
 # Der Befehl trägt eine monoton steigende seq; der TV führt jede seq genau einmal
-# aus (merkt sich die letzte). Das TTS-Audio holt sich der TV selbst über /api/tts,
-# damit es aus den Fernseher-Boxen kommt statt aus dem Handy.
+# aus (merkt sich die letzte). TTS-Ausgabe ist entfernt.
 _DECK_SPEAK_ACTIONS = ("play", "pause", "resume", "stop", "seek")
 _deck_speak: dict = {"seq": 0, "action": "", "convId": "", "text": "", "voiceId": "", "t": 0.0}
 _deck_audio: dict = {"state": "idle", "convId": "", "t": 0.0, "dur": 0.0}

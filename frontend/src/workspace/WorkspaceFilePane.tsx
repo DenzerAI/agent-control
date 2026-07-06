@@ -2,9 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { ChevronLeft, Download, MessageSquare, Pause, Pencil, Play, Save, Shield, Volume2, X } from 'lucide-react'
+import { ChevronLeft, Download, MessageSquare, Pause, Pencil, Play, Save, Shield, X } from 'lucide-react'
 import * as audioQueue from '../audioQueue'
-import { cleanForTTS } from '../ttsClean'
 import { FilePathHeader } from './FilePathHeader'
 import { useMainAgentName } from '../agents'
 
@@ -41,7 +40,6 @@ export function WorkspaceFilePane({ path, onBack, onRevealPath }: {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [ttsLoading, setTtsLoading] = useState(false)
   const [ttsPlaying, setTtsPlaying] = useState(false)
   const [ttsCurrent, setTtsCurrent] = useState(0)
   const [ttsDuration, setTtsDuration] = useState(0)
@@ -106,42 +104,6 @@ export function WorkspaceFilePane({ path, onBack, onRevealPath }: {
     window.dispatchEvent(new CustomEvent('deck:discussFile', { detail: { filePath: path, content } }))
   }
 
-  const startTts = async () => {
-    if (!hasContent) return
-    ttsRef.current?.pause()
-    ttsRef.current = null
-    setTtsPlaying(false)
-    setTtsCurrent(0)
-    setTtsDuration(0)
-    setTtsLoading(true)
-    try {
-      const voiceId = (localStorage.getItem('control:voice') || localStorage.getItem('control:voice:agent') || localStorage.getItem('control:voice:main') || '').trim()
-      const body: Record<string, unknown> = { text: cleanForTTS(content), agent: 'agent' }
-      if (voiceId) {
-        body.voiceId = voiceId
-        try {
-          const raw = localStorage.getItem(`control:voiceSettings:${voiceId}`)
-          if (raw) body.voiceSettings = JSON.parse(raw)
-        } catch {}
-      }
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      const data = await r.json().catch(() => null) as { url?: string } | null
-      if (!data?.url) return
-      const audio = new Audio(data.url)
-      audio.playbackRate = audioQueue.getState().playbackRate
-      ttsRef.current = audio
-      audio.addEventListener('loadedmetadata', () => setTtsDuration(audio.duration || 0))
-      audio.addEventListener('timeupdate', () => setTtsCurrent(audio.currentTime))
-      audio.addEventListener('ended', () => setTtsPlaying(false))
-      await audio.play()
-      setTtsPlaying(true)
-    } catch {
-      setError('Vorlesen fehlgeschlagen.')
-    } finally {
-      setTtsLoading(false)
-    }
-  }
-
   const toggleTts = () => {
     if (!ttsRef.current) return
     if (ttsPlaying) {
@@ -182,11 +144,6 @@ export function WorkspaceFilePane({ path, onBack, onRevealPath }: {
       {canReadText && (
         <button type="button" className="workspace-icon-button" onClick={discuss} disabled={!hasContent} title={`Mit ${agentName} besprechen`}>
           <MessageSquare className="h-4 w-4" />
-        </button>
-      )}
-      {canReadText && (
-        <button type="button" className="workspace-icon-button" onClick={startTts} disabled={!hasContent || ttsLoading} title={ttsLoading ? 'Lädt' : 'Vorlesen'}>
-          <Volume2 className="h-4 w-4" />
         </button>
       )}
       {canEdit && !editing && (

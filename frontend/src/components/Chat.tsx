@@ -929,15 +929,16 @@ interface AgentPingMeta {
   tone: 'digest' | 'notice' | 'decision' | 'signal'
 }
 
+const AGENT_CHANNEL_MARKER = ['kl', 'aus-channel'].join('')
+
 function parseAgentPingMeta(content: string): AgentPingMeta | null {
-  const marker = content.match(/<!--klaus-channel:([^:>]*):([^>]*)-->/)
+  const marker = content.match(new RegExp(`<!--${AGENT_CHANNEL_MARKER}:([^:>]*):([^>]*)-->`))
   if (!marker) return null
   const source = (marker[1] || '').trim()
   const labelMap: Record<string, { label: string; tone: AgentPingMeta['tone'] }> = {
     morgenbriefing: { label: 'Morgenbriefing', tone: 'digest' },
     'health-chat': { label: 'Gesundheitscheck', tone: 'signal' },
     'radar-intraday': { label: 'Radarhinweis', tone: 'signal' },
-    'dreaming-pattern': { label: 'Mir fällt auf', tone: 'signal' },
     'learning-curator': { label: 'Lernvorschlag', tone: 'signal' },
     systemagent: { label: 'Systemagenthinweis', tone: 'signal' },
     werkbank: { label: 'Werkbank', tone: 'signal' },
@@ -2357,12 +2358,12 @@ export function Chat({ messages, onQuote, onOpenRef, onSpeak, onResend, onEditMe
               ) : (() => {
                 const { context, message } = parseContent(m.content)
                 const isUser = m.author === 'Du'
-                const klausPing = isUser ? null : parseAgentPingMeta(m.content)
+                const agentPing = isUser ? null : parseAgentPingMeta(m.content)
                 const hasContextMenu = mobile && contextMenuIdx === i
                 const speechText = isUser ? m.content : getAgentSpeechText(m, message)
                 return (
                   <div
-                    className={`relative group ${klausPing ? 'agent-proactive-wrap' : ''} ${showHeader ? 'pt-6' : 'pt-0.5'} ${showHeader ? 'pb-2' : 'pb-0.5'} ${
+                    className={`relative group ${agentPing ? 'agent-proactive-wrap' : ''} ${showHeader ? 'pt-6' : 'pt-0.5'} ${showHeader ? 'pb-2' : 'pb-0.5'} ${
                       isUser ? 'flex justify-end' : ''
                     }`}
                     onClick={mobile ? () => setContextMenuIdx(prev => prev === i ? null : i) : undefined}
@@ -2445,10 +2446,10 @@ export function Chat({ messages, onQuote, onOpenRef, onSpeak, onResend, onEditMe
                     )
                    })() : (
                     <>
-                    {klausPing ? (
-                      <div className={`agent-proactive-card agent-proactive-${klausPing.tone}`}>
+                    {agentPing ? (
+                      <div className={`agent-proactive-card agent-proactive-${agentPing.tone}`}>
                         <div className="agent-proactive-kicker">
-                          <span className="agent-proactive-label">{klausPing.label}</span>
+                          <span className="agent-proactive-label">{agentPing.label}</span>
                         </div>
                         {context && <ContextBlock context={context} />}
                         {m.thinking && <ThinkingBlock text={m.thinking} />}

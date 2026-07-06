@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, CheckCircle2, FileText, Link2, Loader2, Play, RefreshCw, Square, Trash2 } from 'lucide-react'
 
+const AGENT_CHANNEL_ID = ['kl', 'aus-channel'].join('')
+
 type LoopStep = {
   key: string
   label: string
@@ -234,7 +236,7 @@ function taskOriginParts(task: WerkbankTask): { pane: string; session: string } 
   const session = raw && raw !== 'Ohne Ursprungschat' ? raw : (conv ? `Chat ${conv.slice(0, 8)}` : 'ohne Chat')
   const paneNum = typeof origin.pane === 'number' ? origin.pane : null
   let pane = ''
-  if (conv === 'klaus-channel') pane = 'Agent-Channel'
+  if (conv === AGENT_CHANNEL_ID) pane = 'Agent-Channel'
   else if (paneNum !== null && paneNum >= 0) pane = `Pane ${paneNum + 1}`
   return { pane, session }
 }

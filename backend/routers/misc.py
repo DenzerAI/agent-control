@@ -12,9 +12,6 @@ Routen:
 - GET  /api/engines                                     — bekannte Engine-Profile + Runtime-Status
 - POST /api/workflows/{run_id}/feedback                 — User-Feedback zu einer Learning-Log-Akte
 - POST /api/systemagent/run                             — Systemagent-Kreis laufen lassen
-- GET  /api/dreaming                                    — Dreaming-Übersicht
-- POST /api/dreaming/nap                                — einen Nap fahren
-- POST /api/dreaming/candidates/{candidate_id}/decision — Kandidaten-Entscheidung setzen
 - GET  /api/engines/stats                               — aggregierte LLM-Call-Stats je Feature
 - GET  /api/limits                                      — Live-Snapshot des Limits-Tabs
 - GET  /api/history                                     — Message-History je Conversation
@@ -186,38 +183,6 @@ async def systemagent_run(payload: dict = Body(default_factory=dict)):
             except Exception as e:
                 print(f"[systemagent] broadcast failed: {e}", flush=True)
         return JSONResponse(result)
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-# ── Dreaming ──
-
-@router.get("/api/dreaming")
-async def dreaming_overview():
-    try:
-        import dreaming_module
-        return JSONResponse(dreaming_module.overview())
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@router.post("/api/dreaming/nap")
-async def dreaming_nap(payload: dict = Body(default_factory=dict)):
-    try:
-        import dreaming_module
-        result = await asyncio.to_thread(dreaming_module.run_nap, model=str(payload.get("model") or "sonnet"))
-        return JSONResponse(result, status_code=200 if result.get("ok") else 500)
-    except subprocess.TimeoutExpired:
-        return JSONResponse({"ok": False, "status": "error", "error": "Nap timed out"}, status_code=504)
-    except Exception as e:
-        return JSONResponse({"ok": False, "status": "error", "error": str(e)}, status_code=500)
-
-
-@router.post("/api/dreaming/candidates/{candidate_id}/decision")
-async def dreaming_candidate_decision(candidate_id: str, payload: dict = Body(default_factory=dict)):
-    try:
-        import dreaming_module
-        return JSONResponse(dreaming_module.set_decision(candidate_id, str(payload.get("status") or "open")))
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 

@@ -51,19 +51,6 @@ function readVerbosity(): 'result' | 'brief' | 'full' {
   return v === 'result' || v === 'full' ? v : 'brief'
 }
 
-function loadUserSettings(voiceId: string): VoiceSettings | null {
-  try {
-    const raw = localStorage.getItem(`control:voiceSettings:${voiceId}`)
-    if (!raw) return null
-    const p = JSON.parse(raw) as Partial<VoiceSettings>
-    return {
-      stability: typeof p.stability === 'number' ? p.stability : DEFAULT_FALLBACK.stability,
-      similarity_boost: typeof p.similarity_boost === 'number' ? p.similarity_boost : DEFAULT_FALLBACK.similarity_boost,
-      style: typeof p.style === 'number' ? p.style : DEFAULT_FALLBACK.style,
-    }
-  } catch { return null }
-}
-
 interface Props {
   agent: string
   mobile?: boolean
@@ -284,17 +271,9 @@ export function SettingsPanel({ agent, mobile, variant = 'list' }: Props) {
   const [engineDefault, setEngineDefault] = useState<Engine>(() => getDefaultEngine())
 
   useEffect(() => {
-    fetch('/api/voices').then(r => r.json()).then(d => {
-      const vs: Voice[] = d.voices || []
-      setVoices(vs)
-      const loaded: Record<string, VoiceSettings> = {}
-      for (const v of vs) {
-        const u = loadUserSettings(v.id)
-        if (u) loaded[v.id] = u
-      }
-      setUserSettings(loaded)
-      setLoading(false)
-    }).catch(() => setLoading(false))
+    setVoices([])
+    setUserSettings({})
+    setLoading(false)
   }, [])
 
   useEffect(() => audioQueue.subscribe(s => setRate(s.playbackRate)), [])

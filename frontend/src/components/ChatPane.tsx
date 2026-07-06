@@ -1850,12 +1850,6 @@ export function ChatPane({ defaultAgent = 'main', conversationId: externalConvId
       return
     }
 
-    // Agent-Mic Stop-Audio: Hardware-Taste auf Agent-Mic kappt TTS in allen Tabs.
-    if (msg.type === 'voice.stop') {
-      audioQueue.stopAll()
-      return
-    }
-
     // UI-Layout-Kommando vom Backend (z.B. Text-Chat-Agent pusht via /api/ui-command).
     // Jede Pane hat ihr eigenes WS, also nur paneIndex 0 dispatcht das Event,
     // sonst feuern wir 1× pro offener Pane. Mobile ignoriert.

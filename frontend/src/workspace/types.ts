@@ -1,4 +1,4 @@
-export type WorkspaceMode = 'preview' | 'document' | 'filesystem' | 'agent' | 'companyMemory' | 'health' | 'limits' | 'privacy' | 'systemagent' | 'chatagent' | 'loops' | 'offers' | 'pionierplaner' | 'social' | 'analytics' | 'invoice' | 'dreaming' | 'finance' | 'people' | 'skills' | 'engines' | 'inbox' | 'artifacts' | 'calendar' | 'automation' | 'settings' | 'kanban' | 'agents' | 'radar' | 'ideas' | 'pipeline' | 'projects' | 'youtube'
+export type WorkspaceMode = 'preview' | 'document' | 'filesystem' | 'agent' | 'knowledge' | 'tasks' | 'connectors' | 'health' | 'limits' | 'privacy' | 'systemagent' | 'chatagent' | 'loops' | 'offers' | 'pionierplaner' | 'social' | 'analytics' | 'invoice' | 'finance' | 'people' | 'skills' | 'engines' | 'inbox' | 'artifacts' | 'calendar' | 'settings' | 'kanban' | 'agents' | 'radar' | 'ideas' | 'pipeline' | 'projects' | 'youtube'
 export type WorkspaceSpan = 1 | 2 | 3
 export type WorkspaceViewport = 'mobile' | 'tablet' | 'desktop'
 export type WorkspaceFileKind = 'html' | 'markdown' | 'file'

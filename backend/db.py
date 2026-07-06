@@ -192,6 +192,15 @@ def init_db():
         if 'kind' not in conv_cols:
             db.execute("ALTER TABLE conversations ADD COLUMN kind TEXT NOT NULL DEFAULT ''")
             db.execute("UPDATE conversations SET kind = 'work_session' WHERE kind = '' AND (title LIKE 'Arbeitslauf -%' OR title LIKE 'Arbeitslauf ·%')")
+        # Connectors: externe Dienste und Engine-Zugaenge. Es wird bewusst nur
+        # ein maskierter Credential-Hinweis gespeichert, kein Klartext-Key.
+        db.execute("""CREATE TABLE IF NOT EXISTS connectors (
+            service TEXT PRIMARY KEY,
+            account_label TEXT NOT NULL DEFAULT '',
+            credential_hint TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'not_connected',
+            updated_at REAL NOT NULL DEFAULT 0
+        )""")
         # Projects table
         db.execute("""CREATE TABLE IF NOT EXISTS projects (
             id TEXT PRIMARY KEY,
@@ -1544,3 +1553,55 @@ def calendar_get_gcal_ref(event_id: str) -> tuple[str, str]:
     if not row:
         return ('', '')
     return (row[0] or '', row[1] or '')
+
+
+def _mask_connector_secret(secret: str) -> str:
+    value = str(secret or "").strip()
+    if not value:
+        return ""
+    tail = value[-4:] if len(value) >= 4 else value[-1:]
+    return "." * max(8, len(value) - len(tail)) + tail
+
+
+def list_connectors() -> list[dict]:
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT service, account_label, credential_hint, status, updated_at FROM connectors ORDER BY service"
+        ).fetchall()
+    return [
+        {
+            "service": row[0],
+            "account_label": row[1] or "",
+            "credential_hint": row[2] or "",
+            "status": row[3] or "not_connected",
+            "updated_at": row[4] or 0,
+        }
+        for row in rows
+    ]
+
+
+def upsert_connector(service: str, credential: str = "", account_label: str = "") -> dict:
+    service_id = str(service or "").strip()
+    if not service_id:
+        raise ValueError("service_required")
+    hint = _mask_connector_secret(credential)
+    status = "connected" if hint else "not_connected"
+    now = time.time()
+    with get_db() as db:
+        db.execute(
+            """INSERT INTO connectors (service, account_label, credential_hint, status, updated_at)
+               VALUES (?, ?, ?, ?, ?)
+               ON CONFLICT(service) DO UPDATE SET
+                 account_label=excluded.account_label,
+                 credential_hint=excluded.credential_hint,
+                 status=excluded.status,
+                 updated_at=excluded.updated_at""",
+            (service_id, str(account_label or "").strip(), hint, status, now),
+        )
+    return {
+        "service": service_id,
+        "account_label": str(account_label or "").strip(),
+        "credential_hint": hint,
+        "status": status,
+        "updated_at": now,
+    }

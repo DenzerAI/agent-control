@@ -569,19 +569,12 @@
   overflow-y: auto;
 }
 
-.workspace-body > .workspace-radar,
-.workspace-body > .workspace-dreaming {
+.workspace-body > .workspace-radar {
   min-height: 100%;
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   box-sizing: border-box;
-}
-
-.workspace-body > .workspace-dreaming {
-  padding: 12px;
-  background: var(--bg);
-  overflow: auto;
 }
 
 .workspace-radar header {
@@ -716,67 +709,6 @@
   .workspace-radar .radar-player-time-duration {
     display: none;
   }
-}
-
-.workspace-dreaming .workspace-system-hero {
-  align-items: center;
-  min-height: 96px;
-  padding: 16px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-1) 88%, transparent);
-}
-
-.workspace-dreaming .workspace-system-hero p {
-  margin-bottom: 6px;
-  font-size: 11px;
-}
-
-.workspace-dreaming .workspace-system-hero h2 {
-  font-family: var(--font-body);
-  font-size: 21px;
-  line-height: 1.18;
-  font-weight: 600;
-}
-
-.workspace-dreaming .workspace-system-hero div > span {
-  max-width: 620px;
-  margin-top: 7px;
-  font-size: 13px;
-  line-height: 1.42;
-}
-
-.workspace-dreaming .workspace-system-hero button {
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-}
-
-.workspace-dreaming .workspace-system-strip,
-.workspace-dreaming .workspace-system-main {
-  gap: 10px;
-}
-
-.workspace-dreaming .workspace-system-strip section,
-.workspace-dreaming .workspace-system-panel {
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-1) 92%, transparent);
-}
-
-.workspace-dreaming .workspace-system-strip section {
-  min-height: 84px;
-  padding: 12px;
-}
-
-.workspace-dreaming .workspace-system-strip strong {
-  margin: 7px 0 4px;
-  font-size: 19px;
-}
-
-.workspace-dreaming .workspace-system-panel {
-  padding: 13px;
-}
-
-.workspace-dreaming .workspace-system-row {
-  padding: 9px 0;
 }
 
 .werkbank-shell {
@@ -6907,79 +6839,6 @@ pre.path-block code {
   padding-top: 16px !important;
   padding-bottom: 16px !important;
   gap: 28px !important;
-}
-
-/* Dreaming: lesbarer Umbau auf Klartext und Steuerung */
-.workspace-dreaming .workspace-system-strip section.is-good strong {
-  color: var(--green);
-}
-.workspace-dreaming .workspace-system-row strong {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  font-size: 14px;
-  line-height: 1.34;
-}
-.workspace-dreaming .workspace-system-row em {
-  font-size: 12.5px;
-  line-height: 1.46;
-}
-.workspace-dreaming .dream-badge {
-  color: var(--green);
-  font-weight: 600;
-}
-.workspace-dreaming .dream-hint {
-  margin: 0 0 4px;
-  padding: 8px 10px;
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  color: var(--t2);
-  font-size: 12px;
-  line-height: 1.42;
-}
-.workspace-dreaming .dream-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 9px;
-}
-.workspace-dreaming .dream-actions button,
-.workspace-dreaming .dream-nap {
-  min-height: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  color: var(--t2);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
-}
-.workspace-dreaming .dream-actions button.is-yes:hover {
-  border-color: var(--green);
-  color: var(--green);
-  background: color-mix(in srgb, var(--green) 12%, transparent);
-}
-.workspace-dreaming .dream-actions button.is-no:hover {
-  border-color: var(--cc-orange);
-  color: var(--cc-orange);
-  background: color-mix(in srgb, var(--cc-orange) 12%, transparent);
-}
-.workspace-dreaming .dream-nap b {
-  color: var(--t1);
-  font-weight: 600;
-}
-.workspace-dreaming .dream-nap:hover {
-  border-color: var(--accent, var(--cc-orange));
-}
-.workspace-dreaming .dream-actions button:disabled,
-.workspace-dreaming .dream-nap:disabled {
-  opacity: 0.55;
-  cursor: default;
 }
 
 /* Werkbank-Cockpit: Live-Tool-Feed mit Aufklapp-Detail */

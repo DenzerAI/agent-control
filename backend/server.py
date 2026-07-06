@@ -65,6 +65,8 @@ from routers.tools import router as tools_router
 app.include_router(tools_router)
 from routers.misc import router as misc_router
 app.include_router(misc_router)
+from routers.connectors import router as connectors_router
+app.include_router(connectors_router)
 from routers.youtube import router as youtube_router
 app.include_router(youtube_router)
 

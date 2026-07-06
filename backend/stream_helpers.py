@@ -284,19 +284,6 @@ def build_context_router_context(message: str, conv_id: str) -> str:
         return ""
 
 
-def build_dreaming_context() -> str:
-    """Leiser Dreaming-Kontext für Live-Antworten.
-
-    Der Block ist bewusst klein und handlungsarm: Er soll Klaus' Ton und
-    Priorisierung kalibrieren, aber der Nutzer keine weitere Lesepflicht geben.
-    """
-    try:
-        import dreaming_module
-        return dreaming_module.live_context()
-    except Exception:
-        return ""
-
-
 def build_focus_item_context(conv_id: str) -> str:
     """Frischer Item-Kontext für Conversations, die an ein Fokus-Item gekoppelt sind.
     Liefert Fokus-Metadaten, Body und letzte Notizen, damit Klaus pro Turn weiß,

@@ -8,12 +8,12 @@ function playWorkspaceOpen(mode: WorkspaceMode) {
   playUISound(mode === 'filesystem' ? 'workspace-reveal' : 'workspace-open', 0.45)
 }
 
-const PUBLIC_WORKSPACE_MODES = new Set<WorkspaceMode>(['agent', 'inbox', 'companyMemory', 'dreaming', 'automation', 'filesystem'])
+const PUBLIC_WORKSPACE_MODES = new Set<WorkspaceMode>(['agent', 'inbox', 'knowledge', 'tasks', 'connectors', 'filesystem'])
 
 const PARENT_MODE_BY_MODE: Partial<Record<WorkspaceMode, WorkspaceMode>> = {
-  chatagent: 'automation',
-  systemagent: 'automation',
-  kanban: 'automation',
+  chatagent: 'tasks',
+  systemagent: 'tasks',
+  kanban: 'tasks',
 }
 
 export function useWorkspaceController(): WorkspaceController {

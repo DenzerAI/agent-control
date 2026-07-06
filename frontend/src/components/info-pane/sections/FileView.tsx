@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { X, ChevronLeft, Pause, Play, Download, Shield, Info, MessageSquare, Volume2, Pencil, MoreHorizontal } from 'lucide-react'
+import { X, ChevronLeft, Pause, Play, Download, Shield, Info, MessageSquare, Pencil, MoreHorizontal } from 'lucide-react'
 import { useMainAgentName } from '../../../agents'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import * as audioQueue from '../../../audioQueue'
 import { playUISound } from '../../../uiSounds'
-import { extractSection } from '../utils/format'
 import { MD } from '../utils/constants'
 
 // ── File Viewer ──
@@ -120,7 +119,7 @@ function MetaPopover({ meta, onClose }: { meta: JobMeta; onClose: () => void }) 
   )
 }
 
-export function FileViewMenu({ meta, metaOpen, setMetaOpen, isMd, hasContent, isEditable, editing, setEditing, hasTtsAudio, ttsLoading, startTts, path, content }: {
+export function FileViewMenu({ meta, metaOpen, setMetaOpen, isMd, hasContent, isEditable, editing, setEditing, path, content }: {
   meta: JobMeta | null
   metaOpen: boolean
   setMetaOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -129,9 +128,6 @@ export function FileViewMenu({ meta, metaOpen, setMetaOpen, isMd, hasContent, is
   isEditable: boolean
   editing: boolean
   setEditing: (v: boolean) => void
-  hasTtsAudio: boolean
-  ttsLoading: boolean
-  startTts: () => void
   path: string
   content: string
 }) {
@@ -149,7 +145,6 @@ export function FileViewMenu({ meta, metaOpen, setMetaOpen, isMd, hasContent, is
   const items: Item[] = []
   if (meta) items.push({ label: 'Job-Telemetrie', icon: Info, onClick: () => { setMetaOpen(v => !v); setOpen(false) } })
   if (isMd && hasContent) items.push({ label: `Mit ${agentName} besprechen`, icon: MessageSquare, onClick: () => { window.dispatchEvent(new CustomEvent('deck:discussFile', { detail: { filePath: path, content } })); setOpen(false) } })
-  if (isMd && !hasTtsAudio) items.push({ label: ttsLoading ? 'Lädt…' : 'Vorlesen', icon: Volume2, onClick: () => { startTts(); setOpen(false) }, disabled: ttsLoading })
   if (isEditable && !editing) items.push({ label: 'Bearbeiten', icon: Pencil, onClick: () => { setEditing(true); setOpen(false) } })
   items.push({ label: 'Herunterladen', icon: Download, onClick: () => { window.location.href = `/api/fs/download?path=${encodeURIComponent(path)}`; setOpen(false) } })
 
@@ -187,10 +182,9 @@ export function FileView({ path, onClose }: { path: string; onClose: () => void 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   // TTS player state
-  const [ttsLoading, setTtsLoading] = useState(false)
   const [ttsPlaying, setTtsPlaying] = useState(false)
   const [ttsCurrent, setTtsCurrent] = useState(0)
-  const [ttsDuration, setTtsDuration] = useState(0)
+  const [ttsDuration] = useState(0)
   const ttsRef = useRef<HTMLAudioElement | null>(null)
 
   const lower = path.toLowerCase()
@@ -225,46 +219,13 @@ export function FileView({ path, onClose }: { path: string; onClose: () => void 
     finally { setSaving(false) }
   }
 
-  const playText = async (text: string) => {
-    if (ttsRef.current) { ttsRef.current.pause(); ttsRef.current = null }
-    setTtsPlaying(false); setTtsCurrent(0); setTtsDuration(0)
-    if (!text) return
-    setTtsLoading(true)
-    try {
-      const voiceId = (localStorage.getItem('control:voice') || localStorage.getItem('control:voice:agent') || localStorage.getItem('control:voice:main') || '').trim()
-      const body: Record<string, unknown> = { text, agent: 'agent' }
-      if (voiceId) {
-        body.voiceId = voiceId
-        try {
-          const raw = localStorage.getItem(`control:voiceSettings:${voiceId}`)
-          if (raw) body.voiceSettings = JSON.parse(raw)
-        } catch {}
-      }
-      const r = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      const data = await r.json().catch(() => null) as { url?: string } | null
-      if (!data?.url) return
-      const audio = new Audio(data.url)
-      audio.playbackRate = audioQueue.getState().playbackRate
-      ttsRef.current = audio
-      audio.addEventListener('loadedmetadata', () => setTtsDuration(audio.duration || 0))
-      audio.addEventListener('timeupdate', () => setTtsCurrent(audio.currentTime))
-      audio.addEventListener('ended', () => { setTtsPlaying(false) })
-      await audio.play()
-      setTtsPlaying(true)
-    } catch { /* ignore */ }
-    finally { setTtsLoading(false) }
-  }
-
-  const startTts = () => playText(content)
-
   const onMdClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement
     const btn = target.closest('[data-section-heading]') as HTMLElement | null
     if (!btn) return
     e.preventDefault(); e.stopPropagation()
     const heading = decodeURIComponent(btn.getAttribute('data-section-heading') || '')
-    const section = extractSection(content, heading)
-    if (section) playText(section)
+    void heading
   }
 
   // Keep playback rate in sync when user changes it via SettingsMenu
@@ -320,9 +281,6 @@ export function FileView({ path, onClose }: { path: string; onClose: () => void 
           isEditable={kind === 'text' && (path.endsWith('.md') || path.endsWith('.mdx'))}
           editing={editing}
           setEditing={setEditing}
-          hasTtsAudio={hasTtsAudio}
-          ttsLoading={ttsLoading}
-          startTts={startTts}
           path={path}
           content={content}
         />
