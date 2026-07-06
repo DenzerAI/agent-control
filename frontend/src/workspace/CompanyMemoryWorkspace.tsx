@@ -16,7 +16,7 @@ export function CompanyMemoryWorkspace() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-[var(--bg)] text-[var(--t1)]">
       <header className="shrink-0 border-b border-[var(--border)] px-5 py-4">
-        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--warm)]">Firmengedächtnis</div>
+        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--warm)]">Wissen</div>
         <h2 className="mt-1 text-2xl font-medium leading-tight text-[var(--t1)]">Zentrale Wissensbasis</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--t2)]">
           Platzhalter für Kundenwissen, Standards, Entscheidungen und wiederverwendbare Unterlagen.

@@ -35,7 +35,7 @@ import { ConnectorsWorkspace } from './ConnectorsWorkspace'
 // Workspace als permanente linke Spalte: die schmale Nav-Rail ersetzt die alte
 // InfoPane. Ein Klick öffnet den Body rechts daneben, der
 // die Chats schmaler schiebt. Erneuter Klick auf den aktiven Reiter schließt ihn.
-export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file, filesystemPath, onClose, onModeChange, onBack, onSpanChange, onToggleCollapsed, onOpenFile, onRevealPath, onOpenSearch }: {
+export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file, filesystemPath, onClose, onModeChange, onBack, onToggleCollapsed, onOpenFile, onRevealPath, onOpenSearch }: {
   open: boolean
   mode: WorkspaceMode
   returnMode?: WorkspaceMode | null
@@ -46,7 +46,6 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
   onClose: () => void
   onModeChange: (mode: WorkspaceMode) => void
   onBack?: () => void
-  onSpanChange: (span: WorkspaceSpan) => void
   onToggleCollapsed: () => void
   onOpenFile: (path: string) => boolean
   onRevealPath: (path: string) => void
@@ -92,19 +91,6 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
                 </button>
               )}
               <div className="workspace-title">{workspaceModeLabel(mode)}</div>
-            </div>
-            <div className="workspace-actions">
-              {[1, 2, 3].map(n => (
-                <button
-                  key={n}
-                  type="button"
-                  className={span === n ? 'is-active' : ''}
-                  onClick={() => onSpanChange(n as WorkspaceSpan)}
-                  title={`Breite ${n}`}
-                >
-                  {n}
-                </button>
-              ))}
             </div>
           </div>
 

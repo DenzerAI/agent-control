@@ -20,11 +20,11 @@ export function AutomationWorkspace() {
     <div className="workspace-system">
       <header className="workspace-system-hero">
         <div>
-          <p>Automationen</p>
-          <h2>Noch keine Automationen</h2>
+          <p>Aufgaben</p>
+          <h2>Noch keine Aufgaben</h2>
           <span>Der Rahmen steht, die konkreten Abläufe kommen später dazu.</span>
         </div>
-        <button type="button" title="Automation vormerken">
+        <button type="button" title="Aufgabe vormerken">
           <Plus className="h-4 w-4" />
         </button>
       </header>
@@ -52,7 +52,7 @@ export function AutomationWorkspace() {
           <div className="workspace-system-panel-head">
             <div>
               <Activity className="h-4 w-4" />
-              <strong>Automationen</strong>
+              <strong>Aufgaben</strong>
             </div>
             <span>später</span>
           </div>
@@ -71,7 +71,7 @@ export function AutomationWorkspace() {
             <span>keine</span>
           </div>
           <div className="workspace-system-list">
-            <p>Automationen mit Außenwirkung erscheinen hier erst, wenn sie sauber angelegt und freigegeben werden.</p>
+            <p>Aufgaben mit Außenwirkung erscheinen hier erst, wenn sie sauber angelegt und freigegeben werden.</p>
           </div>
         </section>
       </div>

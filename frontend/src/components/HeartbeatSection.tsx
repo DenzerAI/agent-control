@@ -197,7 +197,7 @@ export function HeartbeatSection({ mobile, tasksSlot, tasksCount, tasksColor }: 
           headerColor === 'red' ? 'text-[var(--cc-orange)]'
           : 'text-[var(--t3)]'
         }`} />
-        <span className="text-[var(--t2)] font-medium">Automation</span>
+        <span className="text-[var(--t2)] font-medium">Aufgaben</span>
         <span className="flex-1" />
         {open && (
           <button

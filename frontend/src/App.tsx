@@ -4,7 +4,7 @@ const Spotlight = lazy(() => import('./components/Spotlight').then(m => ({ defau
 import { LinkPreview } from './components/LinkPreview'
 import { WorkspaceOverlay, useWorkspaceController, type WorkspaceSpan } from './workspace'
 import { GlobalYouTubePlayer } from './components/GlobalYouTubePlayer'
-import { Square, MessageSquare, Presentation, Radio, Settings, Plus, X, Pencil, Archive, ArchiveRestore, Search, Maximize2, Minimize2, Check, Wrench } from 'lucide-react'
+import { Square, MessageSquare, Presentation, Radio, Settings, Plus, X, Pencil, Archive, ArchiveRestore, Search, Wrench } from 'lucide-react'
 import { getAgentNames, getDefaultEngine, useMainAgentName } from './agents'
 import { playUISound, preloadUISounds } from './uiSounds'
 import { fuzzyIncludes } from './fuzzy'
@@ -90,8 +90,6 @@ function SpaceSwitcher({ current, onSelect, onClose }: { current: string; onSele
   )
 }
 
-type Layout = '1' | '2' | '3' | '4'
-
 // Pane config: each pane holds N tabs (chats), one is active
 interface Tab {
   conversationId: string  // '' = empty state, no chat loaded yet
@@ -105,26 +103,8 @@ interface PaneConfig {
 // Safe getter: returns the currently visible tab, with fallback for malformed state
 const activeTab = (p: PaneConfig): Tab => p.tabs[p.activeIndex] ?? p.tabs[0] ?? { conversationId: '', agent: 'main' }
 
-function slotSyncSig(slots: { agent: string; convId: string }[], activeSlot: number): string {
-  return JSON.stringify({ slots, activeSlot })
-}
-
-const DEFAULT_PANES: Record<Layout, PaneConfig[]> = {
-  '1':  [{ tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 }],
-  '2':  [{ tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 }],
-  '3':  [{ tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 }],
-  '4':  [{ tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 },
-         { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 }],
-}
-
-function isLayout(value: string | null): value is Layout {
-  return value === '1' || value === '2' || value === '3' || value === '4'
-}
+const DEFAULT_PANE: PaneConfig = { tabs: [{ conversationId: '', agent: 'main' }], activeIndex: 0 }
+const SINGLE_PANE_STORAGE_KEY = 'control:chatPane'
 
 // All possible agents — loaded from Gateway via agents.ts
 const AGENT_NAMES = getAgentNames()
@@ -150,8 +130,8 @@ function chatAge(ts: number): string {
   return `${d.getDate()}. ${d.toLocaleString('de', { month: 'short' })}`
 }
 
-function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, isMaximized, onToggleMaximize, onConvChange, onNewChat, onRenameChat, onArchiveChat, onRestoreChat, onLoadArchive }: {
-  pane: PaneConfig; paneIndex: number; conversations: ConvOption[]; archivedChats: ConvOption[]; busyConvs: Set<string>; isMaximized: boolean; onToggleMaximize: () => void; onConvChange: (idx: number, convId: string, agent: string) => void; onNewChat: (idx: number, agent: string) => void; onRenameChat: (convId: string, title: string) => void; onArchiveChat: (convId: string) => void; onRestoreChat: (convId: string) => void; onLoadArchive: () => void
+function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, onConvChange, onNewChat, onRenameChat, onArchiveChat, onRestoreChat, onLoadArchive }: {
+  pane: PaneConfig; paneIndex: number; conversations: ConvOption[]; archivedChats: ConvOption[]; busyConvs: Set<string>; onConvChange: (idx: number, convId: string, agent: string) => void; onNewChat: (idx: number, agent: string) => void; onRenameChat: (convId: string, title: string) => void; onArchiveChat: (convId: string) => void; onRestoreChat: (convId: string) => void; onLoadArchive: () => void
 }) {
   const [open, setOpenState] = useState(false)
   const setOpen = (v: boolean) => {
@@ -259,34 +239,16 @@ function PaneHeader({ pane, paneIndex, conversations, archivedChats, busyConvs, 
 
   return (
     <div ref={wrapperRef} className="relative flex-shrink-0">
-      {/* Pane title: ein Chat pro Pane, kein lokaler Tab-Browser. */}
+      {/* Schlanker Chat-Wechsler: eine Pane, keine Tab-Leiste. */}
       <div
         className="chat-pane-titlebar group relative w-full flex items-center min-h-[var(--header-row-h)]"
-        style={{
-          background: 'var(--bg)',
-        }}
       >
         <div
           onClick={() => setOpen(true)}
-          className={`relative flex-1 min-w-0 flex items-center gap-1 pl-6 pr-6 pt-[7px] pb-[4px] cursor-pointer transition-colors text-[13px] leading-[18px] text-[var(--t3)] hover:text-[var(--t1)]`}
+          className="chat-pane-switcher"
           title={tabTitle}
         >
-          <span className="truncate font-normal" style={{ fontFamily: 'var(--font-body)' }}>{tabTitle}</span>
-        </div>
-        {/* Header-Controls nur während echtem Hover sichtbar; kein Focus-/Active-Kleben. */}
-        <div
-          id={`chat-pane-controls-${paneIndex}`}
-          className={`absolute right-0 top-0 flex h-[var(--header-row-h)] items-center gap-1 pl-1 pr-6 pt-[5px] pb-[3px] transition-opacity ${isMaximized ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-        >
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onToggleMaximize() }}
-            className="inline-flex h-6 w-6 items-center justify-center text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
-            title={isMaximized ? 'Verkleinern' : 'Maximieren'}
-            aria-label={isMaximized ? 'Chat-Pane verkleinern' : 'Chat-Pane maximieren'}
-          >
-            {isMaximized ? <Minimize2 className="h-[14px] w-[14px]" strokeWidth={1.8} /> : <Maximize2 className="h-[14px] w-[14px]" strokeWidth={1.8} />}
-          </button>
+          <span>{tabTitle}</span>
         </div>
       </div>
       {open && paneRect && (
@@ -491,45 +453,49 @@ function migrateTab(t: any): Tab {
   }
 }
 
-function loadPaneConfigs(layout: Layout): PaneConfig[] {
+function loadPaneConfig(): PaneConfig {
   try {
-    const stored = localStorage.getItem(`control:panes:${layout}`)
+    const stored = localStorage.getItem(SINGLE_PANE_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored)
-      if (Array.isArray(parsed) && parsed.length === DEFAULT_PANES[layout].length) {
-        return parsed.map((p: any): PaneConfig => {
-          // New shape: { tabs, activeIndex }
-          if (Array.isArray(p?.tabs) && p.tabs.length > 0) {
-            const tabs = p.tabs.map(migrateTab)
-            const idx = typeof p.activeIndex === 'number' ? p.activeIndex : 0
-            return { tabs, activeIndex: Math.max(0, Math.min(idx, tabs.length - 1)) }
-          }
-          // Old shape: single { conversationId, agent } → wrap as one tab
-          return { tabs: [migrateTab(p)], activeIndex: 0 }
-        })
+      if (Array.isArray(parsed?.tabs) && parsed.tabs.length > 0) {
+        const tabs = parsed.tabs.map(migrateTab)
+        const idx = typeof parsed.activeIndex === 'number' ? parsed.activeIndex : 0
+        return { tabs, activeIndex: Math.max(0, Math.min(idx, tabs.length - 1)) }
+      }
+    }
+    const legacy = localStorage.getItem('control:panes:1')
+    if (legacy) {
+      const parsed = JSON.parse(legacy)
+      const first = Array.isArray(parsed) ? parsed[0] : null
+      if (Array.isArray(first?.tabs) && first.tabs.length > 0) {
+        const tabs = first.tabs.map(migrateTab)
+        const idx = typeof first.activeIndex === 'number' ? first.activeIndex : 0
+        return { tabs, activeIndex: Math.max(0, Math.min(idx, tabs.length - 1)) }
       }
     }
   } catch {}
-  return DEFAULT_PANES[layout]
+  return DEFAULT_PANE
 }
 
-function savePaneConfigs(layout: Layout, configs: PaneConfig[]) {
-  localStorage.setItem(`control:panes:${layout}`, JSON.stringify(configs))
+function savePaneConfig(config: PaneConfig) {
+  localStorage.setItem(SINGLE_PANE_STORAGE_KEY, JSON.stringify(config))
 }
 
 export default function App() {
-  const [layout, setLayout] = useState<Layout>(() => {
-    const stored = localStorage.getItem('control:layout')
-    return isLayout(stored) ? stored : '1'
-  })
-  const [paneConfigs, setPaneConfigs] = useState<PaneConfig[]>(() => {
-    const stored = localStorage.getItem('control:layout')
-    const l = isLayout(stored) ? stored : '1'
-    return loadPaneConfigs(l)
-  })
+  const [paneConfig, setPaneConfig] = useState<PaneConfig>(() => loadPaneConfig())
+  const paneConfigs = [paneConfig]
+  const setPaneConfigs = useCallback((next: PaneConfig[] | ((prev: PaneConfig[]) => PaneConfig[])) => {
+    setPaneConfig(prev => {
+      const resolved = typeof next === 'function' ? next([prev]) : next
+      const first = resolved[0] || prev
+      savePaneConfig(first)
+      return first
+    })
+  }, [])
   const [showInfo, setShowInfo] = useState(() => localStorage.getItem('control:showInfo') === 'true')
-  const [activePane, setActivePane] = useState(0)
-  const activeTabKey = `${activePane}:${paneConfigs[activePane]?.activeIndex ?? 0}`
+  const activePane = 0
+  const activeTabKey = `0:${paneConfig.activeIndex}`
   const lastActiveTabKeyRef = useRef<string | null>(null)
   const skipNextTabClickRef = useRef(false)
   useEffect(() => {
@@ -542,28 +508,15 @@ export default function App() {
     }
     lastActiveTabKeyRef.current = activeTabKey
   }, [activeTabKey])
-  const [focusedPaneIdx, setFocusedPaneIdx] = useState<number | null>(null)
   const [search, setSearch] = useState(false)
   const [spaceSwitcher, setSpaceSwitcher] = useState(false)
   const [imagePreview, setImagePreview] = useState<{ path: string; src: string } | null>(null)
   const workspace = useWorkspaceController()
   const [activeSpace, setActiveSpace] = useState('chat')
   const [deckFile, setDeckFile] = useState('')
-  const [unread, setUnread] = useState<Set<string>>(new Set())
+  const [, setUnread] = useState<Set<string>>(new Set())
   const [busyConvs, setBusyConvs] = useState<Set<string>>(new Set())
-  // Startzeitpunkt je laufender Conversation, damit die Switch-Leiste im
-  // Kollaps-Modus zeigen kann, wie lange ein anderer Chat schon arbeitet.
-  const [busyStartedAt, setBusyStartedAt] = useState<Map<string, number>>(new Map())
-  // Spiegeln den Kollaps-Zustand für Event-Handler (window-Listener), die zur
-  // Feuerzeit den jüngsten Wert brauchen, ohne als Dependency neu zu binden.
-  const collapseRef = useRef(false)
-  const visiblePaneRef = useRef(0)
-  const paneCountRef = useRef(1)
-  // Reale Breite des Content-Grids messen, um den Single-Pane-Kollaps nicht
-  // stur an die Span-Stufe zu koppeln, sondern an den tatsachlich verbleibenden
-  // Platz fur die Chat-Panes (Ultra-Wide behalt alle Panes nebeneinander).
   const contentFrameRef = useRef<HTMLDivElement | null>(null)
-  const [frameW, setFrameW] = useState(0)
   const [conversations, setConversations] = useState<ConvOption[]>([])
   const [archivedChats, setArchivedChats] = useState<ConvOption[]>([])
 
@@ -649,395 +602,23 @@ export default function App() {
           : [{ conversationId: AGENT_CHANNEL_ID, agent: 'main' }, ...pane.tabs]
         next[0] = { tabs, activeIndex: 0 }
       }
-      savePaneConfigs(layout, next)
+      savePaneConfig(next[0])
       return next
     })
-  }, [conversations, paneConfigs, layout])
+  }, [conversations, paneConfigs])
 
-  const activeAgent = activeTab(paneConfigs[activePane] ?? DEFAULT_PANES['1'][0]).agent
-
-  // ── Slot-Sync (Desktop ↔ Mobile) ──
-  // Slots sind immer 4. Sichtbare Slots = paneConfigs[0..paneCount].activeTab.
-  // Versteckte Slots (für paneCount < 4) leben in desktopSlots und werden trotzdem
-  // ans Backend gepusht — damit Mobile immer 4 Pillen hat, egal welches Layout
-  // der Desktop fährt. Bei Layout-Wechsel (z.B. 1→2) wird die neue Pane aus dem
-  // dazugehörigen versteckten Slot vorbelegt, statt leer aufzumachen.
-  // Agent-Channel darf nur in Slot 0 leben.
-  const SLOT_COUNT = 4
-  const lastSlotsSigRef = useRef<string>('')
-  const slotsHydratedRef = useRef<boolean>(false)
-
-  // Layout 1: welcher der 4 Slots ist in Pane 0 sichtbar. Default 0.
-  const [activeSlot1, setActiveSlot1] = useState<number>(() => {
-    try {
-      const v = parseInt(localStorage.getItem('control:activeSlot1') || '0', 10)
-      return Math.max(0, Math.min(SLOT_COUNT - 1, isFinite(v) ? v : 0))
-    } catch { return 0 }
-  })
-  useEffect(() => {
-    try { localStorage.setItem('control:activeSlot1', String(activeSlot1)) } catch {}
-  }, [activeSlot1])
-
-  const [desktopSlots, setDesktopSlots] = useState<Tab[]>(() => {
-    try {
-      const raw = localStorage.getItem('control:desktopSlots')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) {
-          const out: Tab[] = []
-          for (let i = 0; i < SLOT_COUNT; i++) {
-            const s = parsed[i]
-            const agent = s?.agent || 'main'
-            const cid = typeof s?.conversationId === 'string' ? s.conversationId : (typeof s?.convId === 'string' ? s.convId : '')
-            const convId = (cid === AGENT_CHANNEL_ID && i !== 0) || cid.startsWith('channel-') ? '' : cid
-            out.push({ agent, conversationId: convId })
-          }
-          return out
-        }
-      }
-    } catch {}
-    return Array.from({ length: SLOT_COUNT }, () => ({ agent: 'main', conversationId: '' }))
-  })
-
-  // Hilfsfunktion: aktuelle 4-Slot-Ansicht — sichtbare Panes plus versteckte Slots.
-  // Layout 1 (genau 1 Pane): Pane 0's aktiver Tab liegt logisch in Slot activeSlot1,
-  // die anderen 3 Slots kommen aus desktopSlots. Bei Layout >1: Slot i = Pane i.
-  const buildAllSlots = useCallback((configs: PaneConfig[], hidden: Tab[], slot1Idx: number): { agent: string; convId: string }[] => {
-    const out: { agent: string; convId: string }[] = []
-    const single = configs.length === 1
-    for (let i = 0; i < SLOT_COUNT; i++) {
-      let agent = 'main'
-      let convId = ''
-      if (single) {
-        if (i === slot1Idx) {
-          const at = activeTab(configs[0])
-          agent = at.agent || 'main'
-          convId = at.conversationId || ''
-        } else {
-          const h = hidden[i] || { agent: 'main', conversationId: '' }
-          agent = h.agent || 'main'
-          convId = h.conversationId || ''
-        }
-      } else {
-        const cfg = configs[i]
-        if (cfg) {
-          const at = activeTab(cfg)
-          agent = at.agent || 'main'
-          convId = at.conversationId || ''
-        } else {
-          const h = hidden[i] || { agent: 'main', conversationId: '' }
-          agent = h.agent || 'main'
-          convId = h.conversationId || ''
-        }
-      }
-      if (convId === AGENT_CHANNEL_ID && i !== 0) convId = ''
-      out.push({ agent, convId })
-    }
-    return out
-  }, [])
-
-  // Normalize incoming server slots → genau 4, Agent-Channel raus für i>0.
-  const padIncomingSlots = useCallback((raw: any[]): Tab[] => {
-    const out: Tab[] = []
-    for (let i = 0; i < SLOT_COUNT; i++) {
-      const s = raw[i]
-      const agent = (s && typeof s.agent === 'string' && s.agent) || 'main'
-      const cidRaw = (s && typeof s.convId === 'string') ? s.convId : ''
-      const convId = (!cidRaw || cidRaw.startsWith('channel-') || (cidRaw === AGENT_CHANNEL_ID && i !== 0)) ? '' : cidRaw
-      out.push({ agent, conversationId: convId })
-    }
-    return out
-  }, [])
-
-  // Persistiere desktopSlots (auch versteckte) lokal — überleben Reload.
-  useEffect(() => {
-    if (!slotsHydratedRef.current) return
-    try {
-      localStorage.setItem('control:desktopSlots', JSON.stringify(desktopSlots))
-    } catch {}
-  }, [desktopSlots])
-
-  // Sichtbare Slots in desktopSlots spiegeln. Layout 1: pane 0's aktiver Tab geht
-  // in desktopSlots[activeSlot1]. Layout >1: pane i geht in desktopSlots[i].
-  useEffect(() => {
-    if (!slotsHydratedRef.current) return
-    setDesktopSlots(prev => {
-      const next = prev.slice()
-      let changed = false
-      const single = paneConfigs.length === 1
-      if (single) {
-        const cfg = paneConfigs[0]
-        if (cfg) {
-          const at = activeTab(cfg)
-          const cid = at.conversationId || ''
-          const convId = (cid === AGENT_CHANNEL_ID && activeSlot1 !== 0) ? '' : cid
-          const agent = at.agent || 'main'
-          if (next[activeSlot1]?.conversationId !== convId || next[activeSlot1]?.agent !== agent) {
-            next[activeSlot1] = { agent, conversationId: convId }
-            changed = true
-          }
-        }
-      } else {
-        for (let i = 0; i < SLOT_COUNT; i++) {
-          const cfg = paneConfigs[i]
-          if (!cfg) continue
-          const at = activeTab(cfg)
-          const cid = at.conversationId || ''
-          const convId = (cid === AGENT_CHANNEL_ID && i !== 0) ? '' : cid
-          const agent = at.agent || 'main'
-          if (next[i]?.conversationId !== convId || next[i]?.agent !== agent) {
-            next[i] = { agent, conversationId: convId }
-            changed = true
-          }
-        }
-      }
-      return changed ? next : prev
-    })
-  }, [paneConfigs, activeSlot1])
-
-  // Mappt Server-Slot[i] in Pane[paneIdx]'s aktiven Tab. Bei Layout 1 ist paneIdx=0
-  // und i=activeSlot1. Bei Layout >1 ist paneIdx=i.
-  const applySlotToPane = useCallback((cfg: PaneConfig, slot: Tab): PaneConfig => {
-    const at = activeTab(cfg)
-    if (at.conversationId === slot.conversationId && at.agent === slot.agent) return cfg
-    const existingIdx = slot.conversationId ? cfg.tabs.findIndex(t => t.conversationId === slot.conversationId) : -1
-    if (existingIdx >= 0) return { ...cfg, activeIndex: existingIdx }
-    const tabs = cfg.tabs.slice()
-    tabs[cfg.activeIndex] = { conversationId: slot.conversationId, agent: slot.agent }
-    return { ...cfg, tabs }
-  }, [])
-
-  const applyIncomingSlots = useCallback((padded: Tab[], slot1Idx: number) => {
-    setPaneConfigs(prev => {
-      const single = prev.length === 1
-      const next = prev.map((cfg, i) => {
-        if (single) {
-          if (i !== 0) return cfg
-          return applySlotToPane(cfg, padded[slot1Idx])
-        }
-        if (i >= SLOT_COUNT) return cfg
-        return applySlotToPane(cfg, padded[i])
-      })
-      const sig = slotSyncSig(buildAllSlots(next, padded, slot1Idx), slot1Idx)
-      lastSlotsSigRef.current = sig
-      savePaneConfigs(layout, next)
-      return next
-    })
-  }, [applySlotToPane, buildAllSlots, layout])
-
-  // Initial: vom Backend laden. Wenn lokal in localStorage schon Pane-Configs
-  // stehen, gewinnen die — sonst überschreibt der Server-Stand (möglicherweise
-  // älter, von Mobile gepusht) beim Hard-Reload den eigenen Desktop-State.
-  // Der Outbound-Effect (unten) pusht dann den lokalen Stand zurück zum Server.
-  useEffect(() => {
-    const hasLocalPanes = !!localStorage.getItem(`control:panes:${layout}`)
-    fetch('/api/slots').then(r => r.json()).then(d => {
-      const incoming: any[] = Array.isArray(d?.slots) ? d.slots : []
-      const padded = padIncomingSlots(incoming)
-      const incomingActive = typeof d?.activeSlot === 'number'
-        ? Math.max(0, Math.min(SLOT_COUNT - 1, d.activeSlot))
-        : activeSlot1
-      const effectiveActive = hasLocalPanes ? activeSlot1 : incomingActive
-      lastSlotsSigRef.current = slotSyncSig(
-        padded.map(t => ({ agent: t.agent, convId: t.conversationId })),
-        effectiveActive,
-      )
-      setDesktopSlots(padded)
-      if (!hasLocalPanes) {
-        if (effectiveActive !== activeSlot1) setActiveSlot1(effectiveActive)
-        applyIncomingSlots(padded, effectiveActive)
-      }
-      slotsHydratedRef.current = true
-    }).catch(() => {
-      slotsHydratedRef.current = true
-    })
-    // Beim Tab-Reopen Slots frisch ziehen — aber nur anwenden wenn ein anderer
-    // Client (Mobile) den Stand geändert hat. Wenn der Server genau das zurückliefert,
-    // was Desktop selbst zuletzt gepusht hat, ignorieren — sonst überschreibt Desktop
-    // seine eigenen Panes mit Mobile's altem Stand.
-    const pullOnVisible = () => {
-      if (document.hidden || !slotsHydratedRef.current) return
-      fetch('/api/slots').then(r => r.json()).then(d => {
-        const incoming: any[] = Array.isArray(d?.slots) ? d.slots : []
-        const padded = padIncomingSlots(incoming)
-        setDesktopSlots(padded)
-        const serverSig = slotSyncSig(padded.map(t => ({ agent: t.agent, convId: t.conversationId })), activeSlot1)
-        if (serverSig !== lastSlotsSigRef.current) applyIncomingSlots(padded, activeSlot1)
-      }).catch(() => {})
-    }
-    document.addEventListener('visibilitychange', pullOnVisible)
-    window.addEventListener('focus', pullOnVisible)
-    return () => {
-      document.removeEventListener('visibilitychange', pullOnVisible)
-      window.removeEventListener('focus', pullOnVisible)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Outbound: bei Änderung an Panes, versteckten Slots oder activeSlot1 immer alle 4 pushen.
-  // Debounce 250ms: schnelle Tab-Wechsel/Tipps lösen sonst je einen PUT aus, der per
-  // WS an alle Clients (auch Mobile) gebroadcastet wird — bei 4-5 Switches/Sekunde
-  // hagelt es Re-Renders auf Mobile. Synchronität bleibt sub-second.
-  const slotPushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    if (!slotsHydratedRef.current) return
-    const all = buildAllSlots(paneConfigs, desktopSlots, activeSlot1)
-    const sig = slotSyncSig(all, activeSlot1)
-    if (sig === lastSlotsSigRef.current) return
-    if (slotPushTimerRef.current) clearTimeout(slotPushTimerRef.current)
-    slotPushTimerRef.current = setTimeout(() => {
-      slotPushTimerRef.current = null
-      lastSlotsSigRef.current = sig
-      fetch('/api/slots', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slots: all, activeSlot: activeSlot1, source: 'desktop' }),
-      }).catch(() => {})
-    }, 250)
-    return () => {
-      if (slotPushTimerRef.current) { clearTimeout(slotPushTimerRef.current); slotPushTimerRef.current = null }
-    }
-  }, [paneConfigs, desktopSlots, activeSlot1, buildAllSlots])
-
-  // Inbound: andere Clients (Mobile) ändern Slots → Panes UND versteckte Slots nachziehen.
-  useEffect(() => {
-    const onSlotsUpdate = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      if (detail.source === 'desktop') return
-      const incoming: any[] = Array.isArray(detail.slots) ? detail.slots : []
-      if (incoming.length === 0) return
-      const padded = padIncomingSlots(incoming)
-      setDesktopSlots(padded)
-      // activeSlot1 lokal lassen: ein Mobile-Slot-Wechsel darf den sichtbaren
-      // Desktop-Slot bei Layout 1 nicht umschalten.
-      applyIncomingSlots(padded, activeSlot1)
-    }
-    window.addEventListener('deck:slotsUpdate', onSlotsUpdate)
-    return () => window.removeEventListener('deck:slotsUpdate', onSlotsUpdate)
-  }, [activeSlot1, applyIncomingSlots, padIncomingSlots])
-
-  // Esc im Fokus-Modus: Pane wieder verkleinern, aber nur wenn kein anderes Overlay offen ist
-  useEffect(() => {
-    if (focusedPaneIdx === null) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      if (search || spaceSwitcher) return
-      setFocusedPaneIdx(null)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [focusedPaneIdx, search, spaceSwitcher])
-
-  // Fokus auflösen, wenn die Pane durch Layout-Wechsel wegfällt
-  useEffect(() => {
-    if (focusedPaneIdx !== null && focusedPaneIdx >= paneConfigs.length) {
-      setFocusedPaneIdx(null)
-    }
-  }, [paneConfigs.length, focusedPaneIdx])
-
-  // Layout 1: Click auf Pille i → Pane 0 zeigt desktopSlots[i], activeSlot1 = i.
-  const selectSlot1 = useCallback((i: number) => {
-    if (i < 0 || i >= SLOT_COUNT) return
-    if (i === activeSlot1) return
-    const target = desktopSlots[i] || { agent: 'main', conversationId: '' }
-    const cid = target.conversationId || ''
-    const agent = target.agent || 'main'
-    // Erst Slot-Index umschalten, damit der paneConfigs→desktopSlots-Sync den
-    // alten Pane-0-Inhalt in den richtigen Slot (Slot activeSlot1) zurückspielt.
-    setActiveSlot1(i)
-    setPaneConfigs(prev => {
-      if (prev.length === 0) return prev
-      const cfg = prev[0]
-      const next = prev.slice()
-      const existingIdx = cid ? cfg.tabs.findIndex(t => t.conversationId === cid) : -1
-      if (existingIdx >= 0) {
-        next[0] = { ...cfg, activeIndex: existingIdx }
-      } else {
-        const tabs = cfg.tabs.slice()
-        tabs[cfg.activeIndex] = { conversationId: cid, agent }
-        next[0] = { ...cfg, tabs }
-      }
-      savePaneConfigs(layout, next)
-      return next
-    })
-    if (cid) {
-      setUnread(prev => { const n = new Set(prev); n.delete(cid); return n })
-      window.dispatchEvent(new CustomEvent('deck:loadConversation', { detail: { agent, conversationId: cid, paneIndex: 0 } }))
-    }
-  }, [activeSlot1, desktopSlots, layout])
-
-  const changeLayout = (l: Layout) => {
-    if (l !== layout) playUISound('layout-switch', 0.5)
-    const targetCount = DEFAULT_PANES[l].length
-    setLayout(l)
-    localStorage.setItem('control:layout', l)
-    let configs: PaneConfig[]
-    const wasSingle = paneConfigs.length === 1
-    const willBeSingle = targetCount === 1
-    if (targetCount <= paneConfigs.length) {
-      configs = paneConfigs.slice(0, targetCount)
-    } else {
-      const added: PaneConfig[] = []
-      for (let i = paneConfigs.length; i < targetCount; i++) {
-        // Neue Panes aus dem versteckten Slot vorbelegen — kein leerer Agent-Channel-Spawn.
-        const hidden = i < SLOT_COUNT ? desktopSlots[i] : null
-        const cid = (hidden?.conversationId && (hidden.conversationId !== AGENT_CHANNEL_ID || i === 0)) ? hidden.conversationId : ''
-        const agent = hidden?.agent || 'main'
-        added.push({ tabs: [{ conversationId: cid, agent }], activeIndex: 0 })
-      }
-      configs = [...paneConfigs, ...added]
-    }
-    // Layout 1 mit activeSlot1 != 0 → Layout >1: Pane 0 muss zurück auf Slot 0.
-    if (wasSingle && !willBeSingle && activeSlot1 !== 0) {
-      const target = desktopSlots[0] || { agent: 'main', conversationId: '' }
-      const cfg = configs[0]
-      if (cfg) {
-        const cid = target.conversationId || ''
-        const agent = target.agent || 'main'
-        const existingIdx = cid ? cfg.tabs.findIndex(t => t.conversationId === cid) : -1
-        if (existingIdx >= 0) {
-          configs[0] = { ...cfg, activeIndex: existingIdx }
-        } else {
-          const tabs = cfg.tabs.slice()
-          tabs[cfg.activeIndex] = { conversationId: cid, agent }
-          configs[0] = { ...cfg, tabs }
-        }
-      }
-      setActiveSlot1(0)
-    }
-    setPaneConfigs(configs)
-    savePaneConfigs(l, configs)
-    setActivePane(Math.min(activePane, targetCount - 1))
-  }
+  const activeAgent = activeTab(paneConfig).agent
 
   // ── Pane-Chat-Verwaltung: eine Pane hält genau einen sichtbaren Chat. ──
 
   const addOrSwitchTab = (paneIndex: number, convId: string, agent: string) => {
-    if (convId) {
-      const otherPaneIdx = paneConfigs.findIndex((p, i) => i !== paneIndex && p.tabs.some(t => t.conversationId === convId))
-      if (otherPaneIdx >= 0) {
-        const found = paneConfigs[otherPaneIdx].tabs.find(t => t.conversationId === convId) || { conversationId: convId, agent }
-        setPaneConfigs(prev => {
-          const next = [...prev]
-          next[otherPaneIdx] = { tabs: [found], activeIndex: 0 }
-          savePaneConfigs(layout, next)
-          return next
-        })
-        setActivePane(otherPaneIdx)
-        setUnread(prev => { const n = new Set(prev); n.delete(convId); return n })
-        window.dispatchEvent(new CustomEvent('deck:loadConversation', { detail: { agent, conversationId: convId, paneIndex: otherPaneIdx } }))
-        return
-      }
-    }
     setPaneConfigs(prev => {
       const next = [...prev]
       const pane = next[paneIndex]
       if (!pane) return prev
       next[paneIndex] = { tabs: [{ conversationId: convId, agent }], activeIndex: 0 }
-      savePaneConfigs(layout, next)
       return next
     })
-    setActivePane(paneIndex)
     if (convId) {
       setUnread(prev => { const n = new Set(prev); n.delete(convId); return n })
       window.dispatchEvent(new CustomEvent('deck:loadConversation', { detail: { agent, conversationId: convId, paneIndex } }))
@@ -1045,31 +626,13 @@ export default function App() {
   }
 
   const replaceTabInPane = (paneIndex: number, convId: string, agent: string) => {
-    if (convId) {
-      const otherPaneIdx = paneConfigs.findIndex((p, i) => i !== paneIndex && p.tabs.some(t => t.conversationId === convId))
-      if (otherPaneIdx >= 0) {
-        const found = paneConfigs[otherPaneIdx].tabs.find(t => t.conversationId === convId) || { conversationId: convId, agent }
-        setPaneConfigs(prev => {
-          const next = [...prev]
-          next[otherPaneIdx] = { tabs: [found], activeIndex: 0 }
-          savePaneConfigs(layout, next)
-          return next
-        })
-        setActivePane(otherPaneIdx)
-        setUnread(prev => { const n = new Set(prev); n.delete(convId); return n })
-        window.dispatchEvent(new CustomEvent('deck:loadConversation', { detail: { agent, conversationId: convId, paneIndex: otherPaneIdx } }))
-        return
-      }
-    }
     setPaneConfigs(prev => {
       const next = [...prev]
       const pane = next[paneIndex]
       if (!pane) return prev
       next[paneIndex] = { tabs: [{ conversationId: convId, agent }], activeIndex: 0 }
-      savePaneConfigs(layout, next)
       return next
     })
-    setActivePane(paneIndex)
     if (convId) {
       setUnread(prev => { const n = new Set(prev); n.delete(convId); return n })
       window.dispatchEvent(new CustomEvent('deck:loadConversation', { detail: { agent, conversationId: convId, paneIndex } }))
@@ -1113,7 +676,6 @@ export default function App() {
           needsLoad = { agent: target.agent, convId: target.conversationId }
         }
       }
-      savePaneConfigs(layout, next)
       return next
     })
     if (needsLoad) {
@@ -1145,18 +707,10 @@ export default function App() {
       const { agent, conversationId, source } = (e as CustomEvent).detail || {}
       const convId = conversationId || (agent ? `channel-${agent}` : '')
       if (!convId) return
-      // Nur als unread markieren, wenn der Chat in keinem aktiven Tab einer Pane sichtbar ist.
-      // Im Kollaps-Modus ist nur die eine sichtbare Pane wirklich offen — die anderen
-      // gelten als ungesehen, damit ihr Fertig-Haken in der Switch-Leiste erscheint.
       const visConvs = new Set<string>()
-      if (collapseRef.current) {
-        const vp = paneConfigs[visiblePaneRef.current]
-        if (vp) { const a = activeTab(vp); if (a.conversationId) visConvs.add(a.conversationId) }
-      } else {
-        for (const p of paneConfigs) {
-          const a = activeTab(p)
-          if (a.conversationId) visConvs.add(a.conversationId)
-        }
+      for (const p of paneConfigs) {
+        const a = activeTab(p)
+        if (a.conversationId) visConvs.add(a.conversationId)
       }
       if (!visConvs.has(convId)) {
         setUnread(prev => new Set(prev).add(convId))
@@ -1170,22 +724,11 @@ export default function App() {
   // Global busy tracking — which conversations are currently streaming?
   useEffect(() => {
     const handler = (e: Event) => {
-      const { conversationId: cid, busy, startedAt } = (e as CustomEvent).detail || {}
+      const { conversationId: cid, busy } = (e as CustomEvent).detail || {}
       if (!cid) return
       setBusyConvs(prev => {
         const next = new Set(prev)
         if (busy) next.add(cid); else next.delete(cid)
-        return next
-      })
-      setBusyStartedAt(prev => {
-        const next = new Map(prev)
-        if (busy) {
-          // Echten Stream-Start aus dem Event nehmen, damit die Zeit nach einem
-          // Hard Refresh weiterläuft statt bei null neu anzufangen.
-          const serverStart = typeof startedAt === 'number' && startedAt > 0 ? startedAt : undefined
-          if (serverStart) next.set(cid, serverStart)
-          else if (!next.has(cid)) next.set(cid, Date.now())
-        } else next.delete(cid)
         return next
       })
     }
@@ -1193,10 +736,9 @@ export default function App() {
     return () => window.removeEventListener('deck:convBusy', handler)
   }, [])
 
-  // ── Voice-Layout-Kommandos ──
-  // Agent kann via Sprache InfoPane togglen, Chat-Panes hinzufügen/schliessen
-  // und auf Sektionen springen. Implementiert als window-Events, damit der
-  // Voice-Pfad keine Props durch den Komponentenbaum braucht.
+  // ── Voice-Kommandos ──
+  // Agent kann via Sprache die InfoPane togglen und auf Sektionen springen.
+  // Pane-Layout-Kommandos werden ignoriert, weil der Desktop nur noch eine Chat-Pane hat.
   useEffect(() => {
     const onInfo = (e: Event) => {
       const action = String((e as CustomEvent).detail?.action || 'toggle')
@@ -1208,45 +750,6 @@ export default function App() {
         localStorage.setItem('control:showInfo', String(next))
         return next
       })
-    }
-    const onPane = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      const action = String(detail.action || '')
-      const order: Layout[] = ['1', '2', '3', '4']
-      const curLayout: Layout = layout
-      const curIdx = order.indexOf(curLayout)
-      if (action === 'add') {
-        if (curIdx >= 0 && curIdx < order.length - 1) changeLayout(order[curIdx + 1])
-      } else if (action === 'close-last') {
-        if (curIdx > 0) changeLayout(order[curIdx - 1])
-      } else if (action === 'close-index') {
-        const oneBased = Number(detail.index)
-        const idx = Number.isFinite(oneBased) ? oneBased - 1 : -1
-        if (idx >= 0 && idx < paneConfigs.length && paneConfigs.length > 1) {
-          const nextConfigs = paneConfigs.filter((_, i) => i !== idx)
-          const targetLayout = (String(nextConfigs.length) as Layout)
-          playUISound('layout-switch', 0.5)
-          setLayout(targetLayout)
-          localStorage.setItem('control:layout', targetLayout)
-          setPaneConfigs(nextConfigs)
-          savePaneConfigs(targetLayout, nextConfigs)
-          setActivePane(prev => {
-            if (prev === idx) return Math.max(0, idx - 1)
-            if (prev > idx) return prev - 1
-            return prev
-          })
-        }
-      } else if (action === 'only-active') {
-        const active = paneConfigs[activePane] ?? DEFAULT_PANES['1'][0]
-        playUISound('layout-switch', 0.5)
-        setLayout('1')
-        localStorage.setItem('control:layout', '1')
-        setPaneConfigs([active])
-        savePaneConfigs('1', [active])
-        setActivePane(0)
-        setShowInfo(false)
-        localStorage.setItem('control:showInfo', 'false')
-      }
     }
     const onSection = () => {
       // Sektion-Trigger impliziert: InfoPane offen. Die InfoPane selbst
@@ -1261,14 +764,12 @@ export default function App() {
       })
     }
     window.addEventListener('deck:info', onInfo)
-    window.addEventListener('deck:pane', onPane)
     window.addEventListener('deck:info-section', onSection)
     return () => {
       window.removeEventListener('deck:info', onInfo)
-      window.removeEventListener('deck:pane', onPane)
       window.removeEventListener('deck:info-section', onSection)
     }
-  }, [layout, paneConfigs, activePane, deckFile])
+  }, [deckFile])
 
   const openFilePathFromDetail = (detail: unknown): string => {
     if (typeof detail === 'string') return detail
@@ -1446,220 +947,39 @@ export default function App() {
       if (e.altKey && e.key === 'n') { e.preventDefault(); createNewChat(activeAgent); return }
       // CMD+E toggelt den Workspace (CMD+5 schluckt der Browser als Tab-Shortcut, bleibt aber für die PWA aktiv)
       if (e.metaKey && !e.ctrlKey && (e.key === '5' || e.key.toLowerCase() === 'e')) { e.preventDefault(); workspace.toggle(); return }
-      if (e.metaKey && !e.ctrlKey) {
-        const map: Record<string, Layout> = { '1': '1', '2': '2', '3': '3', '4': '4' }
-        if (map[e.key]) {
-          e.preventDefault()
-          window.dispatchEvent(new CustomEvent('deck:stopAudio'))
-          // Im Kollaps-Modus wechselt CMD+N nicht das Layout, sondern springt
-          // direkt zu Pane N (0-basiert: CMD+1 → Pane 0), solange sie existiert.
-          if (collapseRef.current) {
-            const target = parseInt(e.key, 10) - 1
-            if (target >= 0 && target < paneCountRef.current) setActivePane(target)
-            return
-          }
-          changeLayout(map[e.key])
-          return
-        }
-      }
-      // Ctrl/Alt sind die browser-sicheren Zwillinge der CMD-Tasten (CMD+1-4
-      // schluckt der Browser als Tab-Shortcut). Im Kollaps springt Ctrl+2-5
-      // (bzw. Alt) direkt zur Pane — gleiche Versatz-Belegung wie der
-      // Layout-Wechsel (Ctrl+2 = erste Pane … Ctrl+5 = vierte Pane).
-      if ((e.ctrlKey && !e.metaKey) || (e.altKey && !e.metaKey && !e.ctrlKey)) {
-        const map: Record<string, Layout> = { '2': '1', '3': '2', '4': '3', '5': '4' }
-        if (map[e.key]) {
-          e.preventDefault()
-          window.dispatchEvent(new CustomEvent('deck:stopAudio'))
-          if (collapseRef.current) {
-            const target = parseInt(map[e.key], 10) - 1
-            if (target >= 0 && target < paneCountRef.current) setActivePane(target)
-            return
-          }
-          changeLayout(map[e.key])
-          return
-        }
-      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [activeAgent, showInfo])
 
-  // Layout: Workspace ist die permanente linke Spalte (ersetzt die alte InfoPane).
-  // Geschlossen zeigt sie nur die schmale Nav-Rail; offen kommt der Body dazu und
-  // schiebt die Chat-Panes schmaler. Die Chats behalten ihre runden Karten-Ecken.
+  // Workspace links, ein Chat rechts. Keine Layout-Slots, keine Pane-Pillen.
   const WS_RAIL_PX = 200
-  // Eingeklappt zeigt die Rail nur Icons; dann darf die Chat-Fläche bis dicht an
-  // die Icons heranwachsen, statt die alte Menübreite zu reservieren.
   const WS_RAIL_COLLAPSED_PX = 64
   const N = paneConfigs.length
-  const workspaceMaxSpan = Math.max(1, Math.min(3, paneConfigs.length || 1)) as 1 | 2 | 3
-  const effectiveWorkspaceSpan = Math.min(workspace.span, workspaceMaxSpan) as WorkspaceSpan
-  const chatPanesHidden = false
-  // Kollaps-Modus: Sobald der Workspace breit aufgemacht wird (Span 2/3) und mehr
-  // als eine Pane offen ist, kollabieren die Panes zu einer einzigen breiten Pane.
-  // Gewechselt wird dann unten über die Switch-Leiste, wie auf dem Handy. Reiner
-  // View-Kollaps — paneConfigs bleiben unangetastet, beim Zumachen ist alles zurück.
-  // Misst die Content-Grid-Breite live mit, damit der Kollaps platzbasiert faellt.
-  useEffect(() => {
-    const el = contentFrameRef.current
-    if (!el || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(entries => {
-      const w = entries[0]?.contentRect?.width
-      if (w) setFrameW(w)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  // Wuerden im aufgefaecherten Layout alle Panes noch breit genug stehen? Workspace
-  // nimmt minmax(520, span fr), die Chats teilen sich den Rest zu je 1fr. Liegt jede
-  // Pane ueber MIN_PANE_PX, bleibt aufgefaechert statt in den Single-Pane-Modus zu fallen.
-  const MIN_PANE_PX = 360
-  const wsWidthPx = Math.max(520, (frameW * effectiveWorkspaceSpan) / (effectiveWorkspaceSpan + N))
-  const panePx = N > 0 ? (frameW - wsWidthPx) / N : frameW
-  // Ohne gemessene Breite (erster Frame) am alten Span-Verhalten festhalten.
-  const fitsAllPanes = frameW > 0 && panePx >= MIN_PANE_PX
-  const collapseToSinglePane = workspace.open && effectiveWorkspaceSpan >= 2 && N >= 2 && !fitsAllPanes
-  const visiblePaneIdx = Math.min(activePane, N - 1)
-  collapseRef.current = collapseToSinglePane
-  visiblePaneRef.current = visiblePaneIdx
-  paneCountRef.current = N
-
-  // Auto-Sprung im Kollaps: Sobald Text in eine Pane gepostet wird (Agent per
-  // send_to_pane oder ein Backend-Command), springt die Ansicht zu dieser Pane,
-  // damit man die entstehende Eingabe sofort sieht. Nur im Kollaps, sonst sind
-  // ohnehin alle Panes sichtbar. Refs halten den jüngsten Wert ohne Neu-Bind.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail || {}
-      const target = Number(detail.paneIndex)
-      if (!Number.isFinite(target) || target < 0) return
-      if (!collapseRef.current || target === visiblePaneRef.current) return
-      setActivePane(target)
-    }
-    // deck:paneFocus kommt schon beim Aufnahme-Start (erster PTT-Druck), noch
-    // ohne Text — gleicher Sprung, damit das Ziel-Pane sofort sichtbar ist.
-    window.addEventListener('deck:paneInput', handler)
-    window.addEventListener('deck:paneFocus', handler)
-    return () => {
-      window.removeEventListener('deck:paneInput', handler)
-      window.removeEventListener('deck:paneFocus', handler)
-    }
-  }, [])
+  const effectiveWorkspaceSpan = 1 as WorkspaceSpan
 
   const workspaceColTrack = workspace.open
-    ? `minmax(520px, ${effectiveWorkspaceSpan}fr)`
+    ? 'minmax(520px, 1fr)'
     : `${workspace.collapsed ? WS_RAIL_COLLAPSED_PX : WS_RAIL_PX}px`
-  const chatColTrack = collapseToSinglePane
-    ? 'minmax(0, 1fr)'
-    : `repeat(${N}, minmax(0, 1fr))`
   const horizontalGridStyle: CSSProperties = {
     gridTemplateColumns: N > 0
-      ? `${workspaceColTrack} ${chatColTrack}`
+      ? `${workspaceColTrack} minmax(0, 1fr)`
       : workspaceColTrack,
   }
 
-  // Laufende Zeit für die Switch-Leiste nur dann ticken lassen, wenn im
-  // Kollaps-Modus überhaupt ein Chat arbeitet — sonst kein Timer.
   const [, setNowTick] = useState(0)
   useEffect(() => {
-    if (!collapseToSinglePane || busyConvs.size === 0) return
+    if (busyConvs.size === 0) return
     const id = setInterval(() => setNowTick(t => t + 1), 1000)
     return () => clearInterval(id)
-  }, [collapseToSinglePane, busyConvs.size])
-
-  // Switch-Leiste für den Kollaps-Modus. Wird als Node an die sichtbare Pane
-  // gereicht und dort im Composer-Futter über der Eingabe gerendert — nicht als
-  // konkurrierendes Overlay, damit nichts mit dem Mini-Composer kollidiert.
-  const paneSwitcherNode = (
-    <div className="flex w-full items-center">
-      {paneConfigs.map((p, i) => {
-        const at = activeTab(p)
-        const convId = at.conversationId
-        const conv = convId ? conversations.find(c => c.id === convId) : null
-        const isActive = i === visiblePaneIdx
-        const isBusy = !!convId && busyConvs.has(convId)
-        const isUnread = !!convId && unread.has(convId)
-        const startedAt = isBusy && convId ? busyStartedAt.get(convId) : undefined
-        const elapsedSec = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0
-        return (
-          <button
-            key={i}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setActivePane(i)
-              if (convId) setUnread(prev => { const n = new Set(prev); n.delete(convId); return n })
-            }}
-            className="flex flex-1 items-center justify-center relative"
-            style={{ height: 22, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
-            aria-label={`Chat ${i + 1}${conv?.title ? ` (${conv.title})` : ''}`}
-            title={conv?.title || `Chat ${i + 1}`}
-          >
-            {(() => {
-              // Im Kollaps trägt die Leiste den ganzen Footer, also zeigt auch die
-              // aktive Pane ihre laufende Zeit — sonst sieht man sie nirgends.
-              const isUnreadOrange = isUnread && !isActive && !isBusy
-              if (isBusy) {
-                const mm = Math.floor(elapsedSec / 60)
-                const ss = elapsedSec % 60
-                // Aktive Pane schimmert in Terracotta, alle anderen silbern — so ist
-                // bei mehreren laufenden Uhren sofort klar, wo man gerade drin ist.
-                // Die m/s-Einheiten setzen KEINE eigene Farbe: so erben sie den
-                // Schimmer-Gradient des Eltern-spans und ziehen synchron mit.
-                const unitStyle: CSSProperties = { fontSize: '10.5px', fontWeight: 600, marginLeft: '1px' }
-                const shimmer = isActive ? 'status-shimmer-warm' : 'status-shimmer'
-                return (
-                  <span
-                    className={`tabular-nums text-[14px] font-semibold ${shimmer}`}
-                    style={{ fontFamily: 'var(--font-heading)', textAlign: 'center', lineHeight: '22px', whiteSpace: 'nowrap' }}
-                  >
-                    {mm > 0
-                      ? (<>{mm}<span style={{ ...unitStyle, marginRight: '2px' }}>m</span>{ss}<span style={unitStyle}>s</span></>)
-                      : (<>{ss}<span style={unitStyle}>s</span></>)}
-                  </span>
-                )
-              }
-              if (isUnreadOrange) {
-                return (
-                  <span
-                    className="unread-pulse"
-                    style={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cc-orange)' }}
-                    aria-label="Fertig, ungelesen"
-                  >
-                    <Check size={14} strokeWidth={2.7} />
-                  </span>
-                )
-              }
-              const DOT = isActive ? 6 : 5
-              return (
-                <span
-                  className="rounded-full"
-                  style={{ width: DOT, height: DOT, background: isActive ? 'var(--t1)' : 'var(--t3)', opacity: isActive ? 1 : (convId ? 0.32 : 0.2) }}
-                />
-              )
-            })()}
-          </button>
-        )
-      })}
-    </div>
-  )
+  }, [busyConvs.size])
 
   const renderedPanes = paneConfigs.map((pane, idx) => {
-    const isFocused = focusedPaneIdx === idx
     return (
     <div
       key={idx}
       data-pane-container
-      className={
-        isFocused
-          ? 'fixed inset-0 z-40 bg-[var(--bg)] overflow-hidden'
-          : collapseToSinglePane
-            ? 'relative bg-[var(--bg)] min-h-0 overflow-hidden border-l border-[var(--border)] rounded-l-[14px] rounded-r-[14px]'
-            : `relative bg-[var(--bg)] min-h-0 overflow-hidden${idx === 0 ? ' border-l border-[var(--border)] rounded-l-[14px]' : ''}${idx === N - 1 ? ' rounded-r-[14px]' : ''}`
-      }
-      style={chatPanesHidden || (collapseToSinglePane && idx !== visiblePaneIdx && !isFocused) ? { display: 'none' } : undefined}
-      onClick={() => setActivePane(idx)}
+      className="relative bg-[var(--bg)] min-h-0 overflow-hidden border-l border-[var(--border)] rounded-l-[14px] rounded-r-[14px]"
     >
       {/* Pane header overlay — sitzt absolut oben auf dem Chat, damit Messages dahinter durchscrollen können */}
       <div className="absolute top-0 left-0 right-0 z-20">
@@ -1703,8 +1023,6 @@ export default function App() {
         }}
         onLoadArchive={loadArchivedChats}
         busyConvs={busyConvs}
-        isMaximized={isFocused}
-        onToggleMaximize={() => setFocusedPaneIdx(prev => prev === idx ? null : idx)}
       />
       </div>
       {/* Chat füllt die gesamte Pane — scrollt unter dem Header hindurch */}
@@ -1714,9 +1032,8 @@ export default function App() {
           conversationId={activeTab(pane).conversationId}
           paneIndex={idx}
           isActive={activePane === idx}
-          paneSwitcher={collapseToSinglePane && idx === visiblePaneIdx ? paneSwitcherNode : undefined}
           onOpenRef={openInInfo}
-          onAgentFocus={() => setActivePane(idx)}
+          onAgentFocus={() => {}}
           onAgentSwitch={(newAgent) => createNewChat(newAgent, idx)}
           onConversationChange={(convId) => {
             // Aktiver Tab hat soeben einen neuen Chat erzeugt (z.B. erste Nachricht) — convId in Tab speichern
@@ -1726,57 +1043,11 @@ export default function App() {
               if (!p) return prev
               const newTabs = p.tabs.map((t, i) => i === p.activeIndex ? { ...t, conversationId: convId } : t)
               next[idx] = { ...p, tabs: newTabs }
-              savePaneConfigs(layout, next)
               return next
             })
           }}
         />
       </div>
-      {/* Layout 1: Slot-Pillen über dem Composer, wie Mobile-Bottom-Dots */}
-      {!collapseToSinglePane && paneConfigs.length === 1 && idx === 0 && (
-        <div
-          className="absolute z-30 pointer-events-none flex justify-center"
-          style={{ left: 0, right: 0, bottom: 6 }}
-        >
-          <div className="flex items-center gap-2 pointer-events-auto">
-            {Array.from({ length: SLOT_COUNT }, (_, i) => {
-              const slot = desktopSlots[i]
-              const hasChat = !!slot?.conversationId
-              const isActive = i === activeSlot1
-              const conv = hasChat ? conversations.find(c => c.id === slot.conversationId) : null
-              const isHighlight = !!conv?.highlight && !isActive
-              const isBusy = hasChat && busyConvs.has(slot.conversationId)
-              const background = isHighlight
-                ? '#d97757'
-                : isBusy
-                  ? '#d97757'
-                  : isActive
-                    ? 'var(--t1)'
-                    : 'var(--t3)'
-              const opacity = isHighlight || isBusy ? 1 : isActive ? 1 : hasChat ? 0.5 : 0.22
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); selectSlot1(i) }}
-                  className={`rounded-full transition-opacity${isHighlight ? ' highlight-pulse' : ''}`}
-                  style={{
-                    width: 32,
-                    height: 6,
-                    background,
-                    opacity,
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                  aria-label={`Slot ${i + 1}${hasChat ? ` (${conv?.title || ''})` : ''}`}
-                  title={conv?.title || `Slot ${i + 1}`}
-                />
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )})
 
@@ -1796,7 +1067,6 @@ export default function App() {
         workspace.toggleMode(mode)
       }}
       onBack={() => workspace.openMode(workspace.returnMode || 'artifacts')}
-      onSpanChange={(span) => workspace.setSpan(Math.min(span, workspaceMaxSpan) as WorkspaceSpan)}
       onOpenFile={workspace.openFile}
       onRevealPath={workspace.revealPath}
       onOpenSearch={() => setSearch(true)}

@@ -351,7 +351,7 @@ export function ChatagentWorkspace() {
                 </aside>
               </article>
             ))}
-            {recentRuns.length === 0 && <p>Keine passenden Workflow-Läufe im Automation-Snapshot.</p>}
+            {recentRuns.length === 0 && <p>Keine passenden Workflow-Läufe im Aufgaben-Snapshot.</p>}
           </div>
         </section>
       </div>

@@ -1469,7 +1469,7 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                   </div>
                 </SortableSection>
 
-                {/* ── Automation — Pulses, Workers, Hooks und Tasks im Workspace ── */}
+                {/* ── Aufgaben — Pulses, Workers, Hooks und Tasks im Workspace ── */}
                 <SortableSection
                   sectionId="heartbeat"
                   dataInfoSection="heartbeat"
@@ -1491,10 +1491,10 @@ export function InfoPane({ activeAgent, activeConversationId, visibleConversatio
                         type="button"
                         onClick={() => onOpenWorkspaceMode?.('tasks')}
                         className={`group flex w-full items-center pr-3 pl-2 ${mobile ? 'py-3' : 'py-2'} info-text-body cursor-pointer hover:bg-white/[0.06] active:bg-white/[0.08] transition-colors text-left`}
-                        title="Automation im Workspace öffnen"
+                        title="Aufgaben im Workspace öffnen"
                       >
                         <Activity className={`info-icon-md mr-2 flex-shrink-0 ${hasError ? 'text-[var(--cc-orange)]' : 'text-[var(--t3)] group-hover:text-[var(--t2)]'}`} />
-                        <span className="text-[var(--t2)] font-medium flex-1">Automation</span>
+                        <span className="text-[var(--t2)] font-medium flex-1">Aufgaben</span>
                       </button>
                     </div>
                   )

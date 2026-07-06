@@ -308,33 +308,6 @@
   color: var(--t1);
 }
 
-.workspace-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-
-.workspace-actions button {
-  height: 26px;
-  min-width: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 7px;
-  color: var(--t3);
-  font-size: 12px;
-  transition: background-color 120ms ease, color 120ms ease;
-  cursor: pointer;
-}
-
-.workspace-actions button:hover,
-.workspace-actions button.is-active {
-  background: color-mix(in srgb, var(--bg-3) 54%, transparent);
-  color: var(--t1);
-}
-
 /* company.-Wortmarke unten in der Rail, Punkt in Markenfarbe. */
 .workspace-rail-foot {
   margin-top: auto;
@@ -4388,16 +4361,39 @@ html, body, #root {
   --chat-picker-text-inset: 24px;
 }
 
-.chat-pane-titlebar::after {
-  content: '';
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 0;
-  height: 1px;
-  background: var(--border);
-  border-radius: 999px;
+.chat-pane-titlebar {
   pointer-events: none;
+}
+
+.chat-pane-switcher {
+  pointer-events: auto;
+  position: absolute;
+  top: 6px;
+  left: 20px;
+  max-width: min(340px, calc(100% - 40px));
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 8px;
+  color: var(--t3);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.chat-pane-switcher:hover {
+  background: color-mix(in srgb, var(--bg-3) 42%, transparent);
+  color: var(--t1);
+}
+
+.chat-pane-switcher span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Futter-Bereich unten: dieselbe Linie wie der Titlebar oben, nur gespiegelt
