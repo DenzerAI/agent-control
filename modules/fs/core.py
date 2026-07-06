@@ -28,6 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 # Allowed base paths for file read/write/list (mirror von backend/server.py)
 ALLOWED_PATHS = [
+    PROJECT_ROOT,
     Path.home() / "agent",
     Path.home() / ".claude",
     Path.home() / "Projects",
@@ -44,6 +45,10 @@ def _is_allowed_path(p: Path) -> bool:
 
 def _resolve_path(p: str) -> Path:
     raw = str(p or "").strip()
+    if raw == "/workspace":
+        return PROJECT_ROOT.resolve()
+    if raw.startswith("/workspace/"):
+        return (PROJECT_ROOT / raw.removeprefix("/workspace/")).resolve()
     if raw.startswith("~/") or raw == "~":
         raw = str(Path.home() / raw[2:]) if raw.startswith("~/") else str(Path.home())
     # Remote/browser paths may lose the leading slash ("Users/klaus/agent/...").

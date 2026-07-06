@@ -180,6 +180,7 @@ HIDDEN = {'.git', '.venv', 'node_modules', '__pycache__', '.DS_Store', 'dist', '
 
 # Allowed base paths for file read/write/list (prevents path traversal)
 ALLOWED_PATHS = [
+    PROJECT_ROOT,
     Path.home() / "agent",
     Path.home() / ".claude",
     Path.home() / "Projects",
@@ -215,6 +216,10 @@ def _is_sensitive_path(p: Path) -> bool:
 
 def _resolve_path(p: str) -> Path:
     raw = str(p or "").strip()
+    if raw == "/workspace":
+        return PROJECT_ROOT.resolve()
+    if raw.startswith("/workspace/"):
+        return (PROJECT_ROOT / raw.removeprefix("/workspace/")).resolve()
     if raw.startswith("~/") or raw == "~":
         raw = str(Path.home() / raw[2:]) if raw.startswith("~/") else str(Path.home())
     # Some remote/browser paths can arrive as "Users/klaus/agent/..."

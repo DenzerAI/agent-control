@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, useContext, createContext, Fragment } from 'react'
-import { ChevronRight, ChevronLeft, Search, X, FolderOpen, FolderClosed, FolderPlus, Brain, Heart, Cog, Briefcase, Loader2, Upload, Plus, Download, Copy, Pencil, Trash2, Archive, FileText, ArrowDown, ArrowUp, Maximize2, Home, Shield } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Search, X, FolderOpen, FolderClosed, FolderPlus, Brain, Heart, Cog, Briefcase, Loader2, Upload, Plus, Download, Copy, Pencil, Trash2, Archive, FileText, ArrowDown, ArrowUp, Maximize2, Home, Shield, Eye } from 'lucide-react'
 import { playUISound } from '../../../uiSounds'
 import { HIDDEN_FOLDERS } from '../utils/constants'
 import { Guided } from '../utils/tree'
@@ -64,17 +64,22 @@ type FsSelCtx = {
   commitRename: (p: string, newLabel: string) => Promise<void>
   // Rechtsklick-Kontextmenü: openCtxMenu öffnet bei (x, y) für ein Item.
   openCtxMenu: (info: { x: number; y: number; path: string; folder: boolean; level: number; label: string }) => void
-  // Hover-Vorschau für Bilder/SVGs (PDF & Video später).
+  // Hover-Vorschau für Dateien, die der Browser ohne Server-Render direkt zeigen kann.
   onHoverEnter: (path: string, name: string, e: React.MouseEvent) => void
   onHoverLeave: () => void
 }
 
-// Welche Extensions im Hover als Bild vorab gerendert werden — alles, was der
-// Browser nativ rendern kann. PDF und Video kommen später, falls gewünscht.
 const HOVER_IMG_EXT = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'bmp', 'ico'])
+const HOVER_FRAME_EXT = new Set(['html', 'htm', 'md', 'markdown', 'mdx', 'txt', 'json', 'yaml', 'yml', 'css', 'js', 'ts', 'tsx', 'py', 'sh', 'csv', 'log', 'xml'])
+function hoverPreviewKind(name: string): 'image' | 'frame' | null {
+  const dot = name.lastIndexOf('.'); if (dot < 0) return null
+  const ext = name.slice(dot + 1).toLowerCase()
+  if (HOVER_IMG_EXT.has(ext)) return 'image'
+  if (HOVER_FRAME_EXT.has(ext)) return 'frame'
+  return null
+}
 function isHoverPreviewable(name: string): boolean {
-  const dot = name.lastIndexOf('.'); if (dot < 0) return false
-  return HOVER_IMG_EXT.has(name.slice(dot + 1).toLowerCase())
+  return hoverPreviewKind(name) !== null
 }
 const FsSelContext = createContext<FsSelCtx | null>(null)
 
@@ -152,8 +157,8 @@ function displayWorkspaceLabel(name: string, opts?: { root?: boolean; topLevel?:
   return name
 }
 
-function ProjectBrowse({ path, level, onOpenFile, onArchive, label, defaultOpen, mobile, headerSlot, footerSlot, headerActionSlot }: {
-  path: string; level: number; onOpenFile: (p: string) => void; onArchive?: () => void; label?: string; defaultOpen?: boolean; mobile?: boolean; headerSlot?: React.ReactNode; footerSlot?: React.ReactNode; headerActionSlot?: React.ReactNode
+function ProjectBrowse({ path, level, onOpenFile, onBrowseFolder, onArchive, label, defaultOpen, mobile, headerSlot, footerSlot, headerActionSlot, explorer = false }: {
+  path: string; level: number; onOpenFile: (p: string) => void; onBrowseFolder?: (p: string) => void; onArchive?: () => void; label?: string; defaultOpen?: boolean; mobile?: boolean; headerSlot?: React.ReactNode; footerSlot?: React.ReactNode; headerActionSlot?: React.ReactNode; explorer?: boolean
 }) {
   const [open, setOpen] = useFolderOpen(path, defaultOpen ?? false)
   const [items, setItems] = useState<FsItem[]>([])
@@ -302,7 +307,7 @@ function ProjectBrowse({ path, level, onOpenFile, onArchive, label, defaultOpen,
         data-fs-path={path}
         data-fs-folder="true"
         data-fs-level={level}
-        className={`group relative flex items-center transition-colors ${fsRowClass(Boolean(isSelected && level !== 0), dragOver)}`}
+        className={`group relative flex min-h-8 items-center rounded-[8px] transition-colors ${fsRowClass(Boolean(isSelected && level !== 0), dragOver)}`}
         draggable={level !== 0}
         onDragStart={onDragStartFolder}
         onDragOver={onDragOverFolder}
@@ -310,10 +315,10 @@ function ProjectBrowse({ path, level, onOpenFile, onArchive, label, defaultOpen,
         onDrop={onDropFolder}
         onContextMenu={(e) => { e.preventDefault(); sel?.openCtxMenu({ x: e.clientX, y: e.clientY, path, folder: true, level, label: displayName }) }}
       >
-        <button onClick={() => { playUISound(open ? 'section-close' : 'section-open'); setOpen(!open); sel?.setSelected(path); sel?.focusContainer() }}
-          className={`flex-1 flex items-center pr-3 ${level === 0 ? `pl-2 ${mobile ? 'py-3' : 'py-2'}` : `pl-1 ${mobile ? 'py-2' : 'py-[5px]'}`} info-text-body text-left cursor-pointer`}>
-          <ChevronRight className={`info-icon-sm mr-2 text-[var(--t3)] transition-transform duration-150 flex-shrink-0 ${open ? 'rotate-90' : ''}`} />
-          <FolderIcon className={`info-icon-md mr-2 flex-shrink-0 ${isSelected && level !== 0 ? 'text-[var(--t2)]' : 'text-[var(--t3)]'}`} />
+        <button onClick={() => { playUISound(open ? 'section-close' : 'section-open'); setOpen(!open); sel?.setSelected(path); sel?.focusContainer(); onBrowseFolder?.(path) }}
+          className={`flex-1 flex min-w-0 items-center pr-3 ${level === 0 ? `pl-2 ${mobile ? 'py-3' : 'py-1.5'}` : `pl-1 ${mobile ? 'py-2' : 'py-1'}`} text-[13px] leading-none text-left cursor-pointer`}>
+          <ChevronRight className={`mr-1.5 h-4 w-4 text-[var(--t3)] transition-transform duration-150 flex-shrink-0 ${open ? 'rotate-90' : ''}`} />
+          <FolderIcon className={`mr-2 h-4 w-4 flex-shrink-0 ${isSelected && level !== 0 ? 'text-[var(--cc-orange)]' : 'text-[var(--t3)]'}`} />
           {sel?.renaming === path
             ? <RenameInput initial={name} onCommit={(v) => sel.commitRename(path, v)} onCancel={() => sel.cancelRename()} />
             : <span className={`truncate flex-1 text-left group-hover:text-[var(--t1)] ${isSelected && level !== 0 ? 'text-[var(--t1)]' : 'text-[var(--t2)]'}`}>{displayName}</span>}
@@ -376,12 +381,12 @@ function ProjectBrowse({ path, level, onOpenFile, onArchive, label, defaultOpen,
       {open && (
         <Guided>
           {headerSlot}
-          {folders.map(f => <ProjectBrowse key={f.path} path={f.path} level={level + 1} onOpenFile={onOpenFile} mobile={mobile} />)}
-          {hasPlan && (
+          {folders.map(f => <ProjectBrowse key={f.path} path={f.path} level={level + 1} onOpenFile={onOpenFile} onBrowseFolder={onBrowseFolder} mobile={mobile} explorer={explorer} />)}
+          {!explorer && hasPlan && (
             <ProjectFileLeaf key={`${path}/PLAN.md`} path={`${path}/PLAN.md`} label="Plan" level={level + 1} onOpenFile={onOpenFile} />
           )}
-          {otherFiles.map(f => (
-            <ProjectFileLeaf key={f.path} path={f.path} label={f.name} level={level + 1} onOpenFile={onOpenFile} size={f.size} mtime={f.mtime} />
+          {!explorer && otherFiles.map(f => (
+            <ProjectFileLeaf key={f.path} path={f.path} label={f.name} level={level + 1} onOpenFile={onOpenFile} size={f.size} mtime={f.mtime} compact={explorer} />
           ))}
           {footerSlot}
         </Guided>
@@ -390,8 +395,8 @@ function ProjectBrowse({ path, level, onOpenFile, onArchive, label, defaultOpen,
   )
 }
 
-function ProjectFileLeaf({ path, label, level, onOpenFile, size, mtime }: {
-  path: string; label: string; level: number; onOpenFile: (p: string) => void; size?: number | null; mtime?: number | null
+function ProjectFileLeaf({ path, label, level, onOpenFile, size, mtime, compact = false }: {
+  path: string; label: string; level: number; onOpenFile: (p: string) => void; size?: number | null; mtime?: number | null; compact?: boolean
 }) {
   const bus = useContext(FsBusContext)
   const sel = useContext(FsSelContext)
@@ -438,9 +443,9 @@ function ProjectFileLeaf({ path, label, level, onOpenFile, size, mtime }: {
       onMouseLeave={() => sel?.onHoverLeave()}
       onContextMenu={(e) => { e.preventDefault(); sel?.onHoverLeave(); sel?.openCtxMenu({ x: e.clientX, y: e.clientY, path, folder: false, level, label }) }}>
       <button onClick={() => { sel?.setSelected(path); sel?.focusContainer(); if (!isRenaming) onOpenFile(path) }}
-        className={`workspace-file-row flex-1 flex items-center pr-3 info-text-body hover:text-[var(--t1)] cursor-pointer truncate ${isSelected ? 'text-[var(--t1)]' : 'text-[var(--t2)]'}`}
+        className={`workspace-file-row flex-1 flex min-w-0 items-center pr-3 ${compact ? 'py-1 text-[13px]' : 'info-text-body'} hover:text-[var(--t1)] cursor-pointer truncate ${isSelected ? 'text-[var(--t1)]' : 'text-[var(--t2)]'}`}
         style={{ paddingLeft: `${pad}px` }}>
-        <FileIcon className={`info-icon-md mr-2 flex-shrink-0 ${isSelected ? 'text-[var(--t2)]' : 'text-[var(--t3)]'}`} />
+        <FileIcon className={`mr-2 flex-shrink-0 ${compact ? 'h-4 w-4' : 'info-icon-md'} ${isSelected ? 'text-[var(--t2)]' : 'text-[var(--t3)]'}`} />
         {isRenaming
           ? <RenameInput initial={label} onCommit={(v) => sel.commitRename(path, v)} onCancel={() => sel.cancelRename()} />
           : <span className="truncate flex-1 text-left">{label}</span>}
@@ -522,10 +527,9 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
   )
 
   return (
-    <div>
-      <div className="flex items-center px-2 py-1 border-b border-[var(--border)]/30 sticky top-[88px] bg-[var(--bg)]/95 backdrop-blur-sm z-[5]">
+    <div className="min-w-0">
+      <div className="sticky top-0 z-[5] grid grid-cols-[minmax(0,1fr)_88px_118px] items-center border-b border-[var(--border)]/40 bg-[var(--bg)] px-2 py-1.5">
         <Sorter k="name" label="Name" w="auto" />
-        <div className="flex-1" />
         <Sorter k="size" label="Größe" w="80px" right />
         <Sorter k="mtime" label="Geändert" w="120px" right />
       </div>
@@ -545,7 +549,7 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
             data-fs-path={it.path}
             data-fs-folder={it.type === 'folder' ? 'true' : 'false'}
             data-fs-level={0}
-            className={`group relative flex items-center transition-colors ${fsRowClass(Boolean(isSelected))}`}
+            className={`group relative grid min-h-8 grid-cols-[minmax(0,1fr)_88px_118px] items-center rounded-[8px] transition-colors ${fsRowClass(Boolean(isSelected))}`}
             onMouseEnter={(e) => { if (it.type !== 'folder') sel?.onHoverEnter(it.path, it.name, e) }}
             onMouseLeave={() => sel?.onHoverLeave()}
             onContextMenu={(e) => { e.preventDefault(); sel?.onHoverLeave(); sel?.openCtxMenu({ x: e.clientX, y: e.clientY, path: it.path, folder: it.type === 'folder', level: 0, label: displayName }) }}
@@ -553,9 +557,10 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
               sel?.setSelected(it.path); sel?.focusContainer()
               if (it.type === 'folder') onOpenFolder(it.path); else onOpenFile(it.path)
             }}>
-            <div className={`flex items-center gap-2 px-2 ${mobile ? 'py-2' : 'py-[6px]'} flex-1 min-w-0 cursor-pointer info-text-body hover:text-[var(--t1)] ${isSelected ? 'text-[var(--t1)]' : 'text-[var(--t2)]'}`}>
-              <Icon className={`info-icon-sm ${it.type === 'folder' ? 'text-[var(--cc-orange)]' : isSelected ? 'text-[var(--t2)]' : 'text-[var(--t3)]'} flex-shrink-0`} />
+            <div className={`flex items-center gap-2 px-2 ${mobile ? 'py-2' : 'py-1.5'} min-w-0 cursor-pointer text-[13px] leading-none hover:text-[var(--t1)] ${isSelected ? 'text-[var(--t1)]' : 'text-[var(--t2)]'}`}>
+              <Icon className={`h-4 w-4 ${it.type === 'folder' ? 'text-[var(--cc-orange)]' : isSelected ? 'text-[var(--t2)]' : 'text-[var(--t3)]'} flex-shrink-0`} />
               <span className="truncate flex-1">{displayName}</span>
+              {it.type !== 'folder' && isHoverPreviewable(it.name) && <Eye className="h-3.5 w-3.5 shrink-0 text-[var(--t3)] opacity-0 transition-opacity group-hover:opacity-70" />}
             </div>
             <div className="info-text-meta text-[var(--t3)] tabular-nums text-right pr-2" style={{ width: '80px', flexShrink: 0 }}>
               {it.type === 'folder' ? '—' : formatBytes(it.size)}
@@ -667,13 +672,14 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
   }, [bus, setSelected])
 
   // ── Hover-Vorschau ──
-  const [hoverPreview, setHoverPreview] = useState<{ path: string; x: number; y: number } | null>(null)
+  const [hoverPreview, setHoverPreview] = useState<{ path: string; kind: 'image' | 'frame'; x: number; y: number } | null>(null)
   const hoverTimer = useRef<number | null>(null)
   const onHoverEnter = useCallback((path: string, name: string, e: React.MouseEvent) => {
-    if (!isHoverPreviewable(name)) return
+    const kind = hoverPreviewKind(name)
+    if (!kind) return
     const x = e.clientX, y = e.clientY
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current)
-    hoverTimer.current = window.setTimeout(() => setHoverPreview({ path, x, y }), 350)
+    hoverTimer.current = window.setTimeout(() => setHoverPreview({ path, kind, x, y }), 280)
   }, [])
   const onHoverLeave = useCallback(() => {
     if (hoverTimer.current) { window.clearTimeout(hoverTimer.current); hoverTimer.current = null }
@@ -929,11 +935,11 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
   })()
 
   const TopBar = fullMode ? (
-    <div className="sticky top-0 z-10 bg-[var(--bg)]/95 backdrop-blur-sm border-b border-[var(--border)]/40">
+    <div className="sticky top-0 z-10 border-b border-[var(--border)]/40 bg-[var(--bg)]">
       {/* Reihe 1: Breadcrumb + Schließen */}
       <div className="flex items-center gap-1 px-3 py-2 min-w-0">
         <button onClick={() => setCwdPersist(ROOT)}
-          className="text-[var(--t3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 p-1"
+          className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 transition-[background-color,color,transform] active:scale-[0.96]"
           title="Zum Workspace-Root">
           <Home className="info-icon-sm" />
         </button>
@@ -949,7 +955,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
           ))}
         </div>
         <button onClick={onToggleFull}
-          className="text-[var(--t3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 p-1"
+          className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 transition-[background-color,color,transform] active:scale-[0.96]"
           title="Vollbild verlassen (Esc)">
           <X className="info-icon-md" />
         </button>
@@ -957,7 +963,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
       {/* Reihe 2: Aktionen (Ordner anlegen, löschen) + globale Suche */}
       <div className="flex items-center gap-1 px-3 pb-2">
         <button onClick={() => ctxNewFolder(cwd)}
-          className="text-[var(--t3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 p-1"
+          className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 transition-[background-color,color,transform] active:scale-[0.96]"
           title="Neuer Ordner">
           <FolderPlus className="info-icon-sm" />
         </button>
@@ -967,13 +973,13 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
           setSelected(null)
         }}
           disabled={!selected}
-          className="text-[var(--t3)] hover:text-[var(--t1)] disabled:opacity-30 disabled:hover:text-[var(--t3)] cursor-pointer flex-shrink-0 p-1"
+          className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--t3)] cursor-pointer flex-shrink-0 transition-[background-color,color,transform] active:scale-[0.96]"
           title="Auswahl in den Papierkorb">
           <Trash2 className="info-icon-sm" />
         </button>
         <div className="flex-1" />
         <button onClick={() => window.dispatchEvent(new CustomEvent('deck:openSearch'))}
-          className="text-[var(--t3)] hover:text-[var(--t1)] cursor-pointer p-1"
+          className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] cursor-pointer transition-[background-color,color,transform] active:scale-[0.96]"
           title="Alles durchsuchen">
           <Search className="info-icon-sm" />
         </button>
@@ -983,18 +989,35 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
 
   return (
     <FsSelContext.Provider value={selCtx}>
-      <div ref={containerRef} tabIndex={0} onKeyDown={onKeyDown} className="workspace-tree outline-none">
+      <div ref={containerRef} tabIndex={0} onKeyDown={onKeyDown} className="workspace-tree flex h-full min-h-0 flex-col outline-none">
         {TopBar}
         {fullMode ? (
-          <FsListView
-            cwd={cwd}
-            sortKey={sortKey}
-            sortDesc={sortDesc}
-            onSort={setSort}
-            onOpenFolder={(p) => setCwdPersist(p)}
-            onOpenFile={(p) => onOpenFile(p)}
-            mobile={mobile}
-          />
+          <div className="grid min-h-0 flex-1 grid-cols-[minmax(176px,0.34fr)_minmax(0,1fr)] gap-3 px-3 py-3">
+            <aside className="min-h-0 overflow-y-auto overflow-x-hidden border-r border-[var(--border)]/35 pr-3">
+              <ProjectBrowse
+                key="workspace-explorer-tree"
+                path={ROOT}
+                level={0}
+                onOpenFile={onOpenFile}
+                onBrowseFolder={setCwdPersist}
+                label={ROOT_LABEL}
+                defaultOpen
+                mobile={mobile}
+                explorer
+              />
+            </aside>
+            <main className="min-h-0 overflow-y-auto overflow-x-hidden">
+              <FsListView
+                cwd={cwd}
+                sortKey={sortKey}
+                sortDesc={sortDesc}
+                onSort={setSort}
+                onOpenFolder={(p) => setCwdPersist(p)}
+                onOpenFile={(p) => onOpenFile(p)}
+                mobile={mobile}
+              />
+            </main>
+          </div>
         ) : (
           <ProjectBrowse
             key={fullMode ? cwd : ROOT}
@@ -1079,14 +1102,22 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
         if (y + H > window.innerHeight - 8) y = window.innerHeight - H - 8
         return (
           <div
-            className="fixed z-[85] pointer-events-none bg-[var(--bg-2)] border border-[var(--border)] rounded-md shadow-xl p-1.5"
+            className="fixed z-[85] pointer-events-none overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--bg-2)] shadow-2xl"
             style={{ left: x, top: y, width: W }}>
-            <img
-              src={`/api/fs/download?path=${encodeURIComponent(hoverPreview.path)}&inline=1`}
-              alt=""
-              className="block w-full h-auto max-h-[220px] object-contain rounded-sm"
-              draggable={false}
-            />
+            {hoverPreview.kind === 'image' ? (
+              <img
+                src={`/api/fs/download?path=${encodeURIComponent(hoverPreview.path)}&inline=1`}
+                alt=""
+                className="block w-full h-auto max-h-[220px] object-contain"
+                draggable={false}
+              />
+            ) : (
+              <iframe
+                src={`/api/fs/download?path=${encodeURIComponent(hoverPreview.path)}&inline=1`}
+                title="Dateivorschau"
+                className="block h-[220px] w-full border-0 bg-white"
+              />
+            )}
           </div>
         )
       })()}

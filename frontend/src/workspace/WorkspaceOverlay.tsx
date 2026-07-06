@@ -88,7 +88,7 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
     <aside className={`workspace-dock workspace-span-${span}${open ? ' is-open' : ''}${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace">
       <div className="workspace-rail">
         <div className="workspace-rail-head">
-          <img className="workspace-rail-logo" src="/agent-control-logo.png" alt="Agent Control" draggable={false} />
+          <div className="h-[30px] w-[30px]" aria-hidden="true" />
         </div>
         <WorkspaceNav mode={mode} collapsed={collapsed} onModeChange={onModeChange} />
         <div className="workspace-rail-top">
