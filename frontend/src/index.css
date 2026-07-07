@@ -4138,6 +4138,10 @@ body.is-resizing-main-layout * {
   object-fit: contain;
 }
 
+.connector-logo img {
+  display: block;
+}
+
 .connector-logo.is-monochrome::before {
   content: "";
   display: block;
@@ -4221,7 +4225,7 @@ body.is-resizing-main-layout * {
 
 .connector-form {
   display: grid;
-  grid-template-columns: minmax(150px, 0.85fr) minmax(180px, 1fr) auto;
+  grid-template-columns: minmax(150px, 0.85fr) minmax(180px, 1fr) minmax(116px, auto);
   gap: 9px;
   align-items: end;
 }
@@ -4295,72 +4299,6 @@ body.is-resizing-main-layout * {
 .connector-save-button:disabled {
   cursor: default;
   opacity: 0.52;
-}
-
-.agent-system-panel {
-  display: grid;
-  gap: 14px;
-}
-
-.agent-system-form {
-  grid-template-columns: minmax(150px, 0.85fr) minmax(128px, 0.55fr) minmax(220px, 1fr) auto;
-}
-
-.agent-system-target {
-  min-width: 0;
-}
-
-.agent-system-register {
-  display: grid;
-  gap: 8px;
-}
-
-.agent-system-row {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(160px, 0.65fr) minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-  padding: 10px 11px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--bg-2) 24%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-f) 52%, transparent);
-}
-
-.agent-system-row div,
-.agent-system-row p {
-  min-width: 0;
-}
-
-.agent-system-row strong,
-.agent-system-row span {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.agent-system-row strong {
-  color: var(--t1);
-  font-size: 13px;
-  font-weight: 560;
-  line-height: 1.2;
-}
-
-.agent-system-row span {
-  margin-top: 3px;
-  color: var(--t3);
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.agent-system-row p {
-  margin: 0;
-  color: var(--t2);
-  font-size: 12px;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-  text-wrap: pretty;
 }
 
 .connector-error {
@@ -4963,7 +4901,7 @@ body.is-resizing-main-layout * {
 }
 
 .workspace-span-1 .connectors-workspace .workspace-system-strip {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .workspace-span-1 .connectors-workspace .workspace-system-strip section {
@@ -5027,10 +4965,16 @@ body.is-resizing-main-layout * {
   }
 
   .connectors-workspace .workspace-system-strip,
-  .connector-form,
-  .agent-system-form,
-  .agent-system-row {
+  .connector-form {
     grid-template-columns: 1fr;
+  }
+
+  .connector-save-button {
+    width: 100%;
+  }
+
+  .connector-card-head {
+    align-items: start;
   }
 
   .connector-card-copy,
@@ -5056,6 +5000,15 @@ body.is-resizing-main-layout * {
   .workspace-span-1 .connectors-workspace .workspace-system-strip,
   .workspace-span-2 .connectors-workspace .workspace-system-strip {
     grid-template-columns: 1fr;
+  }
+
+  .connector-card-head {
+    grid-template-columns: 1fr;
+  }
+
+  .connector-card-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 

@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konnektoren Hermes und OpenClaw</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   TOKENS.css — die EINE Wahrheit für die Agent-Control HTML-Artefakt-Palette.
+
+   Quelle gegen Drift (Strang 1): Jede neue Artefakt-HTML übernimmt diesen Block
+   1:1 INLINE in ihren <style> — nicht aus dem Kopf neu tippen, nicht abweichen.
+   So erreicht ein CI-Update (Farb-Tweak, neuer Token) alle künftigen Seiten über
+   eine Stelle, statt in jeder Datei eine eigene, langsam alternde Kopie zu pflegen.
+
+   Die fertige HTML bleibt self-contained: der Block wird inline eingesetzt, stammt
+   aber aus dieser einen Quelle. Helfer zum Ausgeben:
+     python3 scripts/artifact-check.py --emit-tokens
+   Konsistenz-Prüfung vor Übergabe:
+     python3 scripts/artifact-check.py <datei.html>
+
+   Default ist DUNKEL (Agent-Control-Darks). Der Light-Block ist Pflicht, weil der
+   Preview-Viewer per data-theme am <html> umschaltet. Beide Blöcke immer mitnehmen.
+   Hintergrund/Skala/Komponenten stehen in DESIGN.md + COMPONENTS.md.
+   ============================================================================ */
+
+:root {
+  --bg:          #1F1F1E;              /* Haupthintergrund (Agent-Control-Dark) */
+  --bg-1:        #2C2C2B;              /* Karten, raised surface */
+  --bg-2:        #353533;             /* tertiäre Flächen, Code-BG */
+  --border:      #3A3A38;             /* Card-Ränder, gut sichtbar auf bg-1 */
+  --border-soft: #2A2A29;             /* dezente Sektions-Trenner auf bg */
+  --t1:          #E6E6E3;             /* Primärtext */
+  --t2:          #A1A1A0;             /* Sekundärtext (Leads, Beschreibungen) */
+  --t3:          #8A8278;             /* Muted (Preise, Meta) */
+  --accent:      #D97757;             /* Terrakotta, einzige Signalfarbe */
+  --accent-soft: rgba(217,119,87,0.12);
+  --warm:        #D6C9A8;             /* warmer Highlight-Ton */
+  --max:         980px;               /* Layout-Breite (.wrap) */
+  /* Status-Grün (optional, nur wenn echt gebraucht — z. B. live-Pill) */
+  --ok:          #7FB069;
+  --ok-soft:     rgba(127,176,105,0.14);
+  /* Sticky-Top-Nav-Hintergrund (COMPONENTS §14) */
+  --nav-bg:      rgba(31,31,30,0.82);
+}
+
+:root[data-theme="light"] {
+  --bg:          #FAF9F5;             /* Original-Hellwerte aus DESIGN.md */
+  --bg-1:        #F5F3EC;
+  --bg-2:        #F0EEE6;
+  --border:      #E4E0D2;
+  --border-soft: #ECEAE0;
+  --t1:          #1F1F1E;
+  --t2:          #5C5B57;
+  --t3:          #8A8983;
+  --accent:      #E07A4F;             /* im Light kräftiger für Kontrast */
+  --accent-soft: rgba(224,122,79,0.10);
+  --warm:        #9A8C68;
+  --ok:          #5C8A3C;             /* Status-Grün im Light dunkler */
+  --ok-soft:     rgba(92,138,60,0.12);
+  --nav-bg:      rgba(250,249,245,0.85);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: transparent;
+  color: var(--t1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+body { overflow-x: hidden; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.italic { font-family: 'Lora', Georgia, serif; font-style: italic; font-weight: 400; }
+.hero {
+  padding: 86px 0 72px;
+  border-top: 0;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: clamp(28px, 6vw, 64px);
+  align-items: center;
+}
+.eyebrow {
+  margin-bottom: 18px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  margin-bottom: 18px;
+  font-size: clamp(46px, 6.2vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+h2 {
+  margin-bottom: 16px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+h3 {
+  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+.lead {
+  max-width: 650px;
+  color: var(--t2);
+  font-size: 20px;
+  text-wrap: pretty;
+}
+section {
+  padding: 64px 0;
+  border-top: 1px solid var(--border-soft);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+}
+.metric {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.muted { color: var(--t3); }
+.checklist {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.checklist li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--t2);
+  text-wrap: pretty;
+}
+.checklist li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 800;
+}
+.flow {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.flow text {
+  fill: var(--t2);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+}
+.flow .node {
+  fill: transparent;
+  stroke: var(--border);
+  stroke-width: 1.4;
+}
+.flow .accent {
+  stroke: var(--accent);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.flow .soft {
+  stroke: var(--border-soft);
+  stroke-width: 1;
+}
+.connector-preview {
+  display: grid;
+  gap: 12px;
+}
+.mini-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.mini-card strong {
+  display: block;
+  color: var(--t1);
+  font-size: 16px;
+}
+.mini-card span {
+  display: block;
+  color: var(--t3);
+  font-size: 13px;
+}
+.pill {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.note {
+  padding: 20px 22px;
+  border-left: 2px solid var(--accent);
+  color: var(--t2);
+  background: var(--accent-soft);
+  border-radius: 0 14px 14px 0;
+}
+@media (max-width: 780px) {
+  .wrap { padding: 0 18px; }
+  .hero { padding: 58px 0 52px; }
+  .hero-grid,
+  .cards,
+  .two {
+    grid-template-columns: 1fr;
+  }
+  section { padding: 48px 0; }
+  .card { padding: 20px; }
+  .mini-card {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .pill { width: fit-content; max-width: 100%; }
+}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">Werkbank-Ergebnis</div>
+        <h1>Zwei Konnektoren statt <span class="italic">Sammelkasten</span>.</h1>
+        <p class="lead">Hermes und OpenClaw stehen jetzt einzeln in der Konnektoren-Ansicht, genau wie WhatsApp, Mail oder OpenAI. Jeder bekommt seine eigene Kachel und seine eigene Anbindefläche.</p>
+      </div>
+      <svg class="flow" viewBox="0 0 420 300" role="img" aria-label="Aus einem Template wurden zwei eigene Konnektoren">
+        <path class="soft" d="M64 60h292M64 150h292M64 240h292"/>
+        <rect class="node" x="46" y="34" width="136" height="52" rx="14"/>
+        <text x="68" y="65">Template vorher</text>
+        <path class="accent" d="M194 60 C240 60 240 120 286 120"/>
+        <path class="accent" d="M194 60 C240 60 240 180 286 180"/>
+        <rect class="node" x="268" y="94" width="112" height="52" rx="14"/>
+        <rect class="node" x="268" y="154" width="112" height="52" rx="14"/>
+        <text x="296" y="125">Hermes</text>
+        <text x="292" y="185">OpenClaw</text>
+        <circle cx="194" cy="60" r="5" fill="var(--accent)"/>
+        <circle cx="286" cy="120" r="5" fill="var(--accent)"/>
+        <circle cx="286" cy="180" r="5" fill="var(--accent)"/>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Was sichtbar ist</div>
+      <div class="cards">
+        <article class="card">
+          <span class="metric">2</span>
+          <h3>Agentensysteme</h3>
+          <p class="muted">Hermes und OpenClaw werden oben als zwei eigene Systeme gezählt, nicht als Template.</p>
+        </article>
+        <article class="card">
+          <span class="metric">0</span>
+          <h3>Sammelkasten</h3>
+          <p class="muted">Der alte generische Agentensystem-Block ist aus der Ansicht verschwunden.</p>
+        </article>
+        <article class="card">
+          <span class="metric">3</span>
+          <h3>Prüfungen</h3>
+          <p class="muted">Dunkel, hell und schmal wurden auf 4222 ohne horizontales Scrollen geprüft.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap two">
+      <div>
+        <div class="eyebrow">Neue Kacheln</div>
+        <h2>Gleiche Bedienung wie bei den anderen Zugängen.</h2>
+        <p class="lead">Beide Systeme nutzen die vorhandene Konnektor-Mechanik. Das heißt: Kachel, Status, Account-Feld und Speichern-Knopf bleiben vertraut.</p>
+      </div>
+      <div class="connector-preview">
+        <article class="mini-card">
+          <div><strong>Hermes</strong><span>Engine · Pfad, Endpoint oder Key</span></div>
+          <span class="pill">Einzeln anbinden</span>
+        </article>
+        <article class="mini-card">
+          <div><strong>OpenClaw</strong><span>Engine · Pfad, Endpoint oder Key</span></div>
+          <span class="pill">Einzeln anbinden</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap two">
+      <div>
+        <div class="eyebrow">Kontrolle</div>
+        <h2>Responsive geprüft, Build grün.</h2>
+      </div>
+      <ul class="checklist">
+        <li>Hermes und OpenClaw erscheinen als eigene Karten auf 4222.</li>
+        <li>Der Template-Konnektor ist nicht mehr im sichtbaren Text vorhanden.</li>
+        <li>Schmale Breite bleibt einspaltig, Buttons und Eingabefelder laufen nicht aus der Karte.</li>
+        <li>`npm run build` im Frontend läuft erfolgreich durch.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="note">Offen bleibt absichtlich die echte Agenten-Anbindung. Das nächste Stück ist das Skill-Modul: Skills lesen, erklären, Nutzung zählen und pro Agentensystem laden. Das gehört in einen eigenen, sauberen Bauabschnitt.</div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import {
-  Bot, CheckCircle2, Cpu, KeyRound, Loader2, MessageSquare, PlugZap, Save, TerminalSquare,
+  Bot, CheckCircle2, Cpu, KeyRound, Loader2, MessageSquare, PlugZap, Save,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { WorkspaceShell } from './WorkspaceShell'
 
 type ConnectorStatus = 'connected' | 'not_connected'
-type AgentSystemKind = 'hermes' | 'openclaw' | 'generic'
 
 type ConnectorItem = {
   id: string
@@ -19,32 +18,6 @@ type ConnectorItem = {
   status: ConnectorStatus
   updated_at: number
 }
-
-type AgentSystemConnector = {
-  id: string
-  name: string
-  kind: AgentSystemKind
-  install_target: string
-  created_at: number
-}
-
-const AGENT_SYSTEM_STORAGE_KEY = 'agent-control:agent-system-connectors'
-
-const AGENT_SYSTEM_KIND_LABELS: Record<AgentSystemKind, string> = {
-  hermes: 'Hermes',
-  openclaw: 'OpenClaw',
-  generic: 'Generisch',
-}
-
-const DEFAULT_AGENT_SYSTEMS: AgentSystemConnector[] = [
-  {
-    id: 'template-hermes',
-    name: 'Hermes Vorlage',
-    kind: 'hermes',
-    install_target: 'Installier-Kommando oder Endpoint später eintragen',
-    created_at: 0,
-  },
-]
 
 const ICONS: Record<string, LucideIcon> = {
   custom: PlugZap,
@@ -65,10 +38,12 @@ const LOGOS: Record<string, string> = {
   telegram: '/connectors/telegram.svg',
   sms: '/connectors/sms.svg',
   whatsapp: '/connectors/whatsapp.svg',
+  hermes: '/connectors/hermes.svg',
+  openclaw: '/openclaw.png',
   custom_messenger: '/connectors/custom-messenger.svg',
 }
 
-const MONOCHROME_LOGOS = new Set(['openai', 'anthropic', 'elevenlabs'])
+const MONOCHROME_LOGOS = new Set(['openai', 'anthropic', 'elevenlabs', 'hermes'])
 
 const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'openai', kind: 'service', name: 'OpenAI', description: 'API-Zugang für GPT, Bilder, Transkription und Agentenläufe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
@@ -80,32 +55,11 @@ const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'telegram', kind: 'service', name: 'Telegram', description: 'Chats, Bots und Benachrichtigungen als späterer Messenger-Kanal.', account_label: '', credential_hint: 'Bot-Token leer', status: 'not_connected', updated_at: 0 },
   { id: 'sms', kind: 'service', name: 'SMS', description: 'Kurznachrichten über einen Telefonie-Provider wie Twilio oder Sipgate.', account_label: '', credential_hint: 'Provider-Key leer', status: 'not_connected', updated_at: 0 },
   { id: 'whatsapp', kind: 'service', name: 'WhatsApp', description: 'WhatsApp Business oder lokale Brücke für Kunden- und Teamchats.', account_label: '', credential_hint: 'Zugang leer', status: 'not_connected', updated_at: 0 },
+  { id: 'hermes', kind: 'engine', name: 'Hermes', description: 'Eigenes Agentensystem für vorbereitete Kunden-Agenten, später mit Skill-Laden und lokaler Ausführung.', account_label: '', credential_hint: 'Installationspfad oder Endpoint leer', status: 'not_connected', updated_at: 0 },
+  { id: 'openclaw', kind: 'engine', name: 'OpenClaw', description: 'Agentensystem für lokale oder kundenseitige Agentenläufe, einzeln auswählbar und anbindbar.', account_label: '', credential_hint: 'Installationspfad oder Endpoint leer', status: 'not_connected', updated_at: 0 },
   { id: 'custom', kind: 'service', name: 'Eigener Dienst', description: 'Freier Platz für Kunden-API, CRM, ERP oder interne Tools.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
   { id: 'custom_messenger', kind: 'service', name: 'Custom Messenger', description: 'Freier Messenger-Kanal für Kunden-App, Community oder internes System.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
 ]
-
-function loadAgentSystems(): AgentSystemConnector[] {
-  try {
-    const raw = window.localStorage.getItem(AGENT_SYSTEM_STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : null
-    if (!Array.isArray(parsed)) return DEFAULT_AGENT_SYSTEMS
-    const items = parsed
-      .filter((item): item is AgentSystemConnector => (
-        item &&
-        typeof item.id === 'string' &&
-        typeof item.name === 'string' &&
-        typeof item.install_target === 'string' &&
-        ['hermes', 'openclaw', 'generic'].includes(item.kind)
-      ))
-    return items.length > 0 ? items : DEFAULT_AGENT_SYSTEMS
-  } catch {
-    return DEFAULT_AGENT_SYSTEMS
-  }
-}
-
-function saveAgentSystems(items: AgentSystemConnector[]) {
-  window.localStorage.setItem(AGENT_SYSTEM_STORAGE_KEY, JSON.stringify(items))
-}
 
 function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
   const byId = new Map(items.map(item => [item.id, item]))
@@ -181,11 +135,11 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
           />
         </label>
         <label className="connector-field">
-          <span>API-Key oder Zugang</span>
+          <span>{item.kind === 'engine' ? 'Pfad, Endpoint oder Key' : 'API-Key oder Zugang'}</span>
           <input
             value={credential}
             onChange={e => setCredential(e.target.value)}
-            placeholder={connected ? item.credential_hint : 'Key eintragen'}
+            placeholder={connected ? item.credential_hint : item.kind === 'engine' ? 'Platzhalter eintragen' : 'Key eintragen'}
             type="password"
             className="connector-input"
           />
@@ -200,101 +154,6 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
           Speichern
         </button>
         {error && <p className="connector-error">{error}</p>}
-      </div>
-    </section>
-  )
-}
-
-function AgentSystemRegistry() {
-  const [systems, setSystems] = useState<AgentSystemConnector[]>(() => loadAgentSystems())
-  const [name, setName] = useState('')
-  const [kind, setKind] = useState<AgentSystemKind>('hermes')
-  const [installTarget, setInstallTarget] = useState('')
-
-  function addSystem() {
-    const cleanName = name.trim()
-    const cleanTarget = installTarget.trim()
-    if (!cleanName || !cleanTarget) return
-    const next = [
-      {
-        id: `${kind}-${Date.now()}`,
-        name: cleanName,
-        kind,
-        install_target: cleanTarget,
-        created_at: Date.now(),
-      },
-      ...systems,
-    ]
-    setSystems(next)
-    saveAgentSystems(next)
-    setName('')
-    setKind('hermes')
-    setInstallTarget('')
-  }
-
-  return (
-    <section className="workspace-system-panel agent-system-panel">
-      <div className="connector-card-head">
-        <div className="connector-card-title">
-          <strong>Agentensystem</strong>
-          <span>Template-Konnektor</span>
-        </div>
-        <span className="connector-logo" aria-hidden="true">
-          <TerminalSquare className="h-5 w-5" strokeWidth={1.75} />
-        </span>
-      </div>
-      <p className="connector-card-copy">
-        Leere Hülle für fremde Agentensysteme wie Hermes oder OpenClaw. Hier wird nur registriert, noch nichts gestartet oder angebunden.
-      </p>
-
-      <div className="connector-form agent-system-form">
-        <label className="connector-field">
-          <span>Name</span>
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="z. B. Hermes beim Kunden"
-            className="connector-input"
-          />
-        </label>
-        <label className="connector-field">
-          <span>Art</span>
-          <select value={kind} onChange={e => setKind(e.target.value as AgentSystemKind)} className="connector-input">
-            <option value="hermes">Hermes</option>
-            <option value="openclaw">OpenClaw</option>
-            <option value="generic">Generisch</option>
-          </select>
-        </label>
-        <label className="connector-field agent-system-target">
-          <span>Installier-Kommando oder Endpoint</span>
-          <input
-            value={installTarget}
-            onChange={e => setInstallTarget(e.target.value)}
-            placeholder="Platzhalter, kein Live-Call"
-            className="connector-input"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={addSystem}
-          disabled={!name.trim() || !installTarget.trim()}
-          className="connector-save-button"
-        >
-          <Save className="h-4 w-4" />
-          Eintragen
-        </button>
-      </div>
-
-      <div className="agent-system-register" aria-label="Registrierte Agentensysteme">
-        {systems.map(system => (
-          <article key={system.id} className="agent-system-row">
-            <div>
-              <strong>{system.name}</strong>
-              <span>{AGENT_SYSTEM_KIND_LABELS[system.kind]}</span>
-            </div>
-            <p>{system.install_target}</p>
-          </article>
-        ))}
       </div>
     </section>
   )
@@ -328,8 +187,8 @@ export function ConnectorsWorkspace() {
 
   const stats = useMemo(() => {
     const connected = items.filter(item => item.status === 'connected').length
-    const engines = items.filter(item => item.kind === 'engine').length
-    return { connected, open: Math.max(0, items.length - connected), engines }
+    const agentSystems = items.filter(item => item.id === 'hermes' || item.id === 'openclaw').length
+    return { connected, open: Math.max(0, items.length - connected), agentSystems }
   }, [items])
 
   function handleSaved(next: ConnectorItem) {
@@ -364,13 +223,12 @@ export function ConnectorsWorkspace() {
         </section>
         <section>
           <span>Agentensysteme</span>
-          <strong>Template</strong>
-          <em>Hermes, OpenClaw, frei</em>
+          <strong>{loading ? '…' : stats.agentSystems}</strong>
+          <em>Hermes und OpenClaw einzeln</em>
         </section>
       </div>
 
       <div className="workspace-system-main workspace-system-stack">
-        <AgentSystemRegistry />
         {items.map(item => <ConnectorCard key={item.id} item={item} onSaved={handleSaved} />)}
         {loading && <section className="workspace-system-panel"><div className="workspace-system-list"><p>Lädt …</p></div></section>}
       </div>
