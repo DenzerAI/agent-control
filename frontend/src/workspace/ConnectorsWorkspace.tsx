@@ -38,12 +38,13 @@ const LOGOS: Record<string, string> = {
   telegram: '/connectors/telegram.svg',
   sms: '/connectors/sms.svg',
   whatsapp: '/connectors/whatsapp.svg',
-  hermes: '/connectors/hermes.svg',
+  hermes: '/connectors/hermes-agent.webp',
   openclaw: '/openclaw.png',
   custom_messenger: '/connectors/custom-messenger.svg',
 }
 
-const MONOCHROME_LOGOS = new Set(['openai', 'anthropic', 'elevenlabs', 'hermes'])
+const MONOCHROME_LOGOS = new Set(['openai', 'anthropic', 'elevenlabs'])
+const BADGE_LOGOS = new Set(['hermes'])
 
 const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'openai', kind: 'service', name: 'OpenAI', description: 'API-Zugang für GPT, Bilder, Transkription und Agentenläufe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
@@ -69,6 +70,7 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
   const Icon = ICONS[item.id] || PlugZap
   const logo = LOGOS[item.id]
   const monochromeLogo = logo && MONOCHROME_LOGOS.has(item.id)
+  const badgeLogo = logo && BADGE_LOGOS.has(item.id)
   const [credential, setCredential] = useState('')
   const [accountLabel, setAccountLabel] = useState(item.account_label || '')
   const [saving, setSaving] = useState(false)
@@ -113,7 +115,7 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
             {connected ? 'Verbunden' : 'Offen'}
           </span>
           <span
-            className={`connector-logo${monochromeLogo ? ' is-monochrome' : ''}`}
+            className={`connector-logo${monochromeLogo ? ' is-monochrome' : ''}${badgeLogo ? ' is-badge' : ''}`}
             style={monochromeLogo ? { '--connector-logo-url': `url(${logo})` } as CSSProperties : undefined}
             aria-hidden="true"
           >

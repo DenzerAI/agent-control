@@ -4142,6 +4142,19 @@ body.is-resizing-main-layout * {
   display: block;
 }
 
+.connector-logo.is-badge img {
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+  object-fit: cover;
+  object-position: 45% 34%;
+  outline: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="light"] .connector-logo.is-badge img {
+  outline-color: rgba(0, 0, 0, 0.1);
+}
+
 .connector-logo.is-monochrome::before {
   content: "";
   display: block;
