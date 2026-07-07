@@ -15,7 +15,7 @@ if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
   source "$PROJECT_ROOT/scripts/lib/agent-control-env.sh"
 fi
 LABEL="${AC_LABEL:-com.klaus.agent}"
-PORT="${AC_PORT:-8890}"
+PORT="${AC_PORT:-4222}"
 BASE_URL="http://localhost:$PORT"
 STATUS_URL="$BASE_URL/api/system-status"
 STREAMS_URL="$BASE_URL/api/active-streams"

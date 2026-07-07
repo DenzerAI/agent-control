@@ -13,7 +13,7 @@ if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
   # shellcheck source=lib/agent-control-env.sh
   source "$PROJECT_ROOT/scripts/lib/agent-control-env.sh"
 fi
-PORT="${AC_PORT:-8890}"
+PORT="${AC_PORT:-4222}"
 URL="${WATCHDOG_URL:-http://localhost:$PORT/api/conversations}"
 ENV_FILE="${AC_ROOT:-$PROJECT_ROOT}/.env"
 PY="${AC_PY:-$PROJECT_ROOT/.venv/bin/python3}"

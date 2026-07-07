@@ -32,6 +32,7 @@ MODULES_REGISTRY_PATH = ROOT / "modules" / "modules.json"
 ENV_PATH = ROOT / ".env"
 ENV_EXAMPLE_PATH = ROOT / ".env.example"
 SOUL_DIR = ROOT / "soul"
+SYSTEM_ROOT_ENV = "AGENT_CONTROL_SYSTEM_ROOT"
 ENGINE_PROFILE_IDS = [
     "codex",
     "claude",
@@ -594,6 +595,42 @@ def write_text_once(path: Path, text: str, dry_run: bool, force: bool = False) -
     path.write_text(text, encoding="utf-8")
 
 
+def _system_root() -> Path:
+    configured = os.environ.get(SYSTEM_ROOT_ENV, "").strip()
+    return Path(configured or "/agent-control")
+
+
+def ensure_hatching_space(answers: dict[str, str], dry_run: bool) -> None:
+    """Legt den generischen System-Anker der frisch gehatchten Instanz an."""
+    root = _system_root()
+    marker = root / "README.md"
+    text = (
+        "# Agent Control\n\n"
+        "Dieser Ordner ist der lokale System-Anker der installierten Agent-Control-Instanz.\n\n"
+        f"- Agent: {answers.get('agent_name') or 'Agent'}\n"
+        f"- Owner: {answers.get('owner_name') or 'Owner'}\n"
+        "- Enthält keine Secrets.\n"
+        "- Runtime-Daten bleiben in data/, work/ und den aktivierten Modulen.\n"
+    )
+    section("Hatching-Ort", f"System-Anker: {root}")
+    if dry_run:
+        print(f"[dry-run] mkdir -p {root}")
+        print(f"[dry-run] write {marker}")
+        return
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+        marker.write_text(text, encoding="utf-8")
+        print(paint("✓", "green") + f" {root} vorbereitet")
+    except PermissionError:
+        fallback = ROOT / "work" / "agent-control" / "README.md"
+        fallback.parent.mkdir(parents=True, exist_ok=True)
+        fallback.write_text(
+            text + f"\nHinweis: {root} war ohne Admin-Rechte nicht beschreibbar.\n",
+            encoding="utf-8",
+        )
+        print(paint("!", "gold") + f" {root} nicht beschreibbar, lokaler Spiegel in {_rel(fallback)}")
+
+
 def seed_demo_data(profile: dict[str, Any], dry_run: bool, force: bool = False) -> None:
     seed_path = demo_seed_path(profile)
     if seed_path is None:
@@ -927,6 +964,7 @@ def run(args: argparse.Namespace) -> int:
     write_agents_config(soul_answers, args.dry_run, args.force_soul)
     if not args.no_soul:
         write_soul_files(soul_answers, args.dry_run, args.force_soul)
+    ensure_hatching_space(soul_answers, args.dry_run)
     if profile.get("demo_data") and not args.no_demo_data:
         seed_demo_data(profile, args.dry_run, args.force_demo_data)
 
@@ -937,7 +975,7 @@ def run(args: argparse.Namespace) -> int:
     print(paint("Nächste Schritte:", "bold"))
     print("  1. Falls der Doctor eine Anmeldung meldet: Engine anmelden oder API-Key in .env setzen.")
     print("  2. Starten: bash scripts/start.sh")
-    print("  3. Öffnen:  http://127.0.0.1:8890")
+    print("  3. Öffnen:  http://127.0.0.1:4222")
     print()
     print("Chat ist sofort nutzbar, sobald die gewählte Engine angemeldet ist.")
     return 0
@@ -961,7 +999,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--package-plan", action="store_true", help="Print install package boundary from config/agent-control-manifest.json")
     parser.add_argument("--doctor", action="store_true", help="Only check setup readiness, do not write files")
     parser.add_argument("--skip-doctor", action="store_true", help="Do not run readiness checks after setup")
-    parser.add_argument("--server-url", default="http://127.0.0.1:8890", help="Agent Control server URL for health checks")
+    parser.add_argument("--server-url", default="http://127.0.0.1:4222", help="Agent Control server URL for health checks")
     return parser.parse_args(argv)
 
 

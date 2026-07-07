@@ -4,13 +4,13 @@
 # Usage: ./start.sh
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# Geteilte Umgebung laden (setzt AC_PORT, Default 8890). So laesst sich der
+# Geteilte Umgebung laden (setzt AC_PORT, Default 4222 fuer Fresh-Installs). So laesst sich der
 # Port per env (AC_PORT) ueberschreiben, etwa fuer eine zweite Test-Instanz.
 if [ -f "$PROJECT_ROOT/scripts/lib/agent-control-env.sh" ]; then
     # shellcheck source=lib/agent-control-env.sh
     source "$PROJECT_ROOT/scripts/lib/agent-control-env.sh"
 fi
-PORT="${AC_PORT:-8890}"
+PORT="${AC_PORT:-4222}"
 cd "$PROJECT_ROOT/backend"
 source "$PROJECT_ROOT/.venv/bin/activate"
 

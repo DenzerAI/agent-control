@@ -4,7 +4,7 @@
 #
 # Exportiert / setzt:
 #   AC_ROOT     Projektwurzel (Verzeichnis ueber scripts/)
-#   AC_PORT     Server-Port (Default 8890)
+#   AC_PORT     Server-Port (Default 4222)
 #   AC_LABEL    launchd-Label fuer diese Instanz
 #   AC_PY       venv-Python, faellt auf /usr/bin/python3 zurueck
 #   AC_PLIST    Pfad zur LaunchAgent-plist dieser Instanz
@@ -24,7 +24,13 @@ if [ -z "${AC_ROOT:-}" ]; then
   fi
 fi
 
-AC_PORT="${AC_PORT:-8890}"
+if [ -z "${AC_PORT:-}" ]; then
+  if [ "$AC_ROOT" = "$HOME/agent" ]; then
+    AC_PORT="8890"
+  else
+    AC_PORT="4222"
+  fi
+fi
 
 if [ -z "${AC_LABEL:-}" ]; then
   if [ -f "$AC_ROOT/config/launchd-label" ]; then
