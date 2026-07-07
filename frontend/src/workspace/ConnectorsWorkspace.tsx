@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import {
   Bot, CheckCircle2, Cpu, KeyRound, Loader2, MessageSquare, PlugZap, Save,
 } from 'lucide-react'
@@ -40,6 +41,8 @@ const LOGOS: Record<string, string> = {
   custom_messenger: '/connectors/custom-messenger.svg',
 }
 
+const MONOCHROME_LOGOS = new Set(['openai', 'anthropic', 'elevenlabs'])
+
 const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'openai', kind: 'service', name: 'OpenAI', description: 'API-Zugang für GPT, Bilder, Transkription und Agentenläufe.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
   { id: 'anthropic', kind: 'engine', name: 'Claude', description: 'Claude Code und Anthropic-Modelle für Bau- und Analyseaufgaben.', account_label: '', credential_hint: 'API-Key leer', status: 'not_connected', updated_at: 0 },
@@ -62,6 +65,7 @@ function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
 function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item: ConnectorItem) => void }) {
   const Icon = ICONS[item.id] || PlugZap
   const logo = LOGOS[item.id]
+  const monochromeLogo = logo && MONOCHROME_LOGOS.has(item.id)
   const [credential, setCredential] = useState('')
   const [accountLabel, setAccountLabel] = useState(item.account_label || '')
   const [saving, setSaving] = useState(false)
@@ -96,17 +100,24 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
   return (
     <section className="workspace-system-panel connector-card">
       <div className="connector-card-head">
-        <span className="connector-logo" aria-hidden="true">
-          {logo ? <img src={logo} alt="" /> : <Icon className="h-5 w-5" strokeWidth={1.75} />}
-        </span>
         <div className="connector-card-title">
           <strong>{item.name}</strong>
           <span>{item.kind === 'engine' ? 'Engine' : 'Dienst'}</span>
         </div>
-        <span className={`connector-state is-${connected ? 'connected' : 'idle'}`}>
-          {connected ? <CheckCircle2 className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
-          {connected ? 'Verbunden' : 'Offen'}
-        </span>
+        <div className="connector-card-actions">
+          <span className={`connector-state is-${connected ? 'connected' : 'idle'}`}>
+            {connected ? <CheckCircle2 className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
+            {connected ? 'Verbunden' : 'Offen'}
+          </span>
+          <span
+            className={`connector-logo${monochromeLogo ? ' is-monochrome' : ''}`}
+            style={monochromeLogo ? { '--connector-logo-url': `url(${logo})` } as CSSProperties : undefined}
+            aria-hidden="true"
+          >
+            {logo && !monochromeLogo ? <img src={logo} alt="" /> : null}
+            {!logo ? <Icon className="h-5 w-5" strokeWidth={1.75} /> : null}
+          </span>
+        </div>
       </div>
       <p className="connector-card-copy">{connected ? item.credential_hint : item.description}</p>
       <div className="connector-form">

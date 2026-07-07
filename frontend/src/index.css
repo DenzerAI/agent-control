@@ -4127,14 +4127,23 @@ body.is-resizing-main-layout * {
   display: inline-grid;
   place-items: center;
   flex-shrink: 0;
-  color: var(--t2);
+  color: var(--t1);
 }
 
 .connector-logo img,
-.connector-logo svg {
-  width: 22px;
-  height: 22px;
+.connector-logo svg,
+.connector-logo.is-monochrome::before {
+  width: 23px;
+  height: 23px;
   object-fit: contain;
+}
+
+.connector-logo.is-monochrome::before {
+  content: "";
+  display: block;
+  background: currentColor;
+  mask: var(--connector-logo-url) center / contain no-repeat;
+  -webkit-mask: var(--connector-logo-url) center / contain no-repeat;
 }
 
 .connector-card {
@@ -4147,9 +4156,9 @@ body.is-resizing-main-layout * {
 .connector-card-head {
   min-width: 0;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
 }
 
 .connector-card-title {
@@ -4180,12 +4189,19 @@ body.is-resizing-main-layout * {
 
 .connector-card-copy {
   margin: 0;
-  padding-left: 43px;
   text-wrap: pretty;
 }
 
+.connector-card-actions {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 7px;
+}
+
 .connector-state {
-  min-height: 30px;
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -4208,7 +4224,6 @@ body.is-resizing-main-layout * {
   grid-template-columns: minmax(150px, 0.85fr) minmax(180px, 1fr) auto;
   gap: 9px;
   align-items: end;
-  padding-left: 43px;
 }
 
 .connector-field {
