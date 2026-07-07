@@ -87,9 +87,6 @@ export function WorkspaceOverlay({ open, mode, returnMode, span, collapsed, file
   return (
     <aside className={`workspace-dock workspace-span-${span}${open ? ' is-open' : ''}${collapsed ? ' is-collapsed' : ''}`} aria-label="Workspace">
       <div className="workspace-rail">
-        <div className="workspace-rail-head">
-          <div className="h-[30px] w-[30px]" aria-hidden="true" />
-        </div>
         <WorkspaceNav mode={mode} collapsed={collapsed} onModeChange={onModeChange} />
         <div className="workspace-rail-top">
           <button
