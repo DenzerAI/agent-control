@@ -27,15 +27,24 @@ export function WorkspaceHome({ onOpenFile, onClose, onRevealPath, path, filePat
   }
 
   return (
-    <div className="h-full min-h-0 overflow-hidden bg-[var(--bg)] text-[var(--t1)]">
-      <FsBusProvider>
-        <WorkspaceTree
-          onOpenFile={openFile}
-          fullMode
-          onToggleFull={onClose}
-          initialPath={path || (filePath ? workspaceDirectory(filePath) : null)}
-        />
-      </FsBusProvider>
+    <div className="workspace-files-root h-full min-h-0 overflow-hidden text-[var(--t1)]">
+      <header className="workspace-files-head">
+        <div>
+          <p>Dateien</p>
+          <h2>Workspace</h2>
+          <span>Der echte lokale Datei-Explorer. Wenn ein Ordner leer ist, bleibt er leer.</span>
+        </div>
+      </header>
+      <div className="workspace-files-explorer">
+        <FsBusProvider>
+          <WorkspaceTree
+            onOpenFile={openFile}
+            fullMode
+            onToggleFull={onClose}
+            initialPath={path || (filePath ? workspaceDirectory(filePath) : null)}
+          />
+        </FsBusProvider>
+      </div>
     </div>
   )
 }

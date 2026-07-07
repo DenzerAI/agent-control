@@ -4856,12 +4856,89 @@ html, body, #root {
 
 .workspace-files-root {
   background: transparent;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.workspace-files-head {
+  padding: 8px 2px 14px;
+  flex-shrink: 0;
+}
+
+.workspace-files-head p {
+  margin: 0 0 8px;
+  color: var(--t3);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.workspace-files-head h2 {
+  margin: 0;
+  color: var(--t1);
+  font-family: var(--font-body);
+  font-size: clamp(24px, 2.3vw, 34px);
+  line-height: 1.1;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.workspace-files-head span {
+  display: block;
+  max-width: 620px;
+  margin-top: 9px;
+  color: var(--t2);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.workspace-files-explorer {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  border-top: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
 }
 
 .workspace-files-root .workspace-system-panel {
   border: 0;
   background: transparent;
   padding-inline: 0;
+}
+
+.workspace-files-toolbar {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+}
+
+.workspace-files-list-head {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  background: transparent;
+}
+
+.workspace-files-empty {
+  display: grid;
+  gap: 4px;
+  padding: 18px 12px;
+  color: var(--t3);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.workspace-files-empty strong {
+  color: var(--t2);
+  font-weight: 500;
+}
+
+.workspace-files-empty span {
+  max-width: 420px;
+  text-wrap: pretty;
 }
 
 .workspace-files-row small {
@@ -6530,6 +6607,14 @@ pre.path-block code {
 
 .workspace-tree .workspace-search-row {
   padding-left: var(--info-tree-child-pad) !important;
+}
+
+.workspace-tree-empty {
+  padding-block: 6px;
+  color: var(--t3);
+  font-size: 12px;
+  line-height: 1.35;
+  font-style: italic;
 }
 
 /* Guide-Linie sitzt mittig unter der jeweiligen Chevron-Spitze.

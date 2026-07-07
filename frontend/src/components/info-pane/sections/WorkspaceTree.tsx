@@ -197,6 +197,7 @@ function ProjectBrowse({ path, level, onOpenFile, onBrowseFolder, onArchive, lab
   const displayName = level === 1 ? displayWorkspaceLabel(name, { topLevel: true }) : name
   const hasPlan = files.some(f => f.name === 'PLAN.md')
   const otherFiles = files.filter(f => f.name !== 'PLAN.md')
+  const isEmpty = folders.length === 0 && (explorer || (!hasPlan && otherFiles.length === 0))
 
   const refresh = () => { bus?.bump(path); setTick(t => t + 1) }
   const refreshParent = () => { const parent = path.slice(0, path.lastIndexOf('/')); if (parent) bus?.bump(parent) }
@@ -388,6 +389,11 @@ function ProjectBrowse({ path, level, onOpenFile, onBrowseFolder, onArchive, lab
           {!explorer && otherFiles.map(f => (
             <ProjectFileLeaf key={f.path} path={f.path} label={f.name} level={level + 1} onOpenFile={onOpenFile} size={f.size} mtime={f.mtime} compact={explorer} />
           ))}
+          {isEmpty && (
+            <div className="workspace-tree-empty" style={{ paddingLeft: 'var(--info-tree-child-pad)' }}>
+              Leer
+            </div>
+          )}
           {footerSlot}
         </Guided>
       )}
@@ -528,14 +534,17 @@ function FsListView({ cwd, sortKey, sortDesc, onSort, onOpenFolder, onOpenFile, 
 
   return (
     <div className="min-w-0">
-      <div className="sticky top-0 z-[5] grid grid-cols-[minmax(0,1fr)_88px_118px] items-center border-b border-[var(--border)]/40 bg-[var(--bg)] px-2 py-1.5">
+      <div className="workspace-files-list-head sticky top-0 z-[5] grid grid-cols-[minmax(0,1fr)_88px_118px] items-center px-2 py-1.5">
         <Sorter k="name" label="Name" w="auto" />
         <Sorter k="size" label="Größe" w="80px" right />
         <Sorter k="mtime" label="Geändert" w="120px" right />
       </div>
       {loading && <div className="info-text-body text-[var(--t3)] px-3 py-4">Lade…</div>}
       {!loading && sorted.length === 0 && (
-        <div className="info-text-body text-[var(--t3)] px-3 py-4 italic">Leer.</div>
+        <div className="workspace-files-empty">
+          <strong>Dieser Ordner ist leer.</strong>
+          <span>Keine Demo-Struktur, keine Platzhalter. Hier erscheinen nur echte Dateien.</span>
+        </div>
       )}
       {sorted.map(it => {
         const isSelected = sel?.selected === it.path
@@ -935,7 +944,7 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
   })()
 
   const TopBar = fullMode ? (
-    <div className="sticky top-0 z-10 border-b border-[var(--border)]/40 bg-[var(--bg)]">
+    <div className="workspace-files-toolbar">
       {/* Reihe 1: Breadcrumb + Schließen */}
       <div className="flex items-center gap-1 px-3 py-2 min-w-0">
         <button onClick={() => setCwdPersist(ROOT)}
@@ -954,11 +963,11 @@ export function WorkspaceTree({ onOpenFile, mobile, fullMode, onToggleFull, init
             </Fragment>
           ))}
         </div>
-        <button onClick={onToggleFull}
+        {onToggleFull && <button onClick={onToggleFull}
           className="grid h-10 w-10 place-items-center rounded-[10px] text-[var(--t3)] hover:bg-[var(--bg-3)] hover:text-[var(--t1)] cursor-pointer flex-shrink-0 transition-[background-color,color,transform] active:scale-[0.96]"
           title="Vollbild verlassen (Esc)">
           <X className="info-icon-md" />
-        </button>
+        </button>}
       </div>
       {/* Reihe 2: Aktionen (Ordner anlegen, löschen) + globale Suche */}
       <div className="flex items-center gap-1 px-3 pb-2">
