@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konnektor-Logos und Kacheln</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #1F1F1E;
+  --bg-1:        #2C2C2B;
+  --bg-2:        #353533;
+  --border:      #3A3A38;
+  --border-soft: #2A2A29;
+  --t1:          #E6E6E3;
+  --t2:          #A1A1A0;
+  --t3:          #8A8278;
+  --accent:      #D97757;
+  --accent-soft: rgba(217,119,87,0.12);
+  --warm:        #D6C9A8;
+  --max:         980px;
+  --ok:          #7FB069;
+  --ok-soft:     rgba(127,176,105,0.14);
+  --nav-bg:      rgba(31,31,30,0.82);
+}
+
+:root[data-theme="light"] {
+  --bg:          #FAF9F5;
+  --bg-1:        #F5F3EC;
+  --bg-2:        #F0EEE6;
+  --border:      #E4E0D2;
+  --border-soft: #ECEAE0;
+  --t1:          #1F1F1E;
+  --t2:          #5C5B57;
+  --t3:          #8A8983;
+  --accent:      #E07A4F;
+  --accent-soft: rgba(224,122,79,0.10);
+  --warm:        #9A8C68;
+  --ok:          #5C8A3C;
+  --ok-soft:     rgba(92,138,60,0.12);
+  --nav-bg:      rgba(250,249,245,0.85);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: transparent;
+  color: var(--t1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.italic { font-family: 'Lora', Georgia, serif; font-style: italic; font-weight: 400; }
+.hero {
+  padding: 84px 0 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 42px;
+  align-items: center;
+}
+.eyebrow {
+  margin: 0 0 16px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+h1, h2, h3, p { margin-top: 0; }
+h1 {
+  margin-bottom: 18px;
+  font-size: 62px;
+  line-height: 1.02;
+  letter-spacing: 0;
+  font-weight: 800;
+  text-wrap: balance;
+}
+h2 {
+  margin-bottom: 16px;
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+h3 { margin-bottom: 8px; font-size: 18px; line-height: 1.2; }
+.lead {
+  max-width: 670px;
+  margin-bottom: 0;
+  color: var(--t2);
+  font-size: 20px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+section { padding: 58px 0; border-top: 1px solid var(--border-soft); }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  padding: 22px;
+}
+.metric {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--t1);
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.card p, .copy { margin-bottom: 0; color: var(--t2); text-wrap: pretty; }
+.flow {
+  width: 100%;
+  min-height: 260px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+.label { fill: var(--t2); font: 600 12px Inter, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.name { fill: var(--t1); font: 700 18px Inter, sans-serif; }
+.small { fill: var(--t3); font: 500 12px Inter, sans-serif; }
+.stroke { stroke: var(--border); }
+.accent { stroke: var(--accent); fill: none; }
+.accent-fill { fill: var(--accent); }
+.ok { color: var(--ok); }
+ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+li { position: relative; padding-left: 18px; color: var(--t2); text-wrap: pretty; }
+li::before { content: "·"; position: absolute; left: 0; top: -1px; color: var(--accent); font-weight: 800; font-size: 18px; }
+.footer { padding-bottom: 84px; }
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; padding-top: 58px; gap: 28px; }
+  .grid { grid-template-columns: 1fr; }
+  h1 { font-size: 42px; }
+  h2 { font-size: 28px; }
+  section { padding: 42px 0; }
+}
+</style>
+</head>
+<body>
+  <main>
+    <section class="hero wrap">
+      <div>
+        <div class="eyebrow">Werkbank-Abschluss</div>
+        <h1>Konnektoren sind jetzt <span class="italic">klarer</span>.</h1>
+        <p class="lead">Die falschen oder fehlenden Logos sind ersetzt, und die verwirrende letzte Dienst-Kachel ist raus. Unten bleibt nur noch, was Christian sofort versteht.</p>
+      </div>
+      <svg class="flow" viewBox="0 0 520 300" role="img" aria-label="Vorher-nachher der Konnektor-Kacheln">
+        <line class="stroke" x1="70" y1="150" x2="450" y2="150" stroke-width="1.5"/>
+        <path class="accent" d="M252 92 C284 92 284 208 316 208" stroke-width="2.5" stroke-linecap="round"/>
+        <rect x="36" y="54" width="188" height="92" rx="14" fill="transparent" stroke="var(--border)"/>
+        <text class="label" x="58" y="88">vorher</text>
+        <text class="name" x="58" y="116">Eigener Dienst</text>
+        <text class="small" x="58" y="136">zu allgemein</text>
+        <rect x="296" y="154" width="188" height="92" rx="14" fill="transparent" stroke="var(--border)"/>
+        <text class="label" x="318" y="188">jetzt</text>
+        <text class="name" x="318" y="216">Custom Messenger</text>
+        <text class="small" x="318" y="236">klarer Kanal</text>
+        <circle class="accent-fill" cx="260" cy="150" r="5"/>
+      </svg>
+    </section>
+
+    <section>
+      <div class="wrap grid">
+        <article class="card">
+          <span class="metric">3</span>
+          <h3>Logos korrigiert</h3>
+          <p>Hermes, ElevenLabs und OpenAI nutzen jetzt echte SVG-Glyphen statt leerem oder falschem Platzhalter.</p>
+        </article>
+        <article class="card">
+          <span class="metric">12</span>
+          <h3>Kacheln übrig</h3>
+          <p>Die Liste ist schlanker. Die generische Kachel „Eigener Dienst“ wurde entfernt.</p>
+        </article>
+        <article class="card">
+          <span class="metric ok">grün</span>
+          <h3>Build und Sichtcheck</h3>
+          <p>Build läuft durch. Geprüft wurde hell, dunkel und schmal auf Port 4222.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="footer">
+      <div class="wrap">
+        <div class="eyebrow">Was sichtbar ist</div>
+        <h2>Die letzten Kacheln heißen jetzt nur noch Hermes, OpenClaw und Custom Messenger.</h2>
+        <ul>
+          <li>OpenAI zeigt die offizielle OpenAI-Glyphe, theme-adaptiv als monochromes Logo.</li>
+          <li>ElevenLabs hat jetzt ein echtes Logo, ebenfalls freistehend und theme-adaptiv.</li>
+          <li>Hermes ist nicht mehr der alte Platzhalter, sondern eine eigenständige Hermes-Glyphe.</li>
+          <li>„Eigener Dienst“ ist weg. „Custom Messenger“ bleibt als verständliche Messenger-Kachel.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -22,7 +22,7 @@ type ConnectorItem = {
 const ICONS: Record<string, LucideIcon> = {
   custom: PlugZap,
   sms: MessageSquare,
-  custom_messenger: PlugZap,
+  custom_messenger: MessageSquare,
   engine_claude: Bot,
   engine_codex_openai: KeyRound,
   engine_local_models: Cpu,
@@ -57,8 +57,7 @@ const DEMO_CONNECTORS: ConnectorItem[] = [
   { id: 'whatsapp', kind: 'service', name: 'WhatsApp', description: 'WhatsApp Business oder lokale Brücke für Kunden- und Teamchats.', account_label: '', credential_hint: 'Zugang leer', status: 'not_connected', updated_at: 0 },
   { id: 'hermes', kind: 'engine', name: 'Hermes', description: 'Eigenes Agentensystem für vorbereitete Kunden-Agenten, später mit Skill-Laden und lokaler Ausführung.', account_label: '', credential_hint: 'Installationspfad oder Endpoint leer', status: 'not_connected', updated_at: 0 },
   { id: 'openclaw', kind: 'engine', name: 'OpenClaw', description: 'Agentensystem für lokale oder kundenseitige Agentenläufe, einzeln auswählbar und anbindbar.', account_label: '', credential_hint: 'Installationspfad oder Endpoint leer', status: 'not_connected', updated_at: 0 },
-  { id: 'custom', kind: 'service', name: 'Eigener Dienst', description: 'Freier Platz für Kunden-API, CRM, ERP oder interne Tools.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
-  { id: 'custom_messenger', kind: 'service', name: 'Custom Messenger', description: 'Freier Messenger-Kanal für Kunden-App, Community oder internes System.', account_label: '', credential_hint: 'Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
+  { id: 'custom_messenger', kind: 'service', name: 'Custom Messenger', description: 'Eigener Messenger-Kanal für Kunden-App, Community, Website-Chat oder internes System.', account_label: '', credential_hint: 'Messenger-Endpoint und Key leer', status: 'not_connected', updated_at: 0 },
 ]
 
 function mergeDemoConnectors(items: ConnectorItem[]): ConnectorItem[] {
