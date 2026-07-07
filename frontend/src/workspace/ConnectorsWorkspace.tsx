@@ -94,27 +94,24 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
 
   const connected = item.status === 'connected'
   return (
-    <section className="workspace-system-panel">
-      <div className="workspace-system-panel-head">
-        <div>
-          <span className="connector-logo" aria-hidden="true">
-            {logo ? <img src={logo} alt="" /> : <Icon className="h-4 w-4" strokeWidth={1.75} />}
-          </span>
+    <section className="workspace-system-panel connector-card">
+      <div className="connector-card-head">
+        <span className="connector-logo" aria-hidden="true">
+          {logo ? <img src={logo} alt="" /> : <Icon className="h-5 w-5" strokeWidth={1.75} />}
+        </span>
+        <div className="connector-card-title">
           <strong>{item.name}</strong>
+          <span>{item.kind === 'engine' ? 'Engine' : 'Dienst'}</span>
         </div>
-        <span>{item.kind === 'engine' ? 'Engine' : 'Dienst'}</span>
+        <span className={`connector-state is-${connected ? 'connected' : 'idle'}`}>
+          {connected ? <CheckCircle2 className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}
+          {connected ? 'Verbunden' : 'Offen'}
+        </span>
       </div>
-      <div className="workspace-system-list">
-        <article className={`workspace-system-row is-${connected ? 'ok' : 'neutral'}`}>
-          <span />
-          <div>
-            <strong>{connected ? 'Verbunden' : 'Nicht verbunden'}</strong>
-            <em>{connected ? item.credential_hint : item.description}</em>
-          </div>
-          <aside>{connected ? <CheckCircle2 className="h-4 w-4" /> : <KeyRound className="h-4 w-4" />}</aside>
-        </article>
-        <label className="grid gap-1 text-xs text-[var(--t2)]">
-          <span className="font-medium text-[var(--t3)]">Account</span>
+      <p className="connector-card-copy">{connected ? item.credential_hint : item.description}</p>
+      <div className="connector-form">
+        <label className="connector-field">
+          <span>Account</span>
           <input
             value={accountLabel}
             onChange={e => setAccountLabel(e.target.value)}
@@ -122,8 +119,8 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
             className="connector-input"
           />
         </label>
-        <label className="grid gap-1 text-xs text-[var(--t2)]">
-          <span className="font-medium text-[var(--t3)]">API-Key oder Zugang</span>
+        <label className="connector-field">
+          <span>API-Key oder Zugang</span>
           <input
             value={credential}
             onChange={e => setCredential(e.target.value)}
@@ -132,16 +129,16 @@ function ConnectorCard({ item, onSaved }: { item: ConnectorItem; onSaved: (item:
             className="connector-input"
           />
         </label>
-        {error && <p className="text-xs text-[var(--cc-orange)]">{error}</p>}
         <button
           type="button"
           onClick={save}
           disabled={saving}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-[var(--cc-orange)] px-3 text-sm font-medium text-white transition-transform active:scale-[0.96] disabled:opacity-50"
+          className="connector-save-button"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Speichern
         </button>
+        {error && <p className="connector-error">{error}</p>}
       </div>
     </section>
   )
@@ -188,6 +185,7 @@ export function ConnectorsWorkspace() {
       eyebrow="Konnektoren"
       title="Zugänge für Dienste und Engines"
       subtitle="Keys werden nur maskiert gespeichert und nie im Klartext an die Oberfläche zurückgegeben."
+      className="connectors-workspace"
       action={
         <button type="button" title="Konnektoren aktualisieren" onClick={() => window.location.reload()}>
           <PlugZap className="h-4 w-4" />

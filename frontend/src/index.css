@@ -4122,34 +4122,119 @@ body.is-resizing-main-layout * {
 }
 
 .connector-logo {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   display: inline-grid;
   place-items: center;
   flex-shrink: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-2) 52%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--border-f) 46%, transparent);
+  color: var(--t2);
 }
 
 .connector-logo img,
 .connector-logo svg {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
+}
+
+.connector-card {
+  display: grid;
+  gap: 11px;
+  padding: 13px 14px;
+  overflow: visible;
+}
+
+.connector-card-head {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.connector-card-title {
+  min-width: 0;
+}
+
+.connector-card-title strong,
+.connector-card-title span {
+  display: block;
+}
+
+.connector-card-title strong {
+  color: var(--t1);
+  font-size: 14px;
+  font-weight: 560;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connector-card-title span,
+.connector-card-copy {
+  color: var(--t3);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.connector-card-copy {
+  margin: 0;
+  padding-left: 43px;
+  text-wrap: pretty;
+}
+
+.connector-state {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: 999px;
+  color: var(--t3);
+  background: color-mix(in srgb, var(--bg-2) 40%, transparent);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.connector-state.is-connected {
+  color: color-mix(in srgb, var(--green) 78%, var(--t1));
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+
+.connector-form {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.85fr) minmax(180px, 1fr) auto;
+  gap: 9px;
+  align-items: end;
+  padding-left: 43px;
+}
+
+.connector-field {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.connector-field span {
+  color: var(--t3);
+  font-size: 11px;
+  font-weight: 520;
+  line-height: 1.2;
 }
 
 .connector-input {
   min-height: 40px;
   width: 100%;
-  border: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--border-f) 68%, transparent);
-  background: transparent;
-  padding: 0 1px;
+  border: 1px solid color-mix(in srgb, var(--border-f) 70%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--bg-2) 28%, transparent);
+  padding: 0 10px;
   color: var(--t1);
   font-size: 13px;
   outline: none;
-  transition-property: border-color, color;
+  transition-property: border-color, background, box-shadow;
   transition-duration: 140ms;
   transition-timing-function: ease;
 }
@@ -4159,7 +4244,70 @@ body.is-resizing-main-layout * {
 }
 
 .connector-input:focus {
-  border-color: color-mix(in srgb, var(--cc-orange) 82%, var(--border-f));
+  border-color: color-mix(in srgb, var(--cc-orange) 48%, var(--border-f));
+  background: color-mix(in srgb, var(--bg-1) 72%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc-orange) 9%, transparent);
+}
+
+.connector-save-button {
+  min-width: 116px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--cc-orange) 24%, var(--border-f));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--cc-orange) 7%, transparent);
+  color: color-mix(in srgb, var(--cc-orange) 28%, var(--t1));
+  font-size: 13px;
+  font-weight: 540;
+  transition-property: transform, border-color, background, color;
+  transition-duration: 140ms;
+  transition-timing-function: ease;
+}
+
+.connector-save-button:hover {
+  border-color: color-mix(in srgb, var(--cc-orange) 36%, var(--border-f));
+  background: color-mix(in srgb, var(--cc-orange) 10%, transparent);
+  color: var(--t1);
+}
+
+.connector-save-button:active {
+  transform: scale(0.96);
+}
+
+.connector-save-button:disabled {
+  cursor: default;
+  opacity: 0.52;
+}
+
+.connector-error {
+  grid-column: 1 / -1;
+  margin: -1px 0 0;
+  color: var(--cc-orange);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.connectors-workspace .workspace-system-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.connectors-workspace .workspace-system-strip section {
+  min-height: 68px;
+  padding: 11px 12px;
+}
+
+.connectors-workspace .workspace-system-strip strong {
+  margin: 5px 0 3px;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.connectors-workspace .workspace-system-main {
+  gap: 10px;
 }
 
 .workspace-system-panel-head {
@@ -4725,8 +4873,20 @@ body.is-resizing-main-layout * {
 
 .workspace-span-2 .workspace-system-strip { grid-template-columns: 1fr; }
 
+.workspace-span-2 .connectors-workspace .workspace-system-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .workspace-span-1 .workspace-system-strip section {
   min-height: 78px;
+}
+
+.workspace-span-1 .connectors-workspace .workspace-system-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workspace-span-1 .connectors-workspace .workspace-system-strip section {
+  min-height: 68px;
 }
 
 .workspace-span-1 .workspace-system-row {
@@ -4784,12 +4944,36 @@ body.is-resizing-main-layout * {
   .workspace-limits-engine button span {
     display: none;
   }
+
+  .connectors-workspace .workspace-system-strip,
+  .connector-form {
+    grid-template-columns: 1fr;
+  }
+
+  .connector-card-copy,
+  .connector-form {
+    padding-left: 0;
+  }
+}
+
+@media (min-width: 720px) and (max-width: 1100px) {
+  .workspace-span-2 .connectors-workspace .workspace-system-strip,
+  .connectors-workspace .workspace-system-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
   :root { --t-body: #CFCFCB; }
   :root[data-theme="light"] { --t-body: #4A4842; }
 
+}
+
+@media (max-width: 640px) {
+  .workspace-span-1 .connectors-workspace .workspace-system-strip,
+  .workspace-span-2 .connectors-workspace .workspace-system-strip {
+    grid-template-columns: 1fr;
+  }
 }
 
 html, body, #root {
