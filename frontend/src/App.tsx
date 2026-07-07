@@ -1086,7 +1086,7 @@ export default function App() {
       data-pane-container
       className={isFocused
         ? 'fixed inset-0 z-40 bg-[var(--bg)] overflow-hidden'
-        : 'relative bg-[var(--bg)] min-h-0 overflow-hidden border-l border-[var(--border)] rounded-l-[14px] rounded-r-[14px]'}
+        : 'relative bg-[var(--bg)] min-h-0 overflow-hidden rounded-l-[14px] rounded-r-[14px]'}
     >
       {/* Pane header overlay — sitzt absolut oben auf dem Chat, damit Messages dahinter durchscrollen können */}
       <div className="absolute top-0 left-0 right-0 z-20">
