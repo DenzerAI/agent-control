@@ -114,7 +114,7 @@
   left: 50%;
   width: 1px;
   transform: translateX(-50%);
-  background: color-mix(in srgb, var(--border-f) 50%, transparent);
+  background: transparent;
   transition-property: width, background-color, box-shadow;
   transition-duration: 140ms;
   transition-timing-function: ease;
