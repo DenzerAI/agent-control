@@ -87,7 +87,7 @@ Usage:
 
 Options:
   --profile=<core|client-demo|client-basic|christian>
-  --engine=<codex|claude|gemini|openai-api|anthropic-api|gemini-api|xai-api|lmstudio|ollama|manual>
+  --engine=<codex|claude|hermes|gemini|openai-api|anthropic-api|gemini-api|xai-api|lmstudio|ollama|manual>
   --name=<instance name>
   --agent-name=<agent name>   Visible agent name (non-interactive, works with --yes).
   --owner-name=<owner name>   Name the agent addresses you by (non-interactive).
@@ -95,6 +95,7 @@ Options:
   --server-url=<url>
   --deps-only
   --yes                 Use defaults and do not prompt.
+  --non-interactive     Alias for --yes.
   --doctor
   --dry-run             Print setup writes without changing files.
   --skip-doctor         Do not run readiness checks after setup.
@@ -330,6 +331,7 @@ for arg in "$@"; do
     --doctor) DOCTOR=1 ;;
     --dry-run) DRY_RUN=1; SETUP_ARGS+=("$arg") ;;
     --yes) YES=1; SETUP_ARGS+=("$arg") ;;
+    --non-interactive) YES=1; SETUP_ARGS+=(--yes) ;;
     --install-tools) INSTALL_TOOLS=1 ;;
     --install-local-llm) INSTALL_LOCAL_LLM=1 ;;
     --no-auto-install) AUTO_INSTALL=0 ;;
@@ -450,6 +452,10 @@ if [[ "$SETUP_ENGINE" -eq 1 && -n "$RESOLVED_ENGINE" && "$RESOLVED_ENGINE" != "m
   bash scripts/engine-setup.sh "$RESOLVED_ENGINE" "${ENGINE_FLAGS[@]+"${ENGINE_FLAGS[@]}"}" || \
     echo "${C_GOLD}  Engine-Anmeldung noch offen — spaeter: agent-control doctor${C_RESET}"
 fi
+
+step "Engines erkennen" "Vorhandene CLI-Engines werden lokal angebunden."
+".venv/bin/python" scripts/engine-detect.py --write || \
+  echo "${C_GOLD}  Engine-Erkennung uebersprungen — spaeter: python3 scripts/engine-detect.py --write${C_RESET}"
 
 # 2. Globalen Befehl 'agent-control' verlinken.
 if [[ "$INSTALL_CLI" -eq 1 ]]; then

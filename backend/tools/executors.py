@@ -22,6 +22,7 @@ from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, OpenerDirector, Request, build_opener
 
 from engines import engine_profiles, runtime_engine_ids
+from engines.discovery import scan_engines
 from engines.deployment_readiness import deployment_readiness_manifest
 from engines.install_readiness import install_readiness_manifest
 from engines.process_guard import scan_engine_processes
@@ -359,8 +360,10 @@ def agent_value_flywheel(_: dict[str, Any]) -> dict[str, Any]:
 
 def engine_list(_: dict[str, Any]) -> dict[str, Any]:
     profiles = engine_profiles()
+    installed = scan_engines()
     return {
         "runtime": list(runtime_engine_ids()),
+        "installed": sorted(installed),
         "profiles": [
             {
                 "id": profile.id,
@@ -368,6 +371,7 @@ def engine_list(_: dict[str, Any]) -> dict[str, Any]:
                 "kind": profile.kind,
                 "provider": profile.provider,
                 "runtime": profile.runtime,
+                "available": profile.id in installed,
                 "default_model": profile.default_model,
                 "models": sorted(profile.models),
             }

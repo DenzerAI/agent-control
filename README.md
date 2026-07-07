@@ -2,7 +2,7 @@
 
 Multi-Agent Dashboard — Chat-first, lokal, dein eigenes Personal-Agent-System.
 
-Eine schwarze Leinwand, ein Chat, dein Agent. Backend: Codex, Claude oder ein anderes Engine-Profil. Memory, Skills, Jobs und ein InfoPane für Detailansichten. Läuft lokal auf deinem Mac, deine Daten bleiben bei dir.
+Eine schwarze Leinwand, ein Chat, dein Agent. Backend: Codex, Claude, Hermes oder ein anderes Engine-Profil. Memory, Skills, Jobs und ein InfoPane für Detailansichten. Läuft lokal auf deinem Mac, deine Daten bleiben bei dir.
 
 ## Quickstart
 
@@ -10,14 +10,14 @@ Eine schwarze Leinwand, ein Chat, dein Agent. Backend: Codex, Claude oder ein an
 curl -fsSL https://raw.githubusercontent.com/DenzerAI/agent-control/main/install.sh | bash
 ```
 
-Der Installer klont Agent Control nach `~/agent-control`, fragt Profil, Engine, Module und Agent-Identität ab, baut Backend und Frontend und kann die App danach direkt starten.
+Der Installer klont Agent Control nach `~/agent-control`, fragt Profil, Engine, Module und Agent-Identität ab, baut Backend und Frontend, erkennt vorhandene CLI-Engines und kann die App danach direkt starten.
 
 ## Was du brauchst
 
 - macOS (Apple Silicon empfohlen)
 - Python 3.11+
 - Node.js 18+
-- Codex CLI, Claude Code oder ein anderes Engine-Profil
+- Codex CLI, Claude Code, Hermes Agent oder ein anderes Engine-Profil
 - API-Keys nur, wenn du eine API-Engine statt OAuth/CLI nutzt
 
 ## Architektur

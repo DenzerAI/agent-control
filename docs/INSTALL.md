@@ -6,7 +6,7 @@ Kurzanleitung fuer eine frische Instanz auf einem Mac. Alle Befehle laufen im Te
 
 - macOS mit Terminal
 - `git`, `python3`, `node` (der Installer kann fehlende Tools via Homebrew nachziehen: `--install-tools`)
-- Ein Engine-Account (z. B. Codex), an den der Agent gehaengt wird
+- Eine lokale Engine-CLI oder ein API-Profil. Direkt erkannt werden `claude`, `codex` und `hermes`.
 
 ## 1. Installieren
 
@@ -21,7 +21,8 @@ Er fuehrt Schritt fuer Schritt durch das Setup und zeigt im Doctor klar, was ber
 
 Auf einem nackten Mac erledigt der One-Click-Installer ausserdem:
 
-- **Engine-CLI mitinstallieren und anmelden:** Bei `codex`, `claude` oder `gemini` wird die passende CLI per `npm install -g` nachgezogen, der Login-Status geprueft und der Login-Flow gestartet (OAuth oeffnet den Browser, der Login wird vom Nutzer bestaetigt). Bei den `*-api`-Engines laeuft es ueber den API-Key in `.env`.
+- **Engine-CLI erkennen und anmelden:** Bei `codex`, `claude` oder `gemini` wird die passende CLI per `npm install -g` nachgezogen, der Login-Status geprueft und der Login-Flow gestartet (OAuth oeffnet den Browser, der Login wird vom Nutzer bestaetigt). `hermes` wird als vorhandene CLI erkannt und als Runtime-Engine angebunden; die Provider-Einrichtung bleibt in Hermes selbst. Bei den `*-api`-Engines laeuft es ueber den API-Key in `.env`.
+- **Engine-Pfade selbstheilend festhalten:** Der Installer scannt `PATH` plus uebliche Mac-Orte wie Homebrew, nvm, volta, bun, npm-global und `~/.local/bin`. Gefundene Engines werden lokal in `config/engine-runtime.json` notiert. Wenn ein Pfad spaeter verschwindet, scannt der Server neu statt dauerhaft an einem alten Pfad zu haengen.
 - **Autostart nach Reboot:** ein launchd-LaunchAgent startet Agent Control beim Login und haelt es am Leben.
 - **Globaler Befehl `agent-control`:** startet den Server bei Bedarf und oeffnet die UI.
 
@@ -61,6 +62,12 @@ Startet den Server bei Bedarf und oeffnet die UI im Browser. Weitere Unterbefehl
 
 Der Server laeuft lokal, Chat ist im Browser und am Handy erreichbar. Nach einem Reboot startet die Instanz dank launchd von selbst.
 Chatten geht sofort, wenn die gewaehlte Engine angemeldet ist. Mail, WhatsApp, Kalender und weitere APIs bleiben bewusst optionale Anschluesse.
+
+Engine-Erkennung erneut ausfuehren:
+
+```bash
+python3 scripts/engine-detect.py --write
+```
 
 ## 4. Aktualisieren
 

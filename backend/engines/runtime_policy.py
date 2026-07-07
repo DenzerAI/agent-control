@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .discovery import engine_command
+
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "work" / "agent-control" / "security" / "runtime-policy.json"
 DEFAULT_BROKER_CLIENT = "python3 scripts/agent-control-tool.py"
@@ -117,7 +119,7 @@ def broker_tool_context(conv_id: str, project: str) -> str:
 
 def build_codex_exec_cmd(*, model: str, cwd: str, effort: str = "", session_id: str = "", network_access: bool = False) -> list[str]:
     mode = engine_safety_mode()
-    cmd = ["codex", "exec", "--json", "--model", model, "--skip-git-repo-check", "-C", cwd]
+    cmd = [engine_command("codex"), "exec", "--json", "--model", model, "--skip-git-repo-check", "-C", cwd]
     if mode == "direct":
         cmd.append("--dangerously-bypass-approvals-and-sandbox")
     else:
@@ -140,7 +142,7 @@ def build_codex_exec_cmd(*, model: str, cwd: str, effort: str = "", session_id: 
 
 def build_claude_print_cmd(*, model: str, effort: str = "", session_id: str = "", new_session_id: str = "") -> list[str]:
     cmd = [
-        "claude", "-p", "--model", model, "--verbose",
+        engine_command("claude"), "-p", "--model", model, "--verbose",
         "--output-format", "stream-json", "--include-partial-messages",
     ]
     if engine_safety_mode() == "direct":
@@ -156,6 +158,22 @@ def build_claude_print_cmd(*, model: str, effort: str = "", session_id: str = ""
     if effort:
         cmd.extend(["--effort", effort])
     return cmd
+
+
+def build_hermes_exec_cmd(*, prompt: str, model: str = "", provider: str = "", cwd: str = "") -> list[str]:
+    """Headless Hermes oneshot command.
+
+    ``model`` may be plain or ``provider/model``. ``cwd`` is accepted for the
+    shared call shape; the caller applies it as subprocess working directory.
+    """
+    from .hermes_cli import DEFAULT_HERMES_MODEL, DEFAULT_HERMES_PROVIDER
+
+    model = (model or "").strip() or DEFAULT_HERMES_MODEL
+    provider = (provider or "").strip()
+    if not provider and "/" in model:
+        provider, model = model.split("/", 1)
+    provider = provider or DEFAULT_HERMES_PROVIDER
+    return [engine_command("hermes"), "-z", prompt, "-m", model, "--provider", provider, "--yolo"]
 
 
 def runtime_policy_manifest() -> dict[str, Any]:
@@ -181,5 +199,9 @@ def runtime_policy_manifest() -> dict[str, Any]:
             "allowed_tools": "" if mode in {"direct", "native"} else claude_allowed_tools(),
             "permission_mode": claude_native_permission_mode() if mode == "native" else "",
             "direct_skip_permissions": mode == "direct",
+        },
+        "hermes": {
+            "cmd": engine_command("hermes"),
+            "runtime": True,
         },
     }

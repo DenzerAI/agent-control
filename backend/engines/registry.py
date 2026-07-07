@@ -9,6 +9,7 @@ from typing import Any
 from .base import EngineProfile
 from .claude_code import ClaudeCodeAdapter
 from .codex_cli import CodexCliAdapter
+from .hermes_cli import HermesCliAdapter
 
 ROOT = Path(__file__).resolve().parents[2]
 SETUP_PROFILES_PATH = ROOT / "config" / "setup-profiles.json"
@@ -16,6 +17,7 @@ SETUP_PROFILES_PATH = ROOT / "config" / "setup-profiles.json"
 _RUNTIME_ADAPTERS = {
     "codex": CodexCliAdapter(),
     "claude": ClaudeCodeAdapter(),
+    "hermes": HermesCliAdapter(),
 }
 
 
@@ -78,10 +80,20 @@ def runtime_engine_ids() -> tuple[str, ...]:
 
 
 def normalize_engine(engine: str | None, default: str = "codex", *, runtime_only: bool = True) -> str:
-    candidate = str(engine or "").strip().lower()
+    candidate = _engine_alias(str(engine or "").strip().lower())
     if runtime_only:
         return candidate if is_runtime_engine(candidate) else default
     return candidate if is_known_engine(candidate) else default
+
+
+def _engine_alias(candidate: str) -> str:
+    if candidate in {"gpt", "openai", "codex-cli"} or candidate.startswith("gpt-"):
+        return "codex"
+    if candidate in {"claude-code"}:
+        return "claude"
+    if candidate in {"hermes-agent"}:
+        return "hermes"
+    return candidate
 
 
 def engine_label(engine: str | None) -> str:

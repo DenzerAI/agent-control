@@ -18,6 +18,7 @@ uploads/
 
 # Runtime
 .server.pid
+config/engine-runtime.json
 
 # Secrets
 .env

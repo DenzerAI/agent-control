@@ -125,6 +125,33 @@
       ]
     },
     {
+      "id": "hermes",
+      "label": "Hermes Agent",
+      "kind": "cli",
+      "provider": "nousresearch",
+      "setup_group": "hermes-cli",
+      "auth_modes": ["provider_config"],
+      "auth_check": {
+        "mode": "all",
+        "items": [
+          {
+            "type": "command",
+            "command": "hermes",
+            "label": "Hermes Agent CLI",
+            "hint": "Install Hermes and configure at least one model provider."
+          }
+        ]
+      },
+      "commands": [
+        {
+          "command": "hermes",
+          "required": true,
+          "hint": "Install Hermes Agent or choose another engine profile."
+        }
+      ],
+      "env": []
+    },
+    {
       "id": "gemini",
       "label": "Gemini CLI",
       "kind": "cli",

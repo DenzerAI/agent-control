@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Engine-CLI mitinstallieren und Login mitfuehren.
 #
-# Fuer die CLI-Engines (codex, claude, gemini):
+# Fuer die CLI-Engines (codex, claude, hermes, gemini):
 #   1. CLI installieren, falls sie fehlt (npm global bzw. offizieller Installer).
 #   2. Login-Status pruefen.
 #   3. Falls nicht angemeldet: Login-Flow anstossen und den Nutzer durchfuehren.
@@ -106,6 +106,10 @@ claude_logged_in() {
 gemini_logged_in() {
   [ -d "$HOME/.gemini" ] && [ -n "$(ls -A "$HOME/.gemini" 2>/dev/null)" ]
 }
+hermes_logged_in() {
+  if [ -s "$HOME/.hermes/config.yaml" ] || [ -s "$HOME/.hermes/config.yml" ]; then return 0; fi
+  [ -d "$HOME/.hermes" ] && [ -n "$(find "$HOME/.hermes" -maxdepth 2 -type f 2>/dev/null | head -1)" ]
+}
 
 # ---- Pro Engine: Install + Login --------------------------------------------
 setup_cli_engine() {
@@ -208,6 +212,24 @@ case "$ENGINE" in
     ;;
   claude)
     setup_cli_engine claude "@anthropic-ai/claude-code" "Claude Code" "claude login" claude_logged_in ANTHROPIC_API_KEY || RC=$?
+    ;;
+  hermes)
+    say "Engine: Hermes Agent"
+    if ! have hermes; then
+      if [ "$CHECK_ONLY" -eq 1 ]; then
+        warn "Hermes CLI fehlt."
+        exit 0
+      fi
+      warn "Hermes installiert sich ueber den offiziellen Installer des Projekts."
+      dim "Bitte ausfuehren: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash"
+      RC=1
+    elif hermes_logged_in; then
+      ok "Hermes ist installiert."
+    else
+      warn "Hermes ist installiert, aber noch nicht eingerichtet."
+      dim "Bitte Hermes einmal starten und den Provider/API-Key einrichten."
+      RC=1
+    fi
     ;;
   gemini)
     # Gemini hat keinen reinen Login-Subcommand; der erste `gemini`-Start fuehrt

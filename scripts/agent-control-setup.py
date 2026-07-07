@@ -35,6 +35,7 @@ SOUL_DIR = ROOT / "soul"
 ENGINE_PROFILE_IDS = [
     "codex",
     "claude",
+    "hermes",
     "gemini",
     "openai-api",
     "anthropic-api",

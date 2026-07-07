@@ -42,7 +42,8 @@ def _of_stream() -> str:
     except Exception:
         return "der Nutzer"
 from engines import engine_label, normalize_model_for_engine
-from engines.runtime_policy import broker_tool_context, build_claude_print_cmd, build_codex_exec_cmd
+from engines.discovery import engine_command
+from engines.runtime_policy import broker_tool_context, build_claude_print_cmd, build_codex_exec_cmd, build_hermes_exec_cmd
 
 router = APIRouter()
 
@@ -2170,7 +2171,7 @@ def setup_streaming(app_config: dict):
             proc = None
             try:
                 proc = await _spawn_process(
-                    "claude", "-p", "--model", "claude-opus-4-8",
+                    engine_command("claude"), "-p", "--model", "claude-opus-4-8",
                     stdin=asyncio.subprocess.PIPE,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
@@ -2188,12 +2189,33 @@ def setup_streaming(app_config: dict):
                 if proc and proc.returncode is None:
                     await _terminate_process(proc)
 
+        if target_engine == "hermes":
+            proc = None
+            try:
+                proc = await _spawn_process(
+                    *build_hermes_exec_cmd(prompt=check_prompt, model="gpt-5.5", cwd=cwd),
+                    stdin=asyncio.subprocess.DEVNULL,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                    cwd=cwd,
+                )
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=180)
+                if proc.returncode != 0:
+                    raise RuntimeError(stderr.decode(errors="replace").strip() or f"hermes rc={proc.returncode}")
+                return stdout.decode(errors="replace").strip()
+            except asyncio.CancelledError:
+                await _terminate_process(proc)
+                raise
+            finally:
+                if proc and proc.returncode is None:
+                    await _terminate_process(proc)
+
         with tempfile.NamedTemporaryFile(prefix="codex-agent-check-", suffix=".txt", delete=False) as tmp:
             out_path = tmp.name
         proc = None
         try:
             proc = await _spawn_process(
-                "codex", "exec",
+                engine_command("codex"), "exec",
                 "--skip-git-repo-check",
                 "--sandbox", "read-only",
                 "-C", cwd,
@@ -2293,6 +2315,8 @@ def setup_streaming(app_config: dict):
                         continue
                     if engine == "claude":
                         asyncio.create_task(_handle_claude(client, msg))
+                    elif engine == "hermes":
+                        asyncio.create_task(_handle_hermes(client, msg))
                     else:
                         asyncio.create_task(_handle_codex(client, msg))
                 elif action == "codex":
@@ -2303,6 +2327,10 @@ def setup_streaming(app_config: dict):
                     if _is_duplicate_send(msg.get("clientMessageId", "")):
                         continue
                     asyncio.create_task(_handle_claude(client, msg))
+                elif action == "hermes":
+                    if _is_duplicate_send(msg.get("clientMessageId", "")):
+                        continue
+                    asyncio.create_task(_handle_hermes(client, msg))
                 elif action == "command":
                     asyncio.create_task(_handle_command(client, msg))
                 elif action == "ping":
@@ -3808,6 +3836,202 @@ def setup_streaming(app_config: dict):
                 except Exception:
                     pass
 
+    async def _handle_hermes(client: WebSocket, msg: dict):
+        """Route a message to Hermes Agent CLI as a headless oneshot."""
+        agent_id = normalize_agent_id(msg.get("agentId", "main"))
+        message = str(msg.get("message") or "").strip()
+        project = msg.get("project", "")
+        conv_id = msg.get("conversationId", "")
+        original_prompt = message
+        deep_mode = msg.get("deepMode", False)
+        verbosity = str(msg.get("verbosity", "") or "").lower().strip()
+        attachments = msg.get("attachments", [])
+        client_kind = (msg.get("clientKind") or "").strip().lower() or None
+        agent_display = get_agent_display(agent_id)
+        hermes_model = normalize_model_for_engine("hermes", str(msg.get("model") or "").strip())
+        if not message and not attachments:
+            print(f"[streaming] hermes: leerer User-Turn verworfen ({conv_id or 'no-conv'})")
+            return
+        if _should_drop_duplicate_user_input(conv_id, message):
+            print(f"[dedupe] hermes: identische User-Eingabe in {conv_id} verworfen")
+            return
+        if conv_id:
+            _stop_requests.discard(conv_id)
+            task = asyncio.current_task()
+            if task is not None:
+                _active_tasks[conv_id] = task
+                _active_started_at.setdefault(conv_id, _time.time())
+
+        _start_stream_session(conv_id, agent_id, agent_display, client)
+
+        async def _safe_send(data):
+            data["conversationId"] = conv_id
+            if conv_id:
+                await _emit_event(conv_id, data)
+            else:
+                try:
+                    await client.send_json(data)
+                except Exception:
+                    pass
+
+        prev_user_ts: float | None = None
+        if conv_id:
+            with get_db() as db:
+                row = db.execute(
+                    "SELECT ts FROM messages WHERE conversation_id = ? AND author = 'Du' ORDER BY id DESC LIMIT 1",
+                    (conv_id,)
+                ).fetchone()
+            if row:
+                prev_user_ts = row[0]
+
+        save_msg(agent_id, project, "Du", message, conv_id, attachments=json.dumps(attachments))
+        learning_run_id = _start_learning_run("hermes", agent_display, original_prompt, project, conv_id, hermes_model)
+        werkbank_task_id = _extract_werkbank_task_id(original_prompt)
+        _mark_werkbank_task_running(werkbank_task_id)
+        if conv_id:
+            auto_title(conv_id, message)
+            auto_project(conv_id)
+        message += await build_attachment_context(attachments)
+        message += "\n\n" + _build_mode_marker(deep_mode, verbosity)
+        await broadcast_sync(agent_id, conv_id, source=client_kind)
+
+        time_ctx = build_time_context(prev_user_ts)
+        cwd = str(Path(project)) if project and Path(project).is_dir() else str(Path(__file__).parent.parent)
+        _attach_git_diff_baseline(conv_id, cwd)
+
+        _sess_for_start = _stream_sessions.get(conv_id) if conv_id else None
+        await _safe_send({
+            "type": "agent.start",
+            "agent": agent_display,
+            "agentId": agent_id,
+            "startedAt": int((_sess_for_start["started_at"] if _sess_for_start else _time.time()) * 1000),
+        })
+
+        identity_ctx = build_identity_context(agent_id, "Hermes Agent")
+        recent_context = _build_recent_chat_context(conv_id, 12) if conv_id else ""
+        prompt = (
+            f"{identity_ctx}\n\n{time_ctx}\n\n{recent_context}"
+            f"Aktuelle Nachricht:\n{message}"
+        ).strip()
+        cmd = build_hermes_exec_cmd(prompt=prompt, model=hermes_model, cwd=cwd)
+
+        proc = None
+        full_text = ""
+        engine_error = ""
+        input_tokens = len(prompt) // 4
+        output_tokens = 0
+        done_sent = False
+        try:
+            proc = await _spawn_process(
+                *cmd,
+                stdin=asyncio.subprocess.DEVNULL,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=cwd,
+            )
+            if conv_id:
+                _active_procs[conv_id] = proc
+                _active_started_at.setdefault(conv_id, _time.time())
+            stdout_b, stderr_b = await proc.communicate()
+            await proc.wait()
+            out_text = (stdout_b or b"").decode(errors="replace").strip()
+            err_text = (stderr_b or b"").decode(errors="replace").strip()
+            if proc.returncode not in (0, None):
+                engine_error = err_text[-2000:] or f"Hermes-Prozess beendet mit Code {proc.returncode}."
+            full_text = linkify_file_paths(out_text) if out_text else (f"Hermes-Fehler: {engine_error}" if engine_error else "Hermes-Lauf endete ohne Ausgabe.")
+            output_tokens = len(full_text) // 4
+
+            if full_text.strip():
+                await _safe_send({
+                    "type": "agent.text",
+                    "agent": agent_display,
+                    "delta": full_text,
+                    "full": full_text,
+                })
+
+            _sess = _stream_sessions.get(conv_id) if conv_id else None
+            elapsed_ms = int((_time.time() - _sess["started_at"]) * 1000) if _sess else None
+            tools_json = json.dumps([{
+                "name": "Hermes Agent",
+                "result": engine_error or "Oneshot-Lauf abgeschlossen.",
+                "input": {"model": hermes_model},
+                "status": "error" if engine_error else "completed",
+            }])
+            if full_text.strip():
+                save_msg(agent_id, project, agent_display, full_text, conv_id, tools=tools_json, elapsed_ms=elapsed_ms, input_tokens=input_tokens, output_tokens=output_tokens)
+            await broadcast_sync(agent_id, conv_id, source=client_kind)
+            update_letzter_stand(project, agent_display, full_text, projects_roots)
+
+            _finish_learning_run(
+                learning_run_id,
+                status="error" if engine_error else ("stopped" if conv_id in _stop_requests else "ok"),
+                final_text=full_text,
+                error=engine_error,
+                elapsed_ms=elapsed_ms,
+                tool_calls={},
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+            )
+            werkbank_report_parent = await asyncio.to_thread(
+                _finish_werkbank_chat_handoff,
+                werkbank_task_id,
+                status="error" if engine_error else ("stopped" if conv_id in _stop_requests else "ok"),
+                final_text=full_text,
+                tool_calls={},
+                elapsed_ms=elapsed_ms,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+                changed_lines=_diff_totals_with_git({}, _sess, cwd),
+            )
+            if werkbank_report_parent and werkbank_report_parent != conv_id:
+                await broadcast_sync(agent_id, werkbank_report_parent, source="werkbank")
+
+            await _safe_send({
+                "type": "agent.done",
+                "agent": agent_display,
+                "status": "error" if engine_error else ("stopped" if conv_id in _stop_requests else "ok"),
+                "model": hermes_model,
+                "contextTokens": input_tokens + output_tokens,
+                "contextWindow": 1_000_000,
+                "inputTokens": input_tokens,
+                "outputTokens": output_tokens,
+                "elapsedMs": elapsed_ms,
+                **({"error": engine_error} if engine_error else {}),
+            })
+            done_sent = True
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            await _safe_send({
+                "type": "agent.done",
+                "agent": agent_display,
+                "status": "error",
+                "error": str(e),
+            })
+            done_sent = True
+        finally:
+            if conv_id and conv_id in _stop_requests and not done_sent:
+                try:
+                    await _safe_send({
+                        "type": "agent.done",
+                        "agent": agent_display,
+                        "status": "stopped",
+                        "model": hermes_model,
+                    })
+                except Exception:
+                    pass
+            if conv_id:
+                _active_procs.pop(conv_id, None)
+                _active_tasks.pop(conv_id, None)
+                _active_started_at.pop(conv_id, None)
+                _end_stream_session(conv_id)
+                _stop_requests.discard(conv_id)
+            if proc and proc.returncode is None:
+                try:
+                    await _terminate_process(proc)
+                except Exception:
+                    pass
+
     async def _handle_command(client: WebSocket, msg: dict):
         """Handle slash commands from frontend."""
         command = msg.get("command", "")
@@ -3831,15 +4055,15 @@ def setup_streaming(app_config: dict):
                 await client.send_json({"type": "system", "content": "Kein aktiver Chat für Agent-Check."})
                 return
             if not raw:
-                await client.send_json({"type": "system", "content": "Verwendung: /consult [claude|codex] <frage>"})
+                await client.send_json({"type": "system", "content": "Verwendung: /consult [claude|codex|hermes] <frage>"})
                 return
 
             first, rest = (raw.split(None, 1) + [""])[:2]
-            explicit = first.lower() if first.lower() in ("claude", "codex") else ""
+            explicit = first.lower() if first.lower() in ("claude", "codex", "hermes") else ""
             target_engine = explicit or ("claude" if current_engine == "codex" else "codex")
             prompt = rest.strip() if explicit else raw
             if not prompt:
-                await client.send_json({"type": "system", "content": "Verwendung: /consult [claude|codex] <frage>"})
+                await client.send_json({"type": "system", "content": "Verwendung: /consult [claude|codex|hermes] <frage>"})
                 return
 
             tool_id = f"agent-check-{_uuid.uuid4().hex[:12]}"
@@ -3971,6 +4195,8 @@ def setup_streaming(app_config: dict):
                         null_client = _NullClient()
                         if engine == "claude":
                             await _handle_claude(null_client, msg)
+                        elif engine == "hermes":
+                            await _handle_hermes(null_client, msg)
                         else:
                             await _handle_codex(null_client, msg)
                         with get_db() as db:

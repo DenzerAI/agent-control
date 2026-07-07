@@ -42,6 +42,7 @@ from fastapi.responses import JSONResponse
 from identity import public_identity_payload
 from db import get_db, get_msgs
 from engines import engine_profiles, runtime_engine_ids
+from engines.discovery import scan_engines
 
 router = APIRouter()
 
@@ -193,8 +194,10 @@ async def systemagent_run(payload: dict = Body(default_factory=dict)):
 async def engines_registry():
     """Known engine profiles from setup config, with runtime support marked explicitly."""
     profiles = engine_profiles()
+    installed = scan_engines()
     return JSONResponse({
         "runtime": list(runtime_engine_ids()),
+        "installed": sorted(installed),
         "profiles": [
             {
                 "id": profile.id,
@@ -202,6 +205,7 @@ async def engines_registry():
                 "kind": profile.kind,
                 "provider": profile.provider,
                 "runtime": profile.runtime,
+                "available": profile.id in installed,
                 "default_model": profile.default_model,
                 "models": sorted(profile.models),
                 "setup_group": profile.setup.get("setup_group", ""),

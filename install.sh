@@ -379,6 +379,7 @@ wait_for_server() {
 # aufgerufen wird, ist das ganze Skript bis dahin schon vollständig eingelesen.
 main() {
 PASSTHRU_ARGS=()
+NO_START=0
 for arg in "$@"; do
   case "$arg" in
     --help|-h)
@@ -389,6 +390,12 @@ for arg in "$@"; do
       AUTO_INSTALL=0
       # An das innere Skript per Env weiterreichen, nicht als Argument.
       export AGENT_CONTROL_NO_AUTO_INSTALL=1
+      ;;
+    --non-interactive)
+      PASSTHRU_ARGS+=(--yes)
+      ;;
+    --no-start)
+      NO_START=1
       ;;
     *)
       PASSTHRU_ARGS+=("$arg")
@@ -465,7 +472,7 @@ if [[ "$BOOTSTRAP_DRY_RUN" -eq 1 ]]; then
   exit 0
 fi
 
-if yes_no "Agent Control jetzt starten?" "Y"; then
+if [[ "$NO_START" -eq 0 ]] && yes_no "Agent Control jetzt starten?" "Y"; then
   mkdir -p logs
   if curl -fsS "http://127.0.0.1:${PORT}/api/system-status" >/dev/null 2>&1; then
     echo "${C_GREEN}✓ Agent Control läuft bereits.${C_RESET}"
@@ -486,7 +493,11 @@ fi
 
 echo
 rule
-echo "${C_ACCENT}${C_BOLD}✓ Fertig. Du kannst jetzt chatten.${C_RESET}"
+if [[ "$NO_START" -eq 1 ]]; then
+  echo "${C_ACCENT}${C_BOLD}✓ Fertig. Installation vorbereitet, Start übersprungen.${C_RESET}"
+else
+  echo "${C_ACCENT}${C_BOLD}✓ Fertig. Du kannst jetzt chatten.${C_RESET}"
+fi
 echo "${C_BOLD}  Chat öffnen:${C_RESET} http://127.0.0.1:${PORT}"
 rule
 echo "${C_DIM}  Ordner:        $DEST${C_RESET}"

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template installierbar: Installer plus</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Lora:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #1F1F1E;              /* Haupthintergrund (Agent-Control-Dark) */
+  --bg-1:        #2C2C2B;              /* Karten, raised surface */
+  --bg-2:        #353533;             /* tertiäre Flächen, Code-BG */
+  --border:      #3A3A38;             /* Card-Ränder, gut sichtbar auf bg-1 */
+  --border-soft: #2A2A29;             /* dezente Sektions-Trenner auf bg */
+  --t1:          #E6E6E3;             /* Primärtext */
+  --t2:          #A1A1A0;             /* Sekundärtext (Leads, Beschreibungen) */
+  --t3:          #8A8278;             /* Muted (Preise, Meta) */
+  --accent:      #D97757;             /* Terrakotta, einzige Signalfarbe */
+  --accent-soft: rgba(217,119,87,0.12);
+  --warm:        #D6C9A8;             /* warmer Highlight-Ton */
+  --max:         980px;               /* Layout-Breite (.wrap) */
+  /* Status-Grün (optional, nur wenn echt gebraucht — z. B. live-Pill) */
+  --ok:          #7FB069;
+  --ok-soft:     rgba(127,176,105,0.14);
+  /* Sticky-Top-Nav-Hintergrund (COMPONENTS §14) */
+  --nav-bg:      rgba(31,31,30,0.82);
+}
+
+:root[data-theme="light"] {
+  --bg:          #FAF9F5;             /* Original-Hellwerte aus DESIGN.md */
+  --bg-1:        #F5F3EC;
+  --bg-2:        #F0EEE6;
+  --border:      #E4E0D2;
+  --border-soft: #ECEAE0;
+  --t1:          #1F1F1E;
+  --t2:          #5C5B57;
+  --t3:          #8A8983;
+  --accent:      #E07A4F;             /* im Light kräftiger für Kontrast */
+  --accent-soft: rgba(224,122,79,0.10);
+  --warm:        #9A8C68;
+  --ok:          #5C8A3C;             /* Status-Grün im Light dunkler */
+  --ok-soft:     rgba(92,138,60,0.12);
+  --nav-bg:      rgba(250,249,245,0.85);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: transparent;
+  color: var(--t1);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+body { overflow-x: hidden; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.italic { font-family: "Lora", Georgia, serif; font-style: italic; font-weight: 400; }
+.hero { padding: 86px 0 72px; border-top: 0; }
+.split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: 44px; align-items: center; }
+.eyebrow { color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 18px; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(44px, 7vw, 74px); line-height: 1.03; letter-spacing: 0; margin-bottom: 20px; font-weight: 800; text-wrap: balance; }
+h2 { font-size: clamp(30px, 4vw, 42px); line-height: 1.12; letter-spacing: 0; margin-bottom: 14px; font-weight: 800; text-wrap: balance; }
+h3 { font-size: 20px; line-height: 1.25; margin-bottom: 8px; }
+.lead { color: var(--t2); font-size: 20px; max-width: 660px; text-wrap: pretty; }
+section { padding: 62px 0; border-top: 1px solid var(--border-soft); }
+.panel, .stat, .step {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+}
+.panel { padding: 24px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+.stat { padding: 22px; min-height: 132px; display: flex; flex-direction: column; justify-content: space-between; }
+.stat .num { font-size: 42px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--t1); }
+.stat .label { color: var(--t2); font-size: 14px; margin-top: 12px; }
+.flow { width: 100%; height: auto; display: block; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 28px; }
+.step { padding: 24px; position: relative; min-height: 172px; }
+.step::before {
+  content: attr(data-step);
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  font-size: 58px;
+  line-height: 1;
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border);
+}
+.step p, .panel p { color: var(--t2); margin-bottom: 0; text-wrap: pretty; }
+.callout { border-left: 3px solid var(--accent); padding: 8px 0 8px 22px; margin-top: 28px; color: var(--t2); }
+.status { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.pill { min-height: 40px; display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 999px; padding: 0 14px; color: var(--t2); font-size: 14px; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, var(--border)); }
+@media (max-width: 760px) {
+  .hero { padding-top: 60px; }
+  .split, .grid, .stats { grid-template-columns: 1fr; }
+  .wrap { padding: 0 18px; }
+  section { padding: 48px 0; }
+  .step { min-height: 0; padding-right: 84px; }
+}
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="wrap split">
+      <div>
+        <div class="eyebrow">Installer plus</div>
+        <h1>Aus dem Skelett wird ein <span class="italic">startbarer</span> Agent.</h1>
+        <p class="lead">Der erste echte Installationsschritt sitzt: Das Template prüft den Mac, richtet die App ein und findet lokale Agenten-Engines selbst.</p>
+        <div class="status">
+          <span class="pill ok">Installer trocken geprüft</span>
+          <span class="pill ok">3 Engines erkannt</span>
+          <span class="pill">Backend-Neustart nötig</span>
+        </div>
+      </div>
+      <div class="panel">
+        <svg class="flow" viewBox="0 0 520 360" role="img" aria-label="Installationsfluss vom Mac zur App und zu den Engines">
+          <defs>
+            <linearGradient id="accentFade" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="var(--accent)" stop-opacity=".85"/>
+              <stop offset="1" stop-color="var(--accent)" stop-opacity=".12"/>
+            </linearGradient>
+          </defs>
+          <rect x="28" y="42" width="150" height="70" rx="14" fill="none" stroke="var(--border)"/>
+          <text x="52" y="84" fill="var(--t1)" font-size="17" font-weight="700">Mac prüfen</text>
+          <rect x="28" y="146" width="150" height="70" rx="14" fill="none" stroke="var(--border)"/>
+          <text x="52" y="188" fill="var(--t1)" font-size="17" font-weight="700">App bauen</text>
+          <rect x="28" y="250" width="150" height="70" rx="14" fill="none" stroke="var(--border)"/>
+          <text x="52" y="292" fill="var(--t1)" font-size="17" font-weight="700">Starten</text>
+          <rect x="292" y="78" width="184" height="70" rx="14" fill="url(#accentFade)" stroke="var(--accent)"/>
+          <text x="318" y="120" fill="var(--t1)" font-size="17" font-weight="800">Engine-Finder</text>
+          <rect x="292" y="204" width="184" height="88" rx="14" fill="none" stroke="var(--border)"/>
+          <text x="318" y="238" fill="var(--t1)" font-size="15" font-weight="700">Claude · Codex · Hermes</text>
+          <text x="318" y="264" fill="var(--t2)" font-size="13">PATH, Homebrew, nvm, local bin</text>
+          <path d="M178 77 C240 77 230 113 292 113" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M178 181 C238 181 238 113 292 113" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M178 285 C250 285 232 248 292 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M384 148 L384 204" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="384" cy="113" r="5" fill="var(--accent)"/>
+          <circle cx="384" cy="248" r="5" fill="var(--accent)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Was jetzt fertig ist</div>
+      <h2>Installation, Engine-Suche und Hermes-Anschluss sind im Template verdrahtet.</h2>
+      <div class="stats">
+        <div class="stat"><div class="num">1</div><div class="label">gemeinsame Discovery-Schicht statt verteilter Einzelchecks</div></div>
+        <div class="stat"><div class="num">3</div><div class="label">CLI-Engines werden lokal erkannt: Claude, Codex, Hermes</div></div>
+        <div class="stat"><div class="num">0</div><div class="label">neue private Pfade oder Tokens im versionierten Code</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Wie es läuft</div>
+      <h2>Der Kunde installiert, die App findet die Maschine hinten dran.</h2>
+      <div class="grid">
+        <div class="step" data-step="01"><h3>Mac vorbereiten</h3><p>Homebrew, Python, Node und Git werden geprüft oder verständlich nachgezogen.</p></div>
+        <div class="step" data-step="02"><h3>App einrichten</h3><p>Backend, Frontend, lokale Konfiguration und Autostart laufen über den bestehenden Installer.</p></div>
+        <div class="step" data-step="03"><h3>Engines erkennen</h3><p>Die Suche schaut nicht nur in den normalen PATH, sondern auch in typische Mac-Orte.</p></div>
+        <div class="step" data-step="04"><h3>Selbst heilen</h3><p>Wenn ein gespeicherter Engine-Pfad später weg ist, scannt die Laufzeit neu.</p></div>
+      </div>
+      <p class="callout">Der wichtigste Punkt: Das Template hängt nicht mehr an Christians Maschine. Die Mechanik ist generisch und bleibt lokal beim Kunden.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="eyebrow">Noch offen</div>
+      <h2>Hermes läuft, aber noch nicht mit demselben Streaming-Gefühl wie Codex und Claude.</h2>
+      <p class="lead">Für den ersten installierbaren Stand reicht der Headless-Oneshot. Der nächste Ausbau ist sauberes Live-Streaming und tiefere Statusanzeige pro Engine.</p>
+    </div>
+  </section>
+</body>
+</html>
