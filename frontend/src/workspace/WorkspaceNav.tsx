@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bot, Cable, CheckSquare2, FolderOpen, Inbox, LibraryBig, BookOpenText, ShieldCheck } from 'lucide-react'
+import { Bot, Cable, CheckSquare2, FolderOpen, Inbox, LibraryBig, BookOpenText, ShieldCheck, Wrench } from 'lucide-react'
 import type { WorkspaceMode } from './types'
 import { useWerkbankNavSignal } from './werkbankSignal'
 
@@ -14,6 +14,7 @@ const WORKSPACE_NAV: NavGroup[] = [
       { id: 'knowledge', label: 'Wissen', icon: BookOpenText },
       { id: 'tasks', label: 'Aufgaben', icon: CheckSquare2 },
       { id: 'connectors', label: 'Konnektoren', icon: Cable },
+      { id: 'skills', label: 'Skills', icon: Wrench },
       { id: 'privacy', label: 'Datenschutz', icon: ShieldCheck },
       { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
       { id: 'artifacts', label: 'Artefakte', icon: LibraryBig },
