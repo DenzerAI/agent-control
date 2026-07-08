@@ -1,37 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bot, Cable, CheckSquare2, FolderOpen, Inbox, LibraryBig, BookOpenText, ShieldCheck, Wrench } from 'lucide-react'
 import type { WorkspaceMode } from './types'
+import { WORKSPACE_NAV } from './navModel'
 import { useWerkbankNavSignal } from './werkbankSignal'
-
-type NavItem = { id: WorkspaceMode; label: string; icon: typeof FolderOpen }
-type NavGroup = { label: string; items: NavItem[] }
-
-const WORKSPACE_NAV: NavGroup[] = [
-  {
-    label: '',
-    items: [
-      { id: 'inbox', label: 'Inbox', icon: Inbox },
-      { id: 'knowledge', label: 'Wissen', icon: BookOpenText },
-      { id: 'tasks', label: 'Aufgaben', icon: CheckSquare2 },
-      { id: 'connectors', label: 'Konnektoren', icon: Cable },
-      { id: 'skills', label: 'Skills', icon: Wrench },
-      { id: 'privacy', label: 'Datenschutz', icon: ShieldCheck },
-      { id: 'filesystem', label: 'Dateien', icon: FolderOpen },
-      { id: 'artifacts', label: 'Artefakte', icon: LibraryBig },
-      { id: 'agent', label: 'Agent', icon: Bot },
-    ],
-  },
-]
-
-const LABEL_BY_MODE = new Map<WorkspaceMode, string>()
-for (const group of WORKSPACE_NAV) for (const item of group.items) LABEL_BY_MODE.set(item.id, item.label)
-LABEL_BY_MODE.set('preview', 'Vorschau')
-LABEL_BY_MODE.set('document', 'Dokument')
-LABEL_BY_MODE.set('loops', 'Aufgaben')
-
-export function workspaceModeLabel(mode: WorkspaceMode): string {
-  return LABEL_BY_MODE.get(mode) || 'Workspace'
-}
+export { workspaceModeLabel } from './navModel'
 
 const today = () => new Date().toLocaleDateString('en-CA')
 
@@ -130,7 +101,7 @@ export function WorkspaceNav({ mode, collapsed = false, onModeChange }: {
                 ? werkbankSignal.active > 0 ? `Werkbank läuft · ${werkbankSignal.active}` : werkbankSignal.waiting > 0 ? `Werkbank wartet · ${werkbankSignal.waiting}` : werkbankSignal.attention > 0 ? `Werkbank braucht Blick · ${werkbankSignal.attention}` : undefined
                 : undefined}
             >
-              <item.icon className="workspace-nav-icon" strokeWidth={1.75} />
+              {item.icon && <item.icon className="workspace-nav-icon" strokeWidth={1.75} />}
               <span>{item.label}</span>
               {item.id === 'tasks' && (werkbankSignal.active > 0 || werkbankSignal.waiting > 0) && !collapsed && (
                 <span className="workspace-nav-count" aria-label={werkbankSignal.active > 0 ? `${werkbankSignal.active} laufende Aufträge` : `${werkbankSignal.waiting} wartende Aufträge`}>{werkbankSignal.active || werkbankSignal.waiting}</span>

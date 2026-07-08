@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { type CSSProperties, useMemo, useState } from 'react'
 import { BarChart3, FolderOpen, Search, Wrench } from 'lucide-react'
 import { WorkspaceShell } from './WorkspaceShell'
 import {
@@ -20,10 +20,18 @@ function byUsageThenName(a: AgentSkill, b: AgentSkill): number {
 
 function SkillSystemCard({ system }: { system: AgentSkillSystem }) {
   const usage = system.skills.reduce((sum, skill) => sum + skill.usageCount, 0)
+  const mark = system.logoSrc
+    ? system.logoMode === 'mask'
+      ? <span className="skill-system-logo-mask" style={{ '--skill-system-logo': `url(${system.logoSrc})` } as CSSProperties} />
+      : <img src={system.logoSrc} alt="" aria-hidden="true" />
+    : system.short
+
   return (
     <section className="skill-system-card">
       <div className="skill-system-card-head">
-        <span className="skill-system-mark">{system.short}</span>
+        <span className={`skill-system-mark${system.logoSrc ? ' has-logo' : ''}`}>
+          {mark}
+        </span>
         <div>
           <strong>{system.name}</strong>
           <em>{system.folder}</em>

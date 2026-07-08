@@ -14,6 +14,8 @@ export type AgentSkillSystem = {
   id: AgentSkillSystemId
   name: string
   short: string
+  logoSrc?: string
+  logoMode?: 'image' | 'mask'
   folder: string
   description: string
   skills: AgentSkill[]
@@ -43,6 +45,8 @@ export const AGENT_SKILL_SYSTEMS: AgentSkillSystem[] = [
     id: 'hermes',
     name: 'Hermes',
     short: 'HE',
+    logoSrc: '/connectors/hermes.svg',
+    logoMode: 'mask',
     folder: 'hermes/skills/',
     description: 'Kundenseitige Agentenfähigkeiten für Kommunikation, Vorbereitung und lokale Arbeitsläufe.',
     skills: [
@@ -55,6 +59,8 @@ export const AGENT_SKILL_SYSTEMS: AgentSkillSystem[] = [
     id: 'openclaw',
     name: 'OpenClaw',
     short: 'OC',
+    logoSrc: '/openclaw.png',
+    logoMode: 'image',
     folder: 'openclaw/skills/',
     description: 'Lokale Skills für installierte Kunden-Agenten, Dateiarbeit und Systemaufgaben am Zielgerät.',
     skills: [
@@ -67,6 +73,8 @@ export const AGENT_SKILL_SYSTEMS: AgentSkillSystem[] = [
     id: 'claude-code',
     name: 'Claude Code',
     short: 'CC',
+    logoSrc: '/connectors/anthropic.svg',
+    logoMode: 'mask',
     folder: '.claude/skills/',
     description: 'Bau- und Review-Fähigkeiten aus Claude-Code-Umgebungen, später aus deren Skill-Ordnern importierbar.',
     skills: [
@@ -79,6 +87,8 @@ export const AGENT_SKILL_SYSTEMS: AgentSkillSystem[] = [
     id: 'codex',
     name: 'Codex',
     short: 'CX',
+    logoSrc: '/connectors/openai.svg',
+    logoMode: 'mask',
     folder: '.codex/skills/',
     description: 'Skills aus Codex-Profilen für lokale Werkbankarbeit, Artefakte und strukturierte Projektänderungen.',
     skills: [

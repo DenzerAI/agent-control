@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef, useCallback, Suspense, type CSSProperties, type TouchEvent } from 'react'
-import { ArrowLeft, Check, X } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, Moon, Paperclip, RotateCw, Search, Sun, X } from 'lucide-react'
 import { ChatPane } from './components/ChatPane'
+import { WORKSPACE_NAV, MOBILE_PRIMARY, navItem, workspaceModeLabel } from './workspace/navModel'
+import { workspaceDirectory, workspaceFileKind, workspacePathParts } from './workspace/fileRouting'
+import { WorkspaceContent } from './workspace/WorkspaceContent'
 import { LoopWorkspace } from './workspace/LoopWorkspace'
+import type { WorkspaceFile, WorkspaceMode } from './workspace/types'
+import { useWerkbankTasks } from './workspace/werkbankSignal'
 import { lazyWithRetry } from './components/info-pane/utils/lazyWithRetry'
 const MobileFokus = lazyWithRetry(() => import('./MobileFokus'))
 const MobileHealth = lazyWithRetry(() => import('./MobileHealth'))
 const Spotlight = lazyWithRetry(() => import('./components/Spotlight').then(m => ({ default: m.Spotlight })))
 import { getDefaultEngine } from './agents'
+import { getThemeMode, resolveTheme, setThemeMode } from './theme'
+import { triggerSafeRestart, isRestartInFlight } from './lib/restart'
 import { preloadUISounds, playUISound } from './uiSounds'
 import './index.css'
 
@@ -281,6 +288,231 @@ function MobileTopMarker({
   )
 }
 
+const MOBILE_FILE_ACCEPT = 'image/*,.pdf,.doc,.docx,.txt,.md,.csv,.xlsx,.json,.yaml,.yml'
+
+function MobileWorkspaceMenuPanel({
+  bottom,
+  paneIndex,
+  hasUnread,
+  werkbankSignal,
+  onClose,
+  onOpenMode,
+}: {
+  bottom: number
+  paneIndex: number
+  hasUnread: boolean
+  werkbankSignal: { active: number; attention: number }
+  onClose: () => void
+  onOpenMode: (mode: WorkspaceMode, label: string) => void
+}) {
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => resolveTheme(getThemeMode()))
+  const fileInputId = `mobile-workspace-quick-file-${paneIndex}`
+
+  useEffect(() => {
+    const syncTheme = () => setResolvedTheme(resolveTheme(getThemeMode()))
+    window.addEventListener('theme-changed', syncTheme)
+    return () => window.removeEventListener('theme-changed', syncTheme)
+  }, [])
+
+  const toggleTheme = () => {
+    const next = resolvedTheme === 'dark' ? 'light' : 'dark'
+    setResolvedTheme(next)
+    setThemeMode(next)
+    playUISound('option-pick', 0.4)
+  }
+
+  const openMode = (mode: WorkspaceMode, label = workspaceModeLabel(mode)) => {
+    onOpenMode(mode, label)
+    playUISound('option-pick', 0.32)
+  }
+
+  const mobileHidden = new Set<WorkspaceMode>([...MOBILE_PRIMARY, 'artifacts'])
+  const settingsGroups = WORKSPACE_NAV
+    .map(group => ({ ...group, items: group.items.filter(item => !mobileHidden.has(item.id)) }))
+    .filter(group => group.items.length)
+
+  const modeRow = (mode: WorkspaceMode, label?: string, detail?: string, accent = false, notify = false, badge?: string, strong = false) => {
+    const item = navItem(mode)
+    const Icon = item?.icon
+    return (
+      <button
+        key={`${mode}-${label || item?.label || mode}`}
+        type="button"
+        className={`mobile-workspace-settings-row${accent ? ' is-accent' : ''}${notify ? ' is-notify' : ''}${strong ? ' is-strong' : ''}`}
+        onClick={() => openMode(mode, label || item?.label || workspaceModeLabel(mode))}
+      >
+        <span className="mobile-workspace-settings-icon" aria-hidden>
+          {Icon && <Icon size={19} strokeWidth={1.75} />}
+        </span>
+        <span className="mobile-workspace-settings-copy">
+          <strong>{label || item?.label || workspaceModeLabel(mode)}</strong>
+          {detail ? <em>{detail}</em> : null}
+        </span>
+        {badge ? (
+          <span className="mobile-workspace-settings-badge" aria-label={`${badge} aktiv`}>{badge}</span>
+        ) : (
+          <ChevronRight className="mobile-workspace-settings-chevron" size={19} strokeWidth={2.1} aria-hidden />
+        )}
+      </button>
+    )
+  }
+
+  const activeRuns = werkbankSignal.active
+  const needsAttention = werkbankSignal.attention > 0
+  const werkbankDetail = activeRuns > 0
+    ? `${activeRuns} ${activeRuns === 1 ? 'Lauf aktiv' : 'Läufe aktiv'}`
+    : needsAttention
+      ? `${werkbankSignal.attention} wartet`
+      : 'Laufende Aufträge'
+
+  return (
+    <div className="mobile-workbench-overlay mobile-workspace-menu" style={{ bottom, zIndex: 45 }}>
+      <header className="mobile-workbench-bar">
+        <button type="button" onClick={onClose} aria-label="Zurück" title="Zurück">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div aria-hidden />
+        <button type="button" onClick={() => openMode('inbox', 'Inbox')} aria-label="Inbox" title="Inbox">
+          <Search className="h-5 w-5" />
+        </button>
+      </header>
+      <div className="mobile-workbench-body mobile-workspace-menu-body">
+        <div className="mobile-workspace-settings">
+          <input
+            id={fileInputId}
+            type="file"
+            multiple
+            accept={MOBILE_FILE_ACCEPT}
+            className="hidden"
+            onChange={(event) => {
+              if (event.target.files?.length) {
+                window.dispatchEvent(new CustomEvent('deck:addFiles', { detail: { paneIndex, files: event.target.files } }))
+                onClose()
+                playUISound('doc-open', 0.35)
+              }
+              event.target.value = ''
+            }}
+          />
+          <section className="mobile-workspace-settings-group">
+            {modeRow('inbox', 'Inbox', 'Nachrichten und Eingang', false, hasUnread)}
+            {modeRow('loops', 'Werkbank', werkbankDetail, true, needsAttention, activeRuns > 0 ? String(activeRuns) : undefined, activeRuns > 0 || needsAttention)}
+            {modeRow('knowledge', 'Wissen', 'Kundenwissen und Kontext')}
+            {modeRow('filesystem', 'Dateien', 'Artefakte und Projektdateien')}
+          </section>
+
+          <section className="mobile-workspace-settings-group">
+            <button type="button" className="mobile-workspace-settings-row" onClick={toggleTheme}>
+              <span className="mobile-workspace-settings-icon" aria-hidden>
+                {resolvedTheme === 'dark' ? <Sun size={18} strokeWidth={1.85} /> : <Moon size={18} strokeWidth={1.85} />}
+              </span>
+              <span className="mobile-workspace-settings-copy">
+                <strong>{resolvedTheme === 'dark' ? 'Helle UI' : 'Dunkle UI'}</strong>
+                <em>Design automatisch mitnehmen</em>
+              </span>
+              <ChevronRight className="mobile-workspace-settings-chevron" size={19} strokeWidth={2.1} aria-hidden />
+            </button>
+          </section>
+
+          {settingsGroups.map(group => (
+            <section key={group.label} className="mobile-workspace-settings-section">
+              <div className="mobile-workspace-settings-label">{group.label}</div>
+              <div className="mobile-workspace-settings-group">
+                {group.items.map(item => modeRow(item.id, item.label))}
+              </div>
+            </section>
+          ))}
+
+          <section className="mobile-workspace-settings-section">
+            <div className="mobile-workspace-settings-label">Werkzeuge</div>
+            <div className="mobile-workspace-settings-group">
+              <button type="button" onClick={() => { if (!isRestartInFlight()) void triggerSafeRestart() }} className="mobile-workspace-settings-row" aria-label="Server neu starten">
+                <span className="mobile-workspace-settings-icon" aria-hidden><RotateCw size={18} strokeWidth={1.85} /></span>
+                <span className="mobile-workspace-settings-copy">
+                  <strong>Neustart</strong>
+                  <em>Server kontrolliert neu laden</em>
+                </span>
+                <ChevronRight className="mobile-workspace-settings-chevron" size={19} strokeWidth={2.1} aria-hidden />
+              </button>
+              <label htmlFor={fileInputId} className="mobile-workspace-settings-row is-primary-tool" aria-label="Datei anhängen">
+                <span className="mobile-workspace-settings-icon" aria-hidden><Paperclip size={18} strokeWidth={1.85} /></span>
+                <span className="mobile-workspace-settings-copy">
+                  <strong>Datei anhängen</strong>
+                  <em>Bild, PDF oder Dokument in den Chat</em>
+                </span>
+                <ChevronRight className="mobile-workspace-settings-chevron" size={19} strokeWidth={2.1} aria-hidden />
+              </label>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileWorkspacePanel({
+  mode,
+  file,
+  filesystemPath,
+  returnMode,
+  bottom,
+  onClose,
+  onBack,
+  onOpenFile,
+  onRevealPath,
+  onOpenMode,
+}: {
+  mode: WorkspaceMode
+  file?: WorkspaceFile | null
+  filesystemPath?: string | null
+  returnMode?: WorkspaceMode | null
+  bottom: number
+  onClose: () => void
+  onBack: () => void
+  onOpenFile: (path: string) => boolean
+  onRevealPath: (path: string) => void
+  onOpenMode: (mode: WorkspaceMode, label: string) => void
+}) {
+  const title = workspaceModeLabel(mode)
+  const subtitle = returnMode && mode !== returnMode ? `Zurück zu ${workspaceModeLabel(returnMode)}` : ''
+  const isPreview = mode === 'preview' && !!file
+
+  return (
+    <div className="mobile-workbench-overlay mobile-workspace-overlay" style={{ bottom }}>
+      <header className="mobile-workbench-bar">
+        <button type="button" onClick={returnMode && mode !== returnMode ? onBack : onClose} aria-label="Zurück" title="Zurück">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <strong>{title}</strong>
+          {isPreview && file ? (
+            <button type="button" className="mobile-workbench-path" onClick={() => onRevealPath(file.path)} title={file.path}>
+              {workspacePathParts(file.path).name}
+            </button>
+          ) : subtitle ? (
+            <span>{subtitle}</span>
+          ) : null}
+        </div>
+        <button type="button" onClick={onClose} aria-label="Schließen" title="Schließen">
+          <X className="h-5 w-5" />
+        </button>
+      </header>
+      <div className="mobile-workbench-body mobile-workspace-body workspace-body">
+        <Suspense fallback={null}>
+          <WorkspaceContent
+            mode={mode}
+            file={file}
+            filesystemPath={filesystemPath}
+            onClose={onClose}
+            onOpenFile={onOpenFile}
+            onRevealPath={onRevealPath}
+            onModeChange={(nextMode) => onOpenMode(nextMode, workspaceModeLabel(nextMode))}
+          />
+        </Suspense>
+      </div>
+    </div>
+  )
+}
+
 function MobileBottomDots({
   slots,
   activeSlot,
@@ -455,6 +687,13 @@ export default function MobileApp() {
   const [fokusOpen, setFokusOpen] = useState(false)
   const [healthOpen, setHealthOpen] = useState(false)
   const [werkbankOpen, setWerkbankOpen] = useState(false)
+  const [mobileWorkspaceMode, setMobileWorkspaceMode] = useState<WorkspaceMode | null>(null)
+  const [mobileWorkspaceReturnMode, setMobileWorkspaceReturnMode] = useState<WorkspaceMode | null>(null)
+  const [mobileWorkspaceFile, setMobileWorkspaceFile] = useState<WorkspaceFile | null>(null)
+  const [mobileFilesystemPath, setMobileFilesystemPath] = useState<string | null>(null)
+  const mobileWorkspaceModeRef = useRef<WorkspaceMode | null>(null)
+  useEffect(() => { mobileWorkspaceModeRef.current = mobileWorkspaceMode }, [mobileWorkspaceMode])
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false)
   const [ephemeralActive, setEphemeralActive] = useState(false)
   const [composerHeight, setComposerHeight] = useState<number>(240)
 
@@ -463,6 +702,7 @@ export default function MobileApp() {
   const conversationId = currentSlot.convId
   // visibleSlotIndex: zeigt entweder den aktiven realen Slot oder den ephemeralen.
   const visibleSlotIndex = ephemeralActive ? slots.length : activeSlot
+  const anyMobileModuleOpen = page === 1 || fokusOpen || healthOpen || werkbankOpen || !!mobileWorkspaceMode || workspaceMenuOpen
 
   // Lazy-warm: nur der sichtbare Slot wird sofort gemountet. Versteckte Slots
   // schlafen nach kurzer Zeit wieder ein, damit sie keine WS/Timer/Fetches halten.
@@ -534,6 +774,54 @@ export default function MobileApp() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [htmlPreviewPath, setHtmlPreviewPath] = useState<string | null>(null)
 
+  const openDesktopWorkspaceMode = useCallback(async (mode: WorkspaceMode, label: string) => {
+    setSearchOpen(false)
+    setPage(0)
+    setFokusOpen(false)
+    setHealthOpen(false)
+    setWerkbankOpen(false)
+    setHtmlPreviewPath(null)
+    setMobileWorkspaceMode(mode)
+    setMobileWorkspaceReturnMode(null)
+    setMobileWorkspaceFile(null)
+    setMobileFilesystemPath(null)
+    setWorkspaceMenuOpen(false)
+    playUISound('workspace-open', 0.35)
+    try {
+      const r = await fetch('/api/ui-command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'workspace', payload: { action: 'open', mode } }),
+      })
+      const d = await r.json().catch(() => ({}))
+      void d?.delivered
+    } catch {
+      void label
+    }
+  }, [])
+
+  const openMobileWorkspaceFile = useCallback((path: string): boolean => {
+    const filePath = String(path || '')
+    const kind = workspaceFileKind(filePath)
+    if (!kind) return false
+    const currentMode = mobileWorkspaceModeRef.current
+    if (currentMode && currentMode !== 'preview' && currentMode !== 'document' && currentMode !== 'filesystem') {
+      setMobileWorkspaceReturnMode(currentMode)
+    }
+    setSearchOpen(false)
+    setPage(0)
+    setFokusOpen(false)
+    setHealthOpen(false)
+    setWerkbankOpen(false)
+    setWorkspaceMenuOpen(false)
+    setHtmlPreviewPath(null)
+    setMobileWorkspaceFile({ path: filePath, kind })
+    setMobileFilesystemPath(kind === 'html' ? null : (workspaceDirectory(filePath) || null))
+    setMobileWorkspaceMode(kind === 'html' ? 'preview' : 'filesystem')
+    playUISound('doc-open', 0.45)
+    return true
+  }, [])
+
   const openMobileHtmlPreview = useCallback((path: string): boolean => {
     const filePath = String(path || '')
     if (!isHtmlPath(filePath)) return false
@@ -541,6 +829,11 @@ export default function MobileApp() {
     setFokusOpen(false)
     setHealthOpen(false)
     setWerkbankOpen(false)
+    setWorkspaceMenuOpen(false)
+    setMobileWorkspaceMode(null)
+    setMobileWorkspaceReturnMode(null)
+    setMobileWorkspaceFile(null)
+    setMobileFilesystemPath(null)
     setPage(0)
     setHtmlPreviewPath(filePath)
     playUISound('doc-open', 0.45)
@@ -558,6 +851,11 @@ export default function MobileApp() {
     setFokusOpen(false)
     setHealthOpen(false)
     setWerkbankOpen(false)
+    setMobileWorkspaceMode(null)
+    setMobileWorkspaceReturnMode(null)
+    setMobileWorkspaceFile(null)
+    setMobileFilesystemPath(null)
+    setWorkspaceMenuOpen(false)
     setHtmlPreviewPath(null)
     setPage(0)
   }, [])
@@ -565,11 +863,16 @@ export default function MobileApp() {
   useEffect(() => {
     const handler = (e: Event) => {
       const path = openFilePathFromDetail((e as CustomEvent).detail)
-      if (path) openMobileHtmlPreview(path)
+      if (!path) return
+      if (mobileWorkspaceModeRef.current || !isHtmlPath(path)) {
+        openMobileWorkspaceFile(path)
+        return
+      }
+      openMobileHtmlPreview(path)
     }
     window.addEventListener('deck:openFile', handler)
     return () => window.removeEventListener('deck:openFile', handler)
-  }, [openMobileHtmlPreview])
+  }, [openMobileHtmlPreview, openMobileWorkspaceFile])
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -597,9 +900,9 @@ export default function MobileApp() {
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('deck:mobileMenuAreaState', {
-      detail: { open: page === 1 || fokusOpen || healthOpen || werkbankOpen || searchOpen || !!htmlPreviewPath },
+      detail: { open: page === 1 || fokusOpen || healthOpen || werkbankOpen || !!mobileWorkspaceMode || workspaceMenuOpen || searchOpen || !!htmlPreviewPath },
     }))
-  }, [page, fokusOpen, healthOpen, werkbankOpen, searchOpen, htmlPreviewPath])
+  }, [page, fokusOpen, healthOpen, werkbankOpen, mobileWorkspaceMode, workspaceMenuOpen, searchOpen, htmlPreviewPath])
 
   useEffect(() => { preloadUISounds() }, [])
 
@@ -1337,35 +1640,48 @@ export default function MobileApp() {
   }, [visibleSlotKey])
 
   useEffect(() => {
-    const open = () => {}
-    const toggle = () => {}
-    const toggleFokus = () => { setSearchOpen(false); setPage(0); setHealthOpen(false); setWerkbankOpen(false); setFokusOpen(o => !o) }
-    const toggleHealth = () => { setSearchOpen(false); setPage(0); setFokusOpen(false); setWerkbankOpen(false); setHealthOpen(o => !o) }
-    const toggleWerkbank = () => { setSearchOpen(false); setPage(0); setFokusOpen(false); setHealthOpen(false); setWerkbankOpen(o => !o) }
+    const closeMobileWorkspace = () => { setMobileWorkspaceMode(null); setMobileWorkspaceReturnMode(null); setMobileWorkspaceFile(null); setMobileFilesystemPath(null) }
+    const open = () => { void openDesktopWorkspaceMode('inbox', workspaceModeLabel('inbox')) }
+    const toggle = () => { void openDesktopWorkspaceMode('inbox', workspaceModeLabel('inbox')) }
+    const toggleFokus = () => { setSearchOpen(false); setPage(0); setHealthOpen(false); setWerkbankOpen(false); setWorkspaceMenuOpen(false); closeMobileWorkspace(); setFokusOpen(o => !o) }
+    const toggleHealth = () => { void openDesktopWorkspaceMode('health', workspaceModeLabel('health')) }
+    const toggleWerkbank = () => { void openDesktopWorkspaceMode('loops', workspaceModeLabel('loops')) }
+    const toggleWorkspaceMenu = () => {
+      setSearchOpen(false)
+      setPage(0)
+      setFokusOpen(false)
+      setHealthOpen(false)
+      setWerkbankOpen(false)
+      closeMobileWorkspace()
+      setHtmlPreviewPath(null)
+      setWorkspaceMenuOpen(open => !open)
+    }
     window.addEventListener('deck:openInfoPane', open)
     window.addEventListener('deck:toggleInfoPane', toggle)
+    window.addEventListener('deck:toggleWorkspaceMenu', toggleWorkspaceMenu)
     window.addEventListener('deck:toggleFokus', toggleFokus)
     window.addEventListener('deck:toggleHealth', toggleHealth)
     window.addEventListener('deck:toggleWerkbank', toggleWerkbank)
     return () => {
       window.removeEventListener('deck:openInfoPane', open)
       window.removeEventListener('deck:toggleInfoPane', toggle)
+      window.removeEventListener('deck:toggleWorkspaceMenu', toggleWorkspaceMenu)
       window.removeEventListener('deck:toggleFokus', toggleFokus)
       window.removeEventListener('deck:toggleHealth', toggleHealth)
       window.removeEventListener('deck:toggleWerkbank', toggleWerkbank)
     }
-  }, [])
+  }, [openDesktopWorkspaceMode])
 
   // Overlay-Status an die Composer melden (Labels und Icon-Farben im Plus-Menü).
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('deck:fokusState', { detail: { open: fokusOpen } }))
   }, [fokusOpen])
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('deck:healthState', { detail: { open: healthOpen } }))
-  }, [healthOpen])
+    window.dispatchEvent(new CustomEvent('deck:healthState', { detail: { open: healthOpen || mobileWorkspaceMode === 'health' } }))
+  }, [healthOpen, mobileWorkspaceMode])
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('deck:werkbankState', { detail: { open: werkbankOpen } }))
-  }, [werkbankOpen])
+    window.dispatchEvent(new CustomEvent('deck:werkbankState', { detail: { open: werkbankOpen || mobileWorkspaceMode === 'tasks' || mobileWorkspaceMode === 'loops' } }))
+  }, [werkbankOpen, mobileWorkspaceMode])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -1377,7 +1693,16 @@ export default function MobileApp() {
       setPage(0)
       setFokusOpen(false)
       setHealthOpen(false)
-      setWerkbankOpen(true)
+      setWerkbankOpen(false)
+      setMobileWorkspaceMode('loops')
+      setMobileWorkspaceReturnMode(null)
+      setMobileWorkspaceFile(null)
+      setMobileFilesystemPath(null)
+      fetch('/api/ui-command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'workspace', payload: { action: 'open', mode: 'loops' } }),
+      }).catch(() => {})
     }
     window.addEventListener('deck:startBauhof', handler)
     window.addEventListener('deck:startWerkbank', handler)
@@ -1425,6 +1750,19 @@ export default function MobileApp() {
       window.removeEventListener('deck:recordResume', onResume)
     }
   }, [cancelRecording, pauseRecording, resumeRecording])
+
+  const sharedWerkbankTasks = useWerkbankTasks()
+  const werkbankMenuSignal = (() => {
+    let active = 0
+    let attention = 0
+    for (const task of sharedWerkbankTasks) {
+      const status = String(task.status || '')
+      if (status === 'done' || status === 'ready' || status === 'canceled' || status === 'cancelled') continue
+      if (status === 'failed' || status === 'error' || status === 'needs_input' || status === 'blocked' || status === 'rate_limited') attention += 1
+      else active += 1
+    }
+    return { active, attention }
+  })()
 
   return (
     <div className="mobile-app" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -1485,7 +1823,7 @@ export default function MobileApp() {
                   mobileSlotIndicator={!visible ? null : (
                     <MobileBottomDots
                       slots={slotsForRender}
-                      activeSlot={(page === 1 || fokusOpen || healthOpen || werkbankOpen) ? -1 : visibleSlotIndex}
+                      activeSlot={anyMobileModuleOpen ? -1 : visibleSlotIndex}
                       busyConvs={busyConvs}
                       busyStartedAt={busyStartedAt}
                       unread={unread}
@@ -1495,6 +1833,13 @@ export default function MobileApp() {
                         if (fokusOpen) setFokusOpen(false)
                         if (healthOpen) setHealthOpen(false)
                         if (werkbankOpen) setWerkbankOpen(false)
+                        if (mobileWorkspaceMode) {
+                          setMobileWorkspaceMode(null)
+                          setMobileWorkspaceReturnMode(null)
+                          setMobileWorkspaceFile(null)
+                          setMobileFilesystemPath(null)
+                        }
+                        if (workspaceMenuOpen) setWorkspaceMenuOpen(false)
                         const target = slotsForRender[idx]
                         if (target?.convId && conversations.find(c => c.id === target.convId)?.highlight) {
                           fetch(`/api/conversations/${target.convId}/seen`, { method: 'POST' }).catch(() => {})
@@ -1597,8 +1942,60 @@ export default function MobileApp() {
             </div>
           </div>
         )}
+        {mobileWorkspaceMode && (
+          <MobileWorkspacePanel
+            mode={mobileWorkspaceMode}
+            file={mobileWorkspaceFile}
+            filesystemPath={mobileFilesystemPath}
+            returnMode={mobileWorkspaceReturnMode}
+            bottom={composerHeight}
+            onClose={() => {
+              setMobileWorkspaceMode(null)
+              setMobileWorkspaceReturnMode(null)
+              setMobileWorkspaceFile(null)
+              setMobileFilesystemPath(null)
+              playUISound('view-back', 0.4)
+            }}
+            onBack={() => {
+              if (mobileWorkspaceReturnMode) {
+                setMobileWorkspaceMode(mobileWorkspaceReturnMode)
+                setMobileWorkspaceReturnMode(null)
+                setMobileWorkspaceFile(null)
+                setMobileFilesystemPath(null)
+                playUISound('view-back', 0.4)
+              } else {
+                setMobileWorkspaceMode(null)
+              }
+            }}
+            onOpenFile={(path) => {
+              fetch('/api/deck/open-file', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path, source: 'mobile' }),
+              }).catch(() => {})
+              return openMobileWorkspaceFile(path)
+            }}
+            onRevealPath={(path) => {
+              setMobileWorkspaceReturnMode(mobileWorkspaceMode)
+              setMobileWorkspaceFile({ path, kind: workspaceFileKind(path) || 'file' })
+              setMobileFilesystemPath(workspaceDirectory(path) || null)
+              setMobileWorkspaceMode('filesystem')
+            }}
+            onOpenMode={openDesktopWorkspaceMode}
+          />
+        )}
         {htmlPreviewPath && (
           <MobileHtmlViewer path={htmlPreviewPath} onClose={() => { setHtmlPreviewPath(null); playUISound('view-back', 0.4) }} />
+        )}
+        {workspaceMenuOpen && (
+          <MobileWorkspaceMenuPanel
+            bottom={0}
+            paneIndex={visibleSlotIndex}
+            hasUnread={unread.size > 0}
+            werkbankSignal={werkbankMenuSignal}
+            onClose={() => setWorkspaceMenuOpen(false)}
+            onOpenMode={openDesktopWorkspaceMode}
+          />
         )}
       </div>
       {searchOpen && (

@@ -1612,6 +1612,196 @@ body.is-resizing-main-layout * {
   overscroll-behavior: contain;
 }
 
+.mobile-workspace-settings {
+  display: grid;
+  gap: 14px;
+  padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 18px);
+}
+
+.mobile-workspace-settings-section {
+  display: grid;
+  gap: 7px;
+}
+
+.mobile-workspace-settings-label {
+  padding: 0 8px;
+  color: var(--t3);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-workspace-settings-group {
+  overflow: hidden;
+  border: 1px solid var(--mobile-chrome-border, var(--border-f));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
+}
+
+:root[data-theme="light"] .mobile-workspace-settings-group {
+  background: color-mix(in srgb, var(--bg-2) 72%, var(--bg));
+}
+
+.mobile-workspace-settings-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 22px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 9px 13px 9px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--t1);
+  text-align: left;
+  cursor: pointer;
+  transition-property: scale, background-color, opacity;
+  transition-duration: 120ms;
+  transition-timing-function: ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-workspace-settings-row + .mobile-workspace-settings-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 66px;
+  right: 14px;
+  height: 1px;
+  background: color-mix(in srgb, var(--t1) 9%, transparent);
+}
+
+.mobile-workspace-settings-row:hover {
+  background: color-mix(in srgb, var(--t1) 4%, transparent);
+}
+
+.mobile-workspace-settings-row:active {
+  scale: 0.96;
+}
+
+.mobile-workspace-settings-row:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--cc-orange) 76%, transparent);
+  outline-offset: -2px;
+}
+
+.mobile-workspace-settings-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--t2);
+  background: color-mix(in srgb, var(--bg-3) 72%, transparent);
+}
+
+.mobile-workspace-settings-row.is-accent .mobile-workspace-settings-icon,
+.mobile-workspace-settings-row.is-notify .mobile-workspace-settings-icon {
+  color: var(--cc-orange);
+  background: color-mix(in srgb, var(--cc-orange) 15%, var(--bg-3));
+}
+
+.mobile-workspace-settings-row.is-strong {
+  min-height: 64px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cc-orange) 12%, transparent), transparent 62%),
+    color-mix(in srgb, var(--bg-2) 88%, transparent);
+}
+
+.mobile-workspace-settings-row.is-strong .mobile-workspace-settings-copy strong {
+  color: var(--t1);
+  font-weight: 680;
+}
+
+.mobile-workspace-settings-row.is-strong .mobile-workspace-settings-copy em {
+  color: color-mix(in srgb, var(--cc-orange) 82%, var(--t2));
+  font-weight: 590;
+}
+
+.mobile-workspace-settings-row.is-primary-tool {
+  min-height: 64px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--cc-orange) 10%, transparent), transparent 64%),
+    color-mix(in srgb, var(--bg-2) 82%, transparent);
+}
+
+.mobile-workspace-settings-row.is-primary-tool .mobile-workspace-settings-icon {
+  color: var(--cc-orange);
+  background: color-mix(in srgb, var(--cc-orange) 17%, var(--bg-3));
+}
+
+.mobile-workspace-settings-row.is-primary-tool .mobile-workspace-settings-copy strong {
+  font-weight: 680;
+}
+
+.mobile-workspace-settings-badge {
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 999px;
+  color: var(--bg);
+  background: var(--cc-orange);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cc-orange) 32%, transparent), 0 10px 24px color-mix(in srgb, var(--cc-orange) 20%, transparent);
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mobile-workspace-settings-row.is-notify .mobile-workspace-settings-copy strong {
+  color: var(--cc-orange);
+}
+
+.mobile-workspace-settings-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.mobile-workspace-settings-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--t1);
+  font-size: 16px;
+  font-weight: 590;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-workspace-settings-copy em {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--t3);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 450;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-workspace-settings-chevron {
+  justify-self: end;
+  color: color-mix(in srgb, var(--t3) 66%, transparent);
+}
+
+@media (max-width: 360px) {
+  .mobile-workspace-settings {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .mobile-workspace-settings-copy strong {
+    font-size: 15px;
+  }
+}
+
 .mobile-workbench-body > .bg-\[var\(--bg\)\] {
   height: auto;
   min-height: 100%;
@@ -4488,6 +4678,27 @@ body.is-resizing-main-layout * {
   font-size: 12px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
+}
+
+.skill-system-mark.has-logo {
+  padding: 7px;
+}
+
+.skill-system-mark img,
+.skill-system-logo-mask {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.skill-system-mark img {
+  object-fit: contain;
+}
+
+.skill-system-logo-mask {
+  background: currentColor;
+  -webkit-mask: var(--skill-system-logo) center / contain no-repeat;
+  mask: var(--skill-system-logo) center / contain no-repeat;
 }
 
 .skill-system-card strong,
